@@ -6,11 +6,12 @@ call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'easymotion/vim-easymotion'
-Plugin 'joshdick/onedark.vim'
-Plugin 'dracula/vim'
 Plugin 'scrooloose/syntastic'
 Plugin 'tpope/vim-obsession'
 Plugin 'flazz/vim-colorschemes'
+Plugin 'taboo.vim'
+Plugin 'vim-surround'
+Plugin 'youcompleteme'
 
 call vundle#end()            " required
 filetype plugin indent on    " required
