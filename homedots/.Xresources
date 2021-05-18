@@ -2,34 +2,35 @@
 ! Cursor theme
 !-------------------------------------------------------------------------------
 
-Xcursor.size:                       48
+Xcursor.size:				40
+Xcursor.theme:					    
 
 !-------------------------------------------------------------------------------
-! URxvt settings
+! URxvt
 !-------------------------------------------------------------------------------
 
-URxvt.keysym.Shift-Up:              command:\033]720;1\007
-URxvt.keysym.Shift-Down:            command:\033]721;1\007
+URxvt.keysym.Shift-Up:			command:\033]720;1\007
+URxvt.keysym.Shift-Down:		command:\033]721;1\007
 
-URxvt.keysym.Control-Up:            \033[1;5A
-URxvt.keysym.Control-Down:          \033[1;5B
-URxvt.keysym.Control-Right:         \033[1;5C
-URxvt.keysym.Control-Left:          \033[1;5D
+URxvt.keysym.Control-Up:		\033[1;5A
+URxvt.keysym.Control-Down:		\033[1;5B
+URxvt.keysym.Control-Right:		\033[1;5C
+URxvt.keysym.Control-Left:		\033[1;5D
 
-!----------------------- Up Down Left Right with ALT-key -----------------------
-URxvt.keysym.M-k:                   \033[A
-URxvt.keysym.M-j:                   \033[B
-URxvt.keysym.M-l:                   \033[C
-URxvt.keysym.M-h:                   \033[D
+! Up Down Left Right with ALT-key
+URxvt.keysym.M-k:			\033[A
+URxvt.keysym.M-j:			\033[B
+URxvt.keysym.M-l:			\033[C
+URxvt.keysym.M-h:			\033[D
 
-!----------------------- Up Down Left Right whole word with ALT-key -----------------------
-URxvt.keysym.Control-M-k:           \033[1;5A
-URxvt.keysym.Control-M-j:           \033[1;5B
-URxvt.keysym.Control-M-l:           \033[1;5C
-URxvt.keysym.Control-M-h:           \033[1;5D
+! Up Down Left Right whole word with ALT-key
+URxvt.keysym.Control-M-k:		\033[1;5A
+URxvt.keysym.Control-M-j:		\033[1;5B
+URxvt.keysym.Control-M-l:		\033[1;5C
+URxvt.keysym.Control-M-h:		\033[1;5D
 
 
-!----------------------- Copy Paste & Oher Extensions -----------------------
+! Copy Paste & Oher Extensions
 URxvt.copyCommand:                  xclip -i -selection clipboard
 URxvt.pasteCommand:                 xclip -o -selection clipboard
 URxvt.keysym.Control-Meta-C:        builtin-string:
@@ -37,8 +38,9 @@ URxvt.keysym.Control-Meta-V:        builtin-string:
 URxvt.keysym.Shift-Control-V:       eval:paste_clipboard
 URxvt.keysym.Shift-Control-C:       eval:selection_to_clipboard
 
-!----------------------- True Clear Scrollback -----------------------
+! True Clear Scrollback
 URxvt.keysym.Shift-Control-M-L:     command:\033c
+! ---
 
 URxvt.font:                         xft:jetbrains mono:extrabold:pixelsize=15:antialias=true
 URxvt.letterSpace:                  0
@@ -57,37 +59,6 @@ URxvt.depth:                        24
 URxvt.iso14755:                     false
 
 
-!URxvt.geometry:			    	100x20
-!URxvt.letterSpace:                 -1
-!URxvt.lineSpace:			    	0
-!URxvt*internalBorder:              15
-!URxvt*externalBorder:              0
-!URxvt*depth:                       32
-!URxvt*saveline:                    2000
-!URxvt*termName:                    xterm-256color
-!URxvt*iso14755:                    false
-!URxvt*scrollBar:                   false
-!URxvt*scrollBar_right:             false
-!URxvt.perl-ext-common:             default,clipboard,url-select,keyboard-select,matcher,resize-font
-!URxvt.copyCommand:                 xclip -i -selection clipboard
-!URxvt.pasteCommand:                xclip -o -selection clipboard
-!URxvt.keysym.M-c:                  perl:clipboard:copy
-!URxvt.keysym.M-v:                  perl:clipboard:paste
-!URxvt.keysym.M-C-v:                perl:clipboard:paste_escaped
-!URxvt.keysym.M-Escape:             perl:keyboard-select:activate
-!URxvt.keysym.Shift-Up:	            command:\033]720;1\007
-!URxvt.keysym.Shift-Down:           command:\033]721;1\007
-!URxvt.keysym.M-s:                  perl:keyboard-select:search
-!URxvt.keysym.M-u:                  perl:url-select:select_next
-!URxvt.underlineURLs:               true
-!URxvt.url-launcher:                firefox
-!URxvt.matcher.button:             	1
-!URxvt*buffered:                    false
-!URxvt.urgentOnBell:	            True
-!URxvt.font:		                xft:jetbrains mono:extrabold:size=12:antialias=true
-!URxvt.allow_bold:	                false
-!URxvt.cursorUnderline:	            1
-!rofi.opacity:		                100
 
 !-------------------------------------------------------------------------------
 ! Xft fonts
