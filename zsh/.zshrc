@@ -1,4 +1,3 @@
-#tester
 export ZSH="/home/qecs/.oh-my-zsh"
 export TERM=xterm-256color
 export wmount="/home/qecs/.config/own/mount.sh"
@@ -10,8 +9,9 @@ export MANPATH="${MANPATH-$(manpath)}:$NPM_PACKAGES/share/man"
 export XMLLINT_INDENT="    "
 export PATH=~/.npm-global/bin:$PATH
 export ZPLUG_HOME=${HOME}/.zplug
+export FZF_DEFAULT_OPTS="--layout=reverse --inline-info"
 
-alias vifm="${HOME}/.vifm/scripts/vifmrun"
+alias vifm="/home/qecs/.vifm/scripts/vifmrun"
 alias ss="sh /home/qecs/.script/pulseaudio_sink_switch.sh"
 alias vims='(xseticon -id "$WINDOWID" /usr/share/pixmaps/vim-icon.png ; vim -S Session.vim)'
 alias vimc="rm ~/.cache/vim/swap/*"
@@ -23,7 +23,7 @@ alias xcomp='(pkill xcompmgr && xcompmgr -r 30 -o .35 -f -l -30 -c -t -35 -D 2 -
 alias screenoff='(sh ~/.script/miniscripts/screen_off.sh)'
 alias start='(startx -- -dpi 120)'
 
-NPM_PACKAGES="${HOME}/.npm-packages"
+NPM_PACKAGES="/home/qecs/.npm-packages"
 
 ZSH_THEME="fwalch"
 
@@ -33,11 +33,14 @@ plugins=(
     archlinux
     zsh-syntax-highlighting
     autojump
+    history-substring-search
+    fzf
 )
 
 if [ "$TERM" = "xterm-256color" ]; then
     xseticon -id "$WINDOWID" /usr/share/pixmaps/terminal256.png
 fi
+
 
 source ~/.zplug/init.zsh
 source /usr/share/nvm/init-nvm.sh

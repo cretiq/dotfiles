@@ -21,7 +21,9 @@ set rnu
 set incsearch
 syntax on
 
+"
 " ----- REMAP -----
+"
 
 let mapleader=" "
 
