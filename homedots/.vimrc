@@ -7,6 +7,7 @@ Plugin 'VundleVim/Vundle.vim'
 Plugin 'easymotion/vim-easymotion'
 Plugin 'scrooloose/syntastic'
 Plugin 'tpope/vim-obsession'
+Plugin 'scrooloose/nerdcommenter'
 Plugin 'flazz/vim-colorschemes'
 Plugin 'gcmt/taboo.vim'
 Plugin 'valloric/youcompleteme'
@@ -19,6 +20,7 @@ set t_Co=256
 set nu
 set rnu
 set incsearch
+set ignorecase
 syntax on
 
 "
