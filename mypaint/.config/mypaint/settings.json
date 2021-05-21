@@ -39,7 +39,7 @@
   "ui.dark_theme_variant": false,
   "ui.rendered_tile_cache_size": 16384,
   "saving.default_format": "openraster",
-  "brushmanager.selected_brush": "tone/Brush_Pen",
+  "brushmanager.selected_brush": "classic/calligraphy",
   "brushmanager.selected_groups": [],
   "frame.color_rgba": [
     0.12,
@@ -72,6 +72,10 @@
             ],
             [
               "MyPaintBrushGroupTool",
+              "Deevad4"
+            ],
+            [
+              "MyPaintBrushGroupTool",
               "Tanda"
             ],
             [
@@ -80,20 +84,20 @@
             ],
             [
               "MyPaintBrushGroupTool",
-              "Ramon"
+              "Tone"
             ],
             [
               "MyPaintBrushGroupTool",
-              "Deevad4"
+              "Ramon"
             ],
             [
               "MyPaintBrushGroupTool",
               "Deevad"
             ]
           ],
-          "active_page": 4,
-          "w": 353,
-          "h": 247
+          "active_page": 6,
+          "w": 349,
+          "h": 666
         },
         {
           "tools": [
@@ -103,8 +107,8 @@
             ]
           ],
           "active_page": 0,
-          "w": 353,
-          "h": 373
+          "w": 349,
+          "h": 336
         },
         {
           "tools": [
@@ -113,15 +117,15 @@
             ]
           ],
           "active_page": 0,
-          "w": 353,
-          "h": 700
+          "w": 349,
+          "h": 318
         },
         {
           "tools": [],
           "active_page": -1
         }
       ],
-      "w": 353,
+      "w": 349,
       "h": 1337
     },
     "right_sidebar": {
@@ -185,9 +189,9 @@
       }
     ],
     "position": {
-      "x": 3001,
+      "x": 2653,
       "y": 1000,
-      "w": 1879,
+      "w": 2227,
       "h": 1437
     },
     "autohide": false,
@@ -222,7 +226,7 @@
     "ETPS/2 Elantech Touchpad:mouse:6": {},
     "SYNA7501:00 06CB:16D1:touchscreen:4": {}
   },
-  "colors.current": "#ffffff",
+  "colors.current": "#262626",
   "colors.palette": {
     "name": "MyPaint Default",
     "columns": 7,
@@ -558,11 +562,11 @@
   "ui.file_compat_warning_mild": true,
   "ui.file_compat_warning_severe": true,
   "colors.history": [
-    "#457193",
-    "#939393",
-    "#454545",
-    "#ffffff",
-    "#ffffff"
+    "#ff3621",
+    "#000000",
+    "#ff3621",
+    "#f1fe00",
+    "#262626"
   ],
   "color_chooser.default.window_size": [
     282,
@@ -570,20 +574,21 @@
   ],
   "scratchpad.last_opened": "/home/quanta/.local/share/mypaint/scratchpads/autosave.ora",
   "brush_chooser.default.window_size": [
-    402,
+    399,
     336
   ],
   "cursor.freehand.style": "thin",
-  "brush_chooser.default.selected_group": "Tone",
+  "brush_chooser.default.selected_group": "Classic",
   "color_chooser.default.selected_adjuster": "RingsColorChangerTool",
   "preview.show_viewfinder": true,
   "color_chooser.fast_subset.window_size": [
     282,
     324
   ],
-  "color_chooser.fast_subset.selected_adjuster": "CrossedBowlColorChangerTool",
+  "color_chooser.fast_subset.selected_adjuster": "PaletteTool",
   "linemode.entry_pressure": 0.30000000000000004,
   "linemode.exit_pressure": 0.30000000000000004,
   "linemode.line_head": 0.0001,
-  "linemode.line_tail": 0.7314709365889213
+  "linemode.line_tail": 0.7314709365889213,
+  "devbrush.last_used": "Wacom Intuos PT S 2 Pen stylus"
 }
