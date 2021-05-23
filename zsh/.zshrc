@@ -1,7 +1,7 @@
 export ZSH="/home/qecs/.oh-my-zsh"
 export TERM=xterm-256color
 export wmount="/home/qecs/.config/own/mount.sh"
-export EDITOR=subl
+export EDITOR='vim'
 export USERNAME=filip_mellqvist@msn.com
 export YOUR_GCS_BUCKET=catdetector
 export PATH="$PATH:$NPM_PACKAGES/bin"
@@ -9,7 +9,7 @@ export MANPATH="${MANPATH-$(manpath)}:$NPM_PACKAGES/share/man"
 export XMLLINT_INDENT="    "
 export PATH=~/.npm-global/bin:$PATH
 export ZPLUG_HOME=${HOME}/.zplug
-export FZF_DEFAULT_OPTS="--layout=reverse --inline-info"
+export FZF_DEFAULT_OPTS="--layout=reverse --exact --inline-info"
 
 alias vifm="/home/qecs/.vifm/scripts/vifmrun"
 alias ss="sh /home/qecs/.script/pulseaudio_sink_switch.sh"
@@ -29,19 +29,17 @@ ZSH_THEME="fwalch"
 
 plugins=(
     zsh-autosuggestions
-    compleat
-    archlinux
     zsh-syntax-highlighting
-    autojump
-    history-substring-search
-    fzf
+    compleat
 )
 
 if [ "$TERM" = "xterm-256color" ]; then
     xseticon -id "$WINDOWID" /usr/share/pixmaps/terminal256.png
 fi
 
-
-source ~/.zplug/init.zsh
-source /usr/share/nvm/init-nvm.sh
 source $ZSH/oh-my-zsh.sh
+source $HOME/.zsh-vi-mode/zsh-vi-mode.plugin.zsh
+
+function zvm_after_init() {
+  [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+}

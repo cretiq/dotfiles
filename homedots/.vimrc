@@ -23,11 +23,24 @@ set incsearch
 set ignorecase
 syntax on
 
+set ttimeout
+set ttimeoutlen=1
+set timeoutlen=3000
+
 "
 " ----- REMAP -----
 "
 
 let mapleader=" "
+
+let &t_SI .= "\<esc>Ptmux;\<esc>\<esc>[6 q\<esc>\\"
+let &t_SI .= "\<esc>Ptmux;\<esc>\<esc>]12;white\x7\<esc>\\"
+" set normal mode to a green block
+let &t_EI .= "\<esc>Ptmux;\<esc>\<esc>[2 q\<esc>\\"
+let &t_EI .= "\<esc>Ptmux;\<esc>\<esc>]12;white\x7\<esc>\\"
+" set replace mode to an orange underscore
+let &t_SR .= "\<esc>Ptmux;\<esc>\<esc>[4 q\<esc>\\"
+let &t_SR .= "\<esc>Ptmux;\<esc>\<esc>]12;white\x7\<esc>\\"
 
 noremap <leader>1 1gt
 noremap <leader>2 2gt
@@ -46,5 +59,3 @@ map <leader>j <C-W>j
 map <leader>k <C-W>k
 map <leader>h <C-W>h
 map <leader>l <C-W>l
-
-

@@ -42,7 +42,7 @@ URxvt.keysym.Shift-Control-C:       eval:selection_to_clipboard
 URxvt.keysym.Shift-Control-M-L:     command:\033c
 ! ---
 
-URxvt.font:                         xft:jetbrains mono:extrabold:pixelsize=15:antialias=true
+URxvt.font:                         xft:jetbrains mono:bold:pixelsize=15:antialias=true
 URxvt.letterSpace:                  0
 URxvt.lineSpace:                    0
 URxvt.geometry:                     92x24
@@ -68,6 +68,23 @@ Xft.lcdfilter: lcddefault
 Xft.hintstyle: hintslight
 Xft.hinting: 1
 Xft.antialias: 1
+
+!-------------------------------------------------------------------------------
+! Rofi
+!-------------------------------------------------------------------------------
+!rofi.color-window: argb:c82d303b, #7c8389, #1d1f21
+!rofi.color-normal: argb:31d1f21, #c4cbd4, argb:96404552, #4084d6, #f9f9f9
+!rofi.color-urgent: argb:2c1d1f21, #cc6666, argb:e54b5160, #a54242, #f9f9f9
+!rofi.color-active: argb:2c1d1f21, #65acff, argb:e44b5160, #4491ed, #f9f9f9
+!rofi.width: 20
+!rofi.lines: 5
+!rofi.columns: 2
+!rofi.font: Jetbrain Mono Bold 12
+!rofi.bw: 0
+!rofi.padding: 400
+!rofi.eh: 1
+!!rofi.separator-style: solid
+!rofi.hide-scrollbar: true
 
 !! Colorscheme
 !
