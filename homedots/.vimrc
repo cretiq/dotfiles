@@ -15,7 +15,7 @@ Plugin 'Chiel92/vim-autoformat'
 call vundle#end()
 filetype plugin indent on
 
-colorscheme materialbox
+colorscheme adventurous
 set background=dark
 
 set t_Co=256
@@ -63,3 +63,44 @@ map <leader>j <C-W>j
 map <leader>k <C-W>k
 map <leader>h <C-W>h
 map <leader>l <C-W>l
+
+function! s:ExtractThemeName(path)
+    let split = split(a:path, "/")
+    let theme_vim = split[6]
+    let themeName_split = split(theme_vim, '\.')
+    return themeName_split[0]
+endfunction
+    
+
+function! SetNextTheme()
+    let paths = split(globpath(&runtimepath, 'colors/*.vim'), "\n")
+    if (exists('g:colors_name'))
+        let current = g:colors_name
+        let i = 0
+        let themeName = ''
+        for path in paths
+            let themeName = s:ExtractThemeName(path)
+            if (themeName == current)
+                let nextTheme = s:ExtractThemeName(paths[i+1])
+                echo nextTheme
+                execute 'colorscheme 'nextTheme
+                break
+            endif
+            let i += 1
+        endfor
+    endif
+endfunction
+
+function! SetRandomTheme()
+    let paths = split(globpath(&runtimepath, 'colors/*.vim'), "\n")
+    let themeLen = len(paths)
+    let nr = reltime()[1] / 1008
+    let setTheme = s:ExtractThemeName(paths[nr])
+    echo setTheme
+    execute 'colorscheme 'setTheme
+endfunction
+
+
+nnoremap <silent><F7> :call SetNextTheme()<CR>
+nnoremap <silent><F6> :call SetRandomTheme()<CR>
+
