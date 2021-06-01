@@ -1,4 +1,4 @@
-HOME="/home/qecs"
+export HOME="/home/qecs"
 export ZSH="/home/qecs/.oh-my-zsh"
 export TERM=xterm-256color
 export wmount="/home/qecs/.config/own/mount.sh"
@@ -24,6 +24,7 @@ alias xcomp='(pkill xcompmgr && xcompmgr -r 30 -o .35 -f -l -30 -c -t -35 -D 2 -
 alias screenoff='(sh ~/.script/miniscripts/screen_off.sh)'
 alias start='(startx -- -dpi 120)'
 alias help_keys='less ${HOME}/.script/help/keybindings.txt'
+alias night='nordvpn set killswitch disabled && nordvpn d'
 
 NPM_PACKAGES="/home/qecs/.npm-packages"
 

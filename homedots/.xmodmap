@@ -6,3 +6,5 @@
 !Solved by udev remap
 keycode  49 = less greater less greater bar brokenbar
 keycode  94 = section degree section degree notsign notsign
+!keycode  49 = section degree section degree notsign notsign
+!keycode  94 = less greater less greater bar brokenbar

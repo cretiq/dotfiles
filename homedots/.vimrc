@@ -32,19 +32,27 @@ set ttimeout
 set ttimeoutlen=1
 set timeoutlen=3000
 
+
+
+"if exists('$TMUX')
+    "" Set insert mode to a white beam
+    "let &t_SI .= "\<esc>Ptmux;\<esc>\<esc>[6 q\<esc>\\"
+    "let &t_SI .= "\<esc>Ptmux;\<esc>\<esc>]12;white\x7\<esc>\\"
+    "" Set normal mode to a white block
+    "let &t_EI .= "\<esc>Ptmux;\<esc>\<esc>[2 q\<esc>\\"
+    "let &t_EI .= "\<esc>Ptmux;\<esc>\<esc>]12;white\x7\<esc>\\"
+    "" Set replace mode to an white underscore
+    "let &t_SR .= "\<esc>Ptmux;\<esc>\<esc>[4 q\<esc>\\"
+    "let &t_SR .= "\<esc>Ptmux;\<esc>\<esc>]12;white\x7\<esc>\\"
+"endif
+
+let &t_SI = "\e[6 q"
+let &t_EI = "\e[2 q"
+
+
 " ----- REMAP -----
 
 let mapleader=" "
-
-" Set insert mode to a white beam
-let &t_SI .= "\<esc>Ptmux;\<esc>\<esc>[6 q\<esc>\\"
-let &t_SI .= "\<esc>Ptmux;\<esc>\<esc>]12;white\x7\<esc>\\"
-" Set normal mode to a white block
-let &t_EI .= "\<esc>Ptmux;\<esc>\<esc>[2 q\<esc>\\"
-let &t_EI .= "\<esc>Ptmux;\<esc>\<esc>]12;white\x7\<esc>\\"
-" Set replace mode to an white underscore
-let &t_SR .= "\<esc>Ptmux;\<esc>\<esc>[4 q\<esc>\\"
-let &t_SR .= "\<esc>Ptmux;\<esc>\<esc>]12;white\x7\<esc>\\"
 
 noremap <leader>1 1gt
 noremap <leader>2 2gt
