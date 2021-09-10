@@ -2,8 +2,6 @@ export ZSH=/home/quanta/.oh-my-zsh
 export TERM=xterm-256color
 export ZPLUG_HOME=${HOME}/.zplug
 
-alias hej=ls -la
-
 if [ -e /usr/share/terminfo/x/xterm-256color ]; then
         export TERM='xterm-256color'
 else
@@ -26,4 +24,3 @@ zplug "zsh-users/zsh-syntax-highlighting", defer:2
 zplug 'dracula/zsh', as:theme
 source $ZSH/oh-my-zsh.sh
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-

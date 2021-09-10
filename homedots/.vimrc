@@ -15,18 +15,16 @@ Plugin 'dracula/vim'
 Plugin 'scrooloose/syntastic'
 Plugin 'tpope/vim-obsession'
 
-
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
 
-
 set t_Co=256
 colorscheme pablo
-
 
 set nu
 set rnu
 set incsearch
 set timeoutlen=0
+set ignorecase
 syntax on
