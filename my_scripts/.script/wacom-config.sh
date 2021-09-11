@@ -29,6 +29,7 @@ xsetwacom set $stylus Button 3 "key q"
 #xsetwacom set $pad Button 3 11
 
 
-xsetwacom set $stylus MapToOutput "3440x1440+1440+1000"
+#xsetwacom set $stylus MapToOutput "3440x1440+1440+1000" <<< For second monitor on right hand side
+xsetwacom set $stylus MapToOutput "3440x1440+0+1000"
 xsetwacom set $stylus Area 0 0 15200 9500
 

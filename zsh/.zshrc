@@ -16,15 +16,17 @@ alias vifm="/home/qecs/.vifm/scripts/vifmrun"
 alias ss="sh /home/qecs/.script/pulseaudio_sink_switch.sh"
 alias vims='(xseticon -id "$WINDOWID" /usr/share/pixmaps/vim-icon.png ; vim -S Session.vim)'
 alias vimc="rm ~/.cache/vim/swap/*"
-alias magic='(sudo sh ~/.script/startup/magickey.sh)'
+alias magic='(sudo sh ~/.script/magickey_keyswap.sh)'
 alias magicc='(sudo sh ~/.script/startup/magickey_colemak_dh.sh)'
-alias initcomp='( cd ~/.script/startup/ && sudo sh magickey.sh ; sh openbox.sh && sudo sh diskgrabber.sh ; sh vpn.sh  )'
 alias inar='( cd ~/.script/startup/ && sudo sh magickey.sh ; sh openbox.sh && sudo sh diskgrabber.sh ; sh vpn.sh  )'
 alias xcomp='(pkill xcompmgr && xcompmgr -r 30 -o .35 -f -l -30 -c -t -35 -D 2 -C &)'
 alias screenoff='(sh ~/.script/miniscripts/screen_off.sh)'
 alias start='(startx -- -dpi 120)'
 alias help_keys='less ${HOME}/.script/help/keybindings.txt'
-alias night='nordvpn set killswitch disabled && nordvpn d'
+alias nordoff='nordvpn set killswitch disabled && nordvpn d'
+alias nordon='nordvpn c && nordvpn set killswitch enabled'
+alias night='nordvpn set killswitch disabled && nordvpn d && shutdown -h 90'
+
 
 NPM_PACKAGES="/home/qecs/.npm-packages"
 

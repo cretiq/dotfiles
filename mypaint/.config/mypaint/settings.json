@@ -39,7 +39,7 @@
   "ui.dark_theme_variant": false,
   "ui.rendered_tile_cache_size": 16384,
   "saving.default_format": "openraster",
-  "brushmanager.selected_brush": "classic/calligraphy",
+  "brushmanager.selected_brush": "tone/Splatter_Smudge_3",
   "brushmanager.selected_groups": [],
   "frame.color_rgba": [
     0.12,
@@ -96,7 +96,7 @@
             ]
           ],
           "active_page": 6,
-          "w": 349,
+          "w": 339,
           "h": 666
         },
         {
@@ -107,8 +107,8 @@
             ]
           ],
           "active_page": 0,
-          "w": 349,
-          "h": 336
+          "w": 339,
+          "h": 174
         },
         {
           "tools": [
@@ -117,15 +117,15 @@
             ]
           ],
           "active_page": 0,
-          "w": 349,
-          "h": 318
+          "w": 339,
+          "h": 480
         },
         {
           "tools": [],
           "active_page": -1
         }
       ],
-      "w": 349,
+      "w": 339,
       "h": 1337
     },
     "right_sidebar": {
@@ -141,8 +141,8 @@
     "floating": [
       {
         "position": {
-          "x": 4556,
-          "y": 1211,
+          "x": 3117,
+          "y": 1646,
           "w": 314,
           "h": 1005
         },
@@ -189,9 +189,9 @@
       }
     ],
     "position": {
-      "x": 2653,
-      "y": 1000,
-      "w": 2227,
+      "x": 1404,
+      "y": 1440,
+      "w": 2036,
       "h": 1437
     },
     "autohide": false,
@@ -224,9 +224,11 @@
     "Microsoft Microsoft\u00ae 2.4GHz Transceiver v9.0 Mouse:mouse:4": {},
     "Virtual core XTEST pointer:mouse:2": {},
     "ETPS/2 Elantech Touchpad:mouse:6": {},
-    "SYNA7501:00 06CB:16D1:touchscreen:4": {}
+    "SYNA7501:00 06CB:16D1:touchscreen:4": {},
+    "Logitech G903 LS:mouse:4": {},
+    "Logitech MX Master 2S:mouse:4": {}
   },
-  "colors.current": "#262626",
+  "colors.current": "#270501",
   "colors.palette": {
     "name": "MyPaint Default",
     "columns": 7,
@@ -562,11 +564,11 @@
   "ui.file_compat_warning_mild": true,
   "ui.file_compat_warning_severe": true,
   "colors.history": [
-    "#ff3621",
-    "#000000",
-    "#ff3621",
-    "#f1fe00",
-    "#262626"
+    "#ababab",
+    "#ff0000",
+    "#ab6b63",
+    "#65251d",
+    "#270501"
   ],
   "color_chooser.default.window_size": [
     282,
@@ -578,14 +580,14 @@
     336
   ],
   "cursor.freehand.style": "thin",
-  "brush_chooser.default.selected_group": "Classic",
+  "brush_chooser.default.selected_group": "Dirty",
   "color_chooser.default.selected_adjuster": "RingsColorChangerTool",
   "preview.show_viewfinder": true,
   "color_chooser.fast_subset.window_size": [
     282,
     324
   ],
-  "color_chooser.fast_subset.selected_adjuster": "PaletteTool",
+  "color_chooser.fast_subset.selected_adjuster": "CrossedBowlColorChangerTool",
   "linemode.entry_pressure": 0.30000000000000004,
   "linemode.exit_pressure": 0.30000000000000004,
   "linemode.line_head": 0.0001,
