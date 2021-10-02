@@ -2,6 +2,9 @@ export ZSH=/home/quanta/.oh-my-zsh
 export TERM=xterm-256color
 export ZPLUG_HOME=${HOME}/.zplug
 
+alias vims='vim -S Session.vim'
+alias vimc="rm ~/.cache/vim/swap/*"
+
 if [ -e /usr/share/terminfo/x/xterm-256color ]; then
         export TERM='xterm-256color'
 else
@@ -16,7 +19,6 @@ plugins=(
     archlinux
     autojump
 )
-
 
 source ~/.zplug/init.zsh
 zplug "djui/alias-tips"
