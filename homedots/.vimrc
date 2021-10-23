@@ -1,5 +1,5 @@
 set nocompatible
-"filetype off
+filetype off
 
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
@@ -12,16 +12,13 @@ Plugin 'flazz/vim-colorschemes'
 Plugin 'gcmt/taboo.vim'
 Plugin 'valloric/youcompleteme'
 Plugin 'Chiel92/vim-autoformat'
-Plugin 'xuhdev/vim-latex-live-preview'
 Plugin 'lervag/vimtex'
 call vundle#end()
-
 filetype plugin indent on
-set grepprg=grep\ -nH\ $*
-let g:tex_flavor = "latex"
+
 let g:livepreview_previewer = 'evince'
 
-colorscheme adventurous
+colorscheme gruvbox
 set background=dark
 
 set t_Co=256
@@ -37,9 +34,6 @@ syntax on
 set ttimeout
 set ttimeoutlen=1
 set timeoutlen=3000
-
-set runtimepath=~/.vim,$VIM/vimfiles,$VIMRUNTIME,$VIM/vimfiles/after,~/.vim/after
-
 
 "if exists('$TMUX')
     "" Set insert mode to a white beam
