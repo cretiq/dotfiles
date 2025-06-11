@@ -1,6 +1,5 @@
 export ZSH="$HOME/.oh-my-zsh"
 export EDITOR="/usr/bin/vim"
-export PATH="/Users/filipmellqvist/.nvm/versions/node/v21.6.0/bin:$PATH"
 
 # alias sp="spf -c ~/.config/spf/config.toml"
 alias sp="spf -c ~/.spf.toml"
@@ -36,3 +35,7 @@ spf() {
     }
 }
 
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
