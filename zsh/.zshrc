@@ -3,6 +3,7 @@ export EDITOR="/usr/bin/vim"
 
 # alias sp="spf -c ~/.config/spf/config.toml"
 alias sp="spf -c ~/.spf.toml"
+alias mw="macrowhisper"
 
 zstyle ':omz:plugins:nvm' lazy yes
 

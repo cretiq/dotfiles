@@ -20,9 +20,9 @@ background-opacity = 0.9
 background-blur-radius = 60
 alpha-blending = linear-corrected
 
-# Cursor styling
-cursor-style = bar
-cursor-style-blink = true
+# Cursor styling (Vim will override these as needed)
+cursor-style = block
+cursor-style-blink = false
 cursor-color = ff79c6
 
 # Split visual effects
@@ -65,6 +65,8 @@ keybind = cmd+opt+l=next_tab
 keybind = cmd+ctrl+opt+shift+h=previous_tab
 keybind = cmd+opt+w=close_surface
 
+# Text Input
+keybind = shift+enter=text:\n
 
 # Split Creation
 keybind = cmd+opt+right=new_split:right
