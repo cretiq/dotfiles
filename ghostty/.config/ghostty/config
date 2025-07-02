@@ -12,13 +12,13 @@
 theme = catppuccin-mocha
 
 # Typography
-font-size = 16
+font-size = 15
 font-family = "JetBrains Mono"
 
 # Glass effect styling
-background-opacity = 0.9
+# background-opacity = 1
 background-blur-radius = 60
-alpha-blending = linear-corrected
+# alpha-blending = linear-corrected
 
 # Cursor styling (Vim will override these as needed)
 cursor-style = block
