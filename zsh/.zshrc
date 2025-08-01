@@ -4,12 +4,17 @@ export EDITOR="/usr/bin/vim"
 # alias sp="spf -c ~/.config/spf/config.toml"
 alias sp="spf -c ~/.spf.toml"
 alias mw="macrowhisper"
+alias killprisma="lsof -i :5555 | awk 'NR>1 {print $2}' | xargs kill -9"
 
-zstyle ':omz:plugins:nvm' lazy yes
+alias kill3000='echo "Searching for and forcefully terminating processes on port 3000..."; lsof -i :3000 -t | xargs -r kill -9; if [ $? -eq 0 ]; then echo "Processes on port 3000 terminated successfully (if any were found)."; else echo "An error occurred while trying to terminate processes on port 3000."; fi'
+
+alias kill5555='echo "Searching for and forcefully terminating processes on port 5555..."; lsof -i :5555 -t | xargs -r kill -9; if [ $? -eq 0 ]; then echo "Processes on port 5555 terminated successfully (if any were found)."; else echo "An error occurred while trying to terminate processes on port 5555."; fi'
+
+alias killnpmall="for port in 3000 3001 3002; do echo 'Attempting to forcefully kill processes on port $port...'; lsof -i :$port -t | xargs -r kill -9; done; echo 'Done.'"
 
 ZSH_THEME="af-magic" 
 
-plugins=(git nvm)
+plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -37,6 +42,18 @@ spf() {
 }
 
 
+# Load NVM manually (Oh My Zsh plugin removed due to completion errors)
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Fix for Oh My Zsh NVM completion errors - remove cached functions
+_omz_nvm_setup_completion() { return 0; }
+_omz_nvm_setup_autoload() { return 0; }
+
+# bun completions
+[ -s "/Users/filipmellqvist/.bun/_bun" ] && source "/Users/filipmellqvist/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
