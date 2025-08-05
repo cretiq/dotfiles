@@ -5,10 +5,13 @@ export EDITOR="/usr/bin/vim"
 alias sp="spf -c ~/.spf.toml"
 alias mw="macrowhisper"
 alias killprisma="lsof -i :5555 | awk 'NR>1 {print $2}' | xargs kill -9"
+alias 3005="PORT=3005 npm run dev"
 
 alias kill3000='echo "Searching for and forcefully terminating processes on port 3000..."; lsof -i :3000 -t | xargs -r kill -9; if [ $? -eq 0 ]; then echo "Processes on port 3000 terminated successfully (if any were found)."; else echo "An error occurred while trying to terminate processes on port 3000."; fi'
 
 alias kill5555='echo "Searching for and forcefully terminating processes on port 5555..."; lsof -i :5555 -t | xargs -r kill -9; if [ $? -eq 0 ]; then echo "Processes on port 5555 terminated successfully (if any were found)."; else echo "An error occurred while trying to terminate processes on port 5555."; fi'
+
+alias kr="kill3000 && npm run dev"
 
 alias killnpmall="for port in 3000 3001 3002; do echo 'Attempting to forcefully kill processes on port $port...'; lsof -i :$port -t | xargs -r kill -9; done; echo 'Done.'"
 
