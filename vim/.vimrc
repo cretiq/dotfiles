@@ -25,6 +25,8 @@ let &t_SR = "\e[4 q"    " Replace mode - underline
 
 autocmd VimLeave * silent !echo -ne "\e[6 q"
 
+set guifont=JetBrains\ Mono:h15
+
 set clipboard=unnamed
 set timeoutlen=1000 ttimeoutlen=0
 

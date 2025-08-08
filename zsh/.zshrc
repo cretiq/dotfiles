@@ -60,3 +60,5 @@ _omz_nvm_setup_autoload() { return 0; }
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+alias claude="/Users/filipmellqvist/.claude/local/claude"
