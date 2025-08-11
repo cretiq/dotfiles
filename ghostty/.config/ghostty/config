@@ -10,7 +10,10 @@
 
 # Color scheme
 # theme = catppuccin-mocha
-theme = "Night Owlish Light"
+# theme = "Night Owlish Light"
+# theme = "Night Owl"
+theme = dark:nightfox,light:catppuccin-latte
+
 
 # Typography
 font-size = 15
