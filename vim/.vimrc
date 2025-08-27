@@ -31,7 +31,7 @@ set clipboard=unnamed
 set timeoutlen=1000 ttimeoutlen=0
 
 set termguicolors
-colorscheme catppuccin-mocha
+colorscheme catppuccin-latte
 hi Normal guibg=NONE ctermbg=NONE
 
 " Ghostty config syntax highlighting
