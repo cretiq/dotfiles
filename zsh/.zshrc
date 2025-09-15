@@ -5,6 +5,13 @@ export EDITOR="/usr/bin/vim"
 alias sp="spf -c ~/.spf.toml"
 alias mw="macrowhisper"
 
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# openjdk
+export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
+
 # === DEVELOPMENT COMMANDS ===
 #
 alias npm3001="PORT=3001 npm run dev"
@@ -71,8 +78,3 @@ _omz_nvm_setup_autoload() { return 0; }
 # bun completions
 [ -s "/Users/filipmellqvist/.bun/_bun" ] && source "/Users/filipmellqvist/.bun/_bun"
 
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
-alias claude="/Users/filipmellqvist/.claude/local/claude"
