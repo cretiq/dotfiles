@@ -12,7 +12,7 @@
 # theme = catppuccin-mocha
 # theme = "Night Owlish Light"
 # theme = "Night Owl"
-theme = dark:nightfox,light:catppuccin-latte
+theme = dark:nightfox,light:catppuccin-latte.conf
 
 
 # Typography
