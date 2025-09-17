@@ -73,12 +73,7 @@ keybind = cmd+ctrl+opt+shift+h=previous_tab
 keybind = cmd+opt+w=close_surface
 
 # Text Input
-# Shift+Enter for newlines - try these approaches:
-keybind = shift+enter=text:\\n
-# Alternative if above doesn't work:
-# keybind = shift+enter=text:\n
-# Force unconsumed if needed:
-# keybind = unconsumed:shift+enter=text:\\n
+keybind = shift+enter=text:\n
 
 # Split Creation
 keybind = cmd+opt+right=new_split:right
@@ -86,14 +81,14 @@ keybind = cmd+opt+down=new_split:down
 keybind = cmd+opt+left=new_split:left
 keybind = cmd+opt+up=new_split:up
 
+# Split Navigation (vim-style)
+keybind = cmd+h=goto_split:left
+keybind = cmd+l=goto_split:right
+keybind = cmd+j=goto_split:down
+keybind = cmd+k=goto_split:up
+
 keybind = cmd+alt+shift+k=clear_screen
 keybind = cmd+alt+shift+z=clear_screen
-
-# Split Navigation (custom JKLÖ style)
-keybind = cmd+j=goto_split:left
-keybind = cmd+k=goto_split:down
-keybind = cmd+l=goto_split:up
-keybind = cmd+opt+ctrl+o=goto_split:right
 
 # ===============================================
 # NOTES

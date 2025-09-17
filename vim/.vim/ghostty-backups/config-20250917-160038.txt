@@ -93,7 +93,14 @@ keybind = cmd+alt+shift+z=clear_screen
 keybind = cmd+j=goto_split:left
 keybind = cmd+k=goto_split:down
 keybind = cmd+l=goto_split:up
-keybind = cmd+opt+ctrl+o=goto_split:right
+
+# Multiple approaches for ö key - try these one at a time:
+# Approach 1: Direct Unicode (most likely to work)
+keybind = cmd+ö=goto_split:right
+# Approach 2: Physical key (uncomment if above fails)
+# keybind = cmd+physical:semicolon=goto_split:right
+# Approach 3: Semicolon key (uncomment if above fails)
+# keybind = cmd+semicolon=goto_split:right
 
 # ===============================================
 # NOTES

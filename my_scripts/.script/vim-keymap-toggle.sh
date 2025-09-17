@@ -11,6 +11,7 @@ KEYMAPS_DIR="$VIM_DIR/keymaps"
 DEFAULT_KEYMAP="$KEYMAPS_DIR/default.vim"
 CUSTOM_KEYMAP="$KEYMAPS_DIR/custom.vim"
 VSCODE_MANAGER="$HOME/.dotfiles/my_scripts/.script/vscode-vim-keymap-manager.sh"
+GHOSTTY_MANAGER="$HOME/.dotfiles/my_scripts/.script/ghostty-keymap-manager.sh"
 
 # Ensure directories exist
 mkdir -p "$VIM_DIR" "$KEYMAPS_DIR"
@@ -55,6 +56,12 @@ trigger_vim_reload() {
     if [[ -x "$VSCODE_MANAGER" ]]; then
         echo "🔄 Updating VSCode/Cursor keybindings..."
         "$VSCODE_MANAGER" "$state_mode"
+    fi
+
+    # Also update Ghostty if available
+    if [[ -x "$GHOSTTY_MANAGER" ]]; then
+        echo "🔄 Updating Ghostty keybindings..."
+        "$GHOSTTY_MANAGER" "$state_mode"
     fi
 }
 

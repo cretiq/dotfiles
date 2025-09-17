@@ -6,6 +6,7 @@ A unified keymap toggle system that switches between **HJKL** (default) and **JK
 
 - **Terminal Vim**: Hot-reload with real-time switching
 - **VSCode/Cursor**: Automatic settings.json updates
+- **Ghostty Terminal**: Pane navigation keybinding updates
 - **System-wide access**: FastScripts keyboard shortcuts, terminal commands
 
 ## How It Works
@@ -19,7 +20,8 @@ State File (keymap_state: "default" or "custom")
     ↓
 Application Adapters
     ├─ Terminal Vim (file-based hot-reload)
-    └─ VSCode/Cursor (JSON settings update)
+    ├─ VSCode/Cursor (JSON settings update)
+    └─ Ghostty Terminal (config file update)
 ```
 
 ## File Structure
@@ -35,11 +37,14 @@ Application Adapters
 │       │   ├── custom.vim              # JKLÖ mappings
 │       │   ├── auto-load.vim           # State-aware loading
 │       │   └── hotreload.vim           # Real-time detection
-│       └── vscode-backups/             # VSCode config backups
+│       ├── vscode-backups/             # VSCode config backups
+│       └── ghostty-backups/            # Ghostty config backups
 ├── my_scripts/.script/
 │   ├── vim-keymap-toggle.sh            # Main controller
 │   ├── vscode-vim-keymap-manager.sh    # VSCode adapter
+│   ├── ghostty-keymap-manager.sh       # Ghostty adapter
 │   └── update-vscode-keybindings.py    # JSON processor
+├── ghostty/.config/ghostty/config      # Ghostty terminal config
 ├── zsh/.zshrc                          # Terminal aliases
 └── ~/Library/Scripts/
     └── Toggle Vim Keymaps.sh           # FastScripts integration
@@ -69,10 +74,19 @@ vimkeys custom     # JKLÖ mode
 
 ## Key Mappings
 
+### Vim & VSCode/Cursor
 | Mode | j | k | l | ö |
 |------|---|---|---|---|
 | **Default** | down | up | right | *unused* |
 | **Custom** | left | down | up | right |
+
+### Ghostty Terminal (Pane Navigation)
+| Mode | Cmd+J | Cmd+K | Cmd+L | Right Navigation |
+|------|-------|-------|-------|-----------------|
+| **Default** | left | down | up | Cmd+H |
+| **Custom** | left | down | up | **Cmd+Opt+Ctrl+O** |
+
+> **Note**: The ö key (Cmd+ö) was problematic in Ghostty due to QMK keyboard firmware custom mappings interfering with the key detection. The solution uses **Cmd+Opt+Ctrl+O** instead, which works reliably across all keyboard setups.
 
 ## Adding New Applications
 
@@ -201,12 +215,28 @@ cat ~/.dotfiles/vim/.vim/keymap_state
 ~/.dotfiles/my_scripts/.script/vscode-vim-keymap-manager.sh status
 ```
 
+**Ghostty not updating:**
+```bash
+# Test Ghostty manager directly
+~/.dotfiles/my_scripts/.script/ghostty-keymap-manager.sh status
+
+# Restart Ghostty or create new tab (Cmd+T) to apply changes
+# Check for configuration errors in Ghostty
+```
+
 **FastScripts not working:**
 ```bash
 # Check script exists and is executable
 ls -la ~/Library/Scripts/Toggle\ Vim\ Keymaps.sh
 chmod +x ~/Library/Scripts/Toggle\ Vim\ Keymaps.sh
 ```
+
+**QMK/Custom Keyboard Issues:**
+If you have custom keyboard firmware (QMK) or hardware-level key remapping:
+- Some key combinations may not reach the application level
+- Try alternative key combinations (like Cmd+Opt+Ctrl+O instead of Cmd+ö)
+- Test keybinds in a simple text editor first to verify they're detected
+- Check your QMK configuration for conflicting mappings
 
 **Reset everything:**
 ```bash
