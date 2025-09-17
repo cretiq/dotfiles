@@ -37,3 +37,16 @@ hi Normal guibg=NONE ctermbg=NONE
 " Ghostty config syntax highlighting
 autocmd BufRead,BufNewFile */ghostty/config set filetype=conf
 autocmd BufRead,BufNewFile *.ghostty set filetype=conf
+
+" Dynamic keymap system - load keymap based on saved state
+source ~/.dotfiles/vim/.vim/keymaps/auto-load.vim
+
+" Hot-reload system for real-time keymap switching
+source ~/.dotfiles/vim/.vim/keymaps/hotreload.vim
+
+" Commands for manual keymap switching
+command! KeymapDefault source ~/.dotfiles/vim/.vim/keymaps/default.vim
+command! KeymapCustom source ~/.dotfiles/vim/.vim/keymaps/custom.vim
+command! KeymapToggle call system('~/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh toggle')
+command! KeymapStatus echo 'Current keymap: ' . GetKeymapState()
+command! KeymapReload call CheckAndReloadKeymap()

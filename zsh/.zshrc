@@ -5,6 +5,10 @@ export EDITOR="/usr/bin/vim"
 alias sp="spf -c ~/.spf.toml"
 alias mw="macrowhisper"
 
+# Vim keymap shortcuts
+alias vimkeys="~/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh"
+alias vimtoggle="~/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh toggle"
+
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"

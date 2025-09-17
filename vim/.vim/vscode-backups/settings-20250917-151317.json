@@ -1,0 +1,89 @@
+{
+    "window.commandCenter": 1,
+    "editor.accessibilitySupport": "off",
+    "diffEditor.maxComputationTime": 0,
+    "workbench.iconTheme": "flow-light",
+    "workbench.tree.indent": 16,
+    "explorer.confirmDelete": false,
+    "editor.fontFamily": "'JetBrains Mono', Menlo, Monaco, 'Courier New', monospace",
+    "editor.fontLigatures": true,
+    "[csharp]": { "editor.inlayHints.enabled": "on" },
+
+
+    "vim.normalModeKeyBindingsNonRecursive": [
+    {
+        "before": ["u"],
+        "commands": ["undo"]
+    },
+    {
+        "before": ["U"],
+        "commands": ["redo"]
+      }
+    ],
+
+    "editor.cursorBlinking": "phase",
+
+    "editor.semanticHighlighting.enabled": true,
+    "editor.semanticTokenColorCustomizations": {
+        "enabled": true,
+        // "rules": {
+        //     "variable": "#82AAFF",
+        //     "variable.readonly": "#82AAFF",
+        //     "parameter": "#82AAFF",
+        //     "property": "#82AAFF"
+        // }
+    },
+
+    "editor.codeLens": false,
+    "git.untrackedChanges": "hidden",
+"git.autofetch": true,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "explorer.confirmDragAndDrop": false,
+    "typescript.updateImportsOnFileMove.enabled": "always",
+
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/.history": true
+    },
+    "files.exclude": {
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/.history": true
+    },
+    "cursorStats.enableAlerts": false,
+    "editor.cursorSmoothCaretAnimation": "on",
+    "workbench.list.smoothScrolling": true,
+    "editor.smoothScrolling": true,
+    "terminal.integrated.smoothScrolling": true,
+    "cursorStats.showProgressBars": true,
+    "cursorStats.showTotalRequests": true,
+    "workbench.preferredDarkColorTheme": "Night Owl (No Italics)",
+    "workbench.preferredLightColorTheme": "Atom One Light",
+    "cursor.cpp.enablePartialAccepts": true,
+    "window.newWindowDimensions": "maximized",
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "git.confirmSync": false,
+    "workbench.productIconTheme": "bongocat",
+    "csharp.preview.improvedLaunchExperience": true,
+    "chat.editor.fontSize": 20,
+    "terminal.integrated.fontSize": 14,
+    "editor.fontSize": 14,
+    "workbench.settings.applyToAllProfiles": [
+        "chat.editor.fontSize"
+    ],
+    "chat.editor.fontFamily": "Noto Sans",
+    "cursor.composer.textSizeScale": 1.15,
+    "cursor.composer.shouldChimeAfterChatFinishes": true,
+    "gitlens.ai.model": "gitkraken",
+    "gitlens.ai.gitkraken.model": "gemini:gemini-2.0-flash",
+    "gitlens.graph.minimap.additionalTypes": [
+        "localBranches",
+        "pullRequests"
+    ],
+    "gitlens.graph.onlyFollowFirstParent": true,
+    "workbench.colorTheme": "Atom One Light"
+}
