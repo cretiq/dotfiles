@@ -72,12 +72,6 @@ keybind = cmd+opt+l=next_tab
 keybind = cmd+ctrl+opt+shift+h=previous_tab
 keybind = cmd+opt+w=close_surface
 
-# Text Input
-# Shift+Enter for newlines - working solution:
-keybind = shift+enter=text:
-# Alternative approaches (commented out):
-# keybind = shift+enter=text:\n
-# keybind = unconsumed:shift+enter=text:
 
 # Split Creation
 keybind = cmd+opt+right=new_split:right
@@ -101,3 +95,4 @@ keybind = cmd+opt+ctrl+o=goto_split:right
 # List themes: ghostty +list-themes
 # List fonts: ghostty +list-fonts
 # Show config: ghostty +show-config
+keybind = shift+enter=text:\x1b\r
