@@ -73,11 +73,12 @@ keybind = cmd+ctrl+opt+shift+h=previous_tab
 keybind = cmd+opt+w=close_surface
 
 # Text Input
-# Shift+Enter for newlines - working solution:
-keybind = shift+enter=text:
-# Alternative approaches (commented out):
+# Shift+Enter for newlines - try these approaches:
+keybind = shift+enter=text:\\n
+# Alternative if above doesn't work:
 # keybind = shift+enter=text:\n
-# keybind = unconsumed:shift+enter=text:
+# Force unconsumed if needed:
+# keybind = unconsumed:shift+enter=text:\\n
 
 # Split Creation
 keybind = cmd+opt+right=new_split:right

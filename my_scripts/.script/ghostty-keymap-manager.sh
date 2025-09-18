@@ -84,7 +84,7 @@ get_custom_keybindings() {
 keybind = cmd+j=goto_split:left
 keybind = cmd+k=goto_split:down
 keybind = cmd+l=goto_split:up
-keybind = cmd+physical:semicolon=goto_split:right
+keybind = cmd+opt+ctrl+o=goto_split:right
 EOF
 }
 
