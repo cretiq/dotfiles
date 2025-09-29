@@ -95,3 +95,6 @@ keybind = cmd+k=goto_split:down
 keybind = cmd+l=goto_split:up
 keybind = cmd+opt+ctrl+o=goto_split:right
 
+# Text Editing
+keybind = cmd+z=text:\x1f
+
