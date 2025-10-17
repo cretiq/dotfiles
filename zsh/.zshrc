@@ -1,5 +1,8 @@
 export ZSH="$HOME/.oh-my-zsh"
-export EDITOR="/usr/bin/vim"
+export EDITOR="nvim"
+
+# Skip compaudit checks (safe for personal systems, saves ~300ms on startup)
+skip_global_compinit=1
 
 # alias sp="spf -c ~/.config/spf/config.toml"
 alias sp="spf -c ~/.spf.toml"
@@ -9,12 +12,50 @@ alias mw="macrowhisper"
 alias vimkeys="~/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh"
 alias vimtoggle="~/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh toggle"
 
+# Windows Cursor keymap shortcuts
+alias cursorkeys="~/.dotfiles/my_scripts/.script/windows-cursor-keymap-manager.sh"
+alias cursortoggle="~/.dotfiles/my_scripts/.script/windows-cursor-keymap-manager.sh toggle"
+
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
+# Add Windows Node.js tools to PATH (for .exe wrappers)
+export PATH="$PATH:/mnt/c/Program Files/nodejs"
+
 # openjdk
 export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
+
+# Dotnet cli through Windows (for direct access to Windows services)
+alias dotnet='dotnet.exe'
+
+# Git through Windows (for corporate network access)
+alias git='git.exe'
+
+# Smart wrappers for Node tools - use Windows versions in /mnt/c paths for better performance
+function yarn() {
+  if [[ $(pwd) == /mnt/* ]]; then
+    cmd.exe /c 'C:\Users\FilipM\AppData\Roaming\npm\yarn.cmd' "$@"
+  else
+    command yarn "$@"
+  fi
+}
+
+function npm() {
+  if [[ $(pwd) == /mnt/* ]]; then
+    cmd.exe /c 'C:\Program Files\nodejs\npm.cmd' "$@"
+  else
+    command npm "$@"
+  fi
+}
+
+function node() {
+  if [[ $(pwd) == /mnt/* ]]; then
+    node.exe "$@"
+  else
+    command node "$@"
+  fi
+}
 
 # === DEVELOPMENT COMMANDS ===
 #
@@ -38,12 +79,34 @@ alias killnpmall="for port in 3000 3001 3002; do echo 'Attempting to forcefully 
 
 alias script-export="DEBUG_CV_UPLOAD=true NODE_ENV=development npx tsx scripts/analyze-direct-upload.ts"
 
+alias glab='glab.exe'
+
+# Phoenix project shortcuts
+alias devserver='cd ~/Dev/server'
+
+dev() {
+  cd ~/Dev/server
+  echo ""
+  echo "📁 You're in: $(pwd)"
+  echo ""
+  echo "🚀 Next steps (run in Windows PowerShell):"
+  echo "   Backend:   cd C:\\Dev\\server\\Phoenix\\server\\Phoenix && dotnet run"
+  echo "   Frontend:  cd C:\\Dev\\server\\Phoenix\\client\\phoenix-client && yarn dev"
+  echo ""
+  echo "📝 Git commands (run here in WSL2):"
+  echo "   git status"
+  echo "   git add ."
+  echo "   git commit -m 'message'"
+  echo ""
+}
+
 # === ==================== ===
 
-ZSH_THEME="af-magic" 
+ZSH_THEME="af-magic"
 
 plugins=(git)
 
+# Source Oh My Zsh after setting up other things for better performance
 source $ZSH/oh-my-zsh.sh
 
 alias tm='task-master'
@@ -53,6 +116,16 @@ bindkey '^[[1;5D' backward-word     # Ctrl+Left
 bindkey '^[[1;5C' forward-word      # Ctrl+Right
 bindkey '^W' backward-kill-word     # Ctrl+W (usually default)
 bindkey '^[d' kill-word             # Alt+d (delete word forward)
+
+# Lazy-load completion system on first use
+autoload -Uz compinit
+_load_completion() {
+    compinit
+    unfunction _load_completion
+}
+compdef _load_completion
+# Trigger completion loading on first command completion
+zstyle ':completion:*' use-cache on
 
 spf() {
     os=$(uname -s)
@@ -70,10 +143,21 @@ spf() {
 }
 
 
-# Load NVM manually (Oh My Zsh plugin removed due to completion errors)
+# Lazy load NVM - only load when node/npm/yarn/nvm command is used
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Lazy loading function for NVM
+nvm_lazy_load() {
+  unalias nvm node npm yarn 2>/dev/null
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+}
+
+# Create command aliases that trigger lazy loading
+alias nvm='nvm_lazy_load && nvm'
+alias node='nvm_lazy_load && node'
+alias npm='nvm_lazy_load && npm'
+alias yarn='nvm_lazy_load && yarn'
 
 # Fix for Oh My Zsh NVM completion errors - remove cached functions
 _omz_nvm_setup_completion() { return 0; }
@@ -82,3 +166,4 @@ _omz_nvm_setup_autoload() { return 0; }
 # bun completions
 [ -s "/Users/filipmellqvist/.bun/_bun" ] && source "/Users/filipmellqvist/.bun/_bun"
 
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
