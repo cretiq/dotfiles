@@ -4,8 +4,8 @@
 # Manages dynamic keybinding switching for VSCodeVim extension
 # Integrates with the main vim-keymap-toggle.sh system
 
-CURSOR_SETTINGS="/Users/filipmellqvist/Library/Application Support/Cursor/User/settings.json"
-VSCODE_SETTINGS="/Users/filipmellqvist/Library/Application Support/Code/User/settings.json"
+CURSOR_SETTINGS="/mnt/c/Users/FilipM/AppData/Roaming/Cursor/User/settings.json"
+VSCODE_SETTINGS="/mnt/c/Users/FilipM/AppData/Roaming/Code/User/settings.json"
 BACKUP_DIR="$HOME/.dotfiles/vim/.vim/vscode-backups"
 
 # Ensure backup directory exists
