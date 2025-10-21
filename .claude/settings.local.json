@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dos2unix:*)",
+      "Bash(zsh:*)",
+      "Bash(git config:*)",
+      "Bash(git reset:*)",
+      "Bash(source zsh/.zshrc)",
+      "Bash(nvim:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
