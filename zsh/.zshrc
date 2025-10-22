@@ -9,8 +9,6 @@ alias sp="spf -c ~/.spf.toml"
 alias mw="macrowhisper"
 
 # Vim keymap shortcuts
-alias vimkeys="~/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh"
-alias vimtoggle="~/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh toggle"
 
 # Windows Cursor keymap shortcuts
 alias cursorkeys="~/.dotfiles/my_scripts/.script/windows-cursor-keymap-manager.sh"
@@ -20,42 +18,24 @@ alias cursortoggle="~/.dotfiles/my_scripts/.script/windows-cursor-keymap-manager
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-# Add Windows Node.js tools to PATH (for .exe wrappers)
-export PATH="$PATH:/mnt/c/Program Files/nodejs"
+# Add Windows Node.js tools to PATH (for .exe wrappers) - DISABLED on WSL2 due to I/O errors
+# export PATH="$PATH:/mnt/c/Program Files/nodejs"
+# Use NVM-managed Node.js instead - it's already in PATH above
 
 # openjdk
 export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
+
+# NPM Global - CRITICAL: DO NOT REMOVE OR MODIFY
+# Uses user-writable directory for global npm packages (standard best practice)
+# Avoids permission issues, prevents need for sudo, and works with nvm
+# This ensures Claude Code and other global CLI tools are accessible without sudo
+export PATH="$HOME/.npm-global/bin:$PATH"
 
 # Dotnet cli through Windows (for direct access to Windows services)
 alias dotnet='dotnet.exe'
 
 # Git through Windows (for corporate network access)
 alias git='git.exe'
-
-# Smart wrappers for Node tools - use Windows versions in /mnt/c paths for better performance
-function yarn() {
-  if [[ $(pwd) == /mnt/* ]]; then
-    cmd.exe /c 'C:\Users\FilipM\AppData\Roaming\npm\yarn.cmd' "$@"
-  else
-    command yarn "$@"
-  fi
-}
-
-function npm() {
-  if [[ $(pwd) == /mnt/* ]]; then
-    cmd.exe /c 'C:\Program Files\nodejs\npm.cmd' "$@"
-  else
-    command npm "$@"
-  fi
-}
-
-function node() {
-  if [[ $(pwd) == /mnt/* ]]; then
-    node.exe "$@"
-  else
-    command node "$@"
-  fi
-}
 
 # === DEVELOPMENT COMMANDS ===
 #
@@ -110,7 +90,7 @@ plugins=(git)
 source $ZSH/oh-my-zsh.sh
 
 alias tm='task-master'
-alias config='/usr/bin/git --git-dir=/Users/filipmellqvist/.dotfiles/ --work-tree=/Users/filipmellqvist'
+# alias config='/usr/bin/git --git-dir=/Users/filipmellqvist/.dotfiles/ --work-tree=/Users/filipmellqvist' # Disabled on WSL2
 
 bindkey '^[[1;5D' backward-word     # Ctrl+Left
 bindkey '^[[1;5C' forward-word      # Ctrl+Right
@@ -164,9 +144,9 @@ _omz_nvm_setup_completion() { return 0; }
 _omz_nvm_setup_autoload() { return 0; }
 
 # bun completions
-[ -s "/Users/filipmellqvist/.bun/_bun" ] && source "/Users/filipmellqvist/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-
-# Claude Code - Always use WSL npm installation
-alias claude='npm exec -y @anthropic-ai/claude-code --'
+# Only eval brew shellenv if the directory exists (fixes WSL2 I/O errors)
+if [ -d "/home/linuxbrew/.linuxbrew/bin" ]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv 2>/dev/null)" || true
+fi
