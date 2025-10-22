@@ -79,37 +79,33 @@ EOF
 # Function to get custom JKLÖ vimrc
 get_custom_vimrc() {
     cat << 'EOF'
-" Custom JKLÖ navigation (HJKL remapped)
+" Custom JKLÖ navigation (direct motion mapping, no chaining)
 " Physical keys: j=left, k=down, l=up, ö=right
 
-" Normal mode navigation
-nmap j h
-nmap k j
-nmap l k
-nmap ö l
+" Normal mode - map directly to motions
+nnoremap j h
+nnoremap k j
+nnoremap l k
+nnoremap ö l
 
-" Visual mode navigation
-vmap j h
-vmap k j
-vmap l k
-vmap ö l
+" Visual mode - map directly to motions
+vnoremap j h
+vnoremap k j
+vnoremap l k
+vnoremap ö l
 
-" Operator pending mode navigation
-omap j h
-omap k j
-omap l k
-omap ö l
+" Operator pending mode - map directly to motions
+onoremap j h
+onoremap k j
+onoremap l k
+onoremap ö l
 
-" Line navigation with J and K (shift versions)
-nmap J ^
-nmap K $
-
-" Quick line navigation alternatives
-nmap H 0
-nmap L $
+" Line navigation alternatives
+nnoremap H 0
+nnoremap L $
 
 " Quickly remove search highlights
-nmap <F9> :nohl<CR>
+nnoremap <F9> :nohl<CR>
 
 " Yank to system clipboard
 set clipboard=unnamed
