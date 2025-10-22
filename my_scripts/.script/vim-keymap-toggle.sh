@@ -12,6 +12,8 @@ DEFAULT_KEYMAP="$KEYMAPS_DIR/default.vim"
 CUSTOM_KEYMAP="$KEYMAPS_DIR/custom.vim"
 VSCODE_MANAGER="$HOME/.dotfiles/my_scripts/.script/vscode-vim-keymap-manager.sh"
 GHOSTTY_MANAGER="$HOME/.dotfiles/my_scripts/.script/ghostty-keymap-manager.sh"
+VIMIUM_MANAGER="$HOME/.dotfiles/my_scripts/.script/vimium-keymap-manager.sh"
+SUPERFILE_MANAGER="$HOME/.dotfiles/my_scripts/.script/superfile-keymap-manager.sh"
 
 # Ensure directories exist
 mkdir -p "$VIM_DIR" "$KEYMAPS_DIR"
@@ -63,6 +65,18 @@ trigger_vim_reload() {
         echo "🔄 Updating Ghostty keybindings..."
         "$GHOSTTY_MANAGER" "$state_mode"
     fi
+
+    # Also update Vimium if available
+    if [[ -x "$VIMIUM_MANAGER" ]]; then
+        echo "🔄 Updating Vimium keybindings..."
+        "$VIMIUM_MANAGER" "$state_mode"
+    fi
+
+    # Also update Superfile if available
+    if [[ -x "$SUPERFILE_MANAGER" ]]; then
+        echo "🔄 Updating Superfile keybindings..."
+        "$SUPERFILE_MANAGER" "$state_mode"
+    fi
 }
 
 # Function to toggle keymap
@@ -78,7 +92,7 @@ toggle_keymap() {
         echo "📍 State saved: custom"
 
         # Show notification
-        osascript -e 'display notification "Custom JKLÖ navigation activated" with title "Vim Keymaps" subtitle "Terminal + VSCode/Cursor"' 2>/dev/null || true
+        osascript -e 'display notification "Custom JKLÖ navigation activated" with title "Vim Keymaps" subtitle "Terminal + VSCode/Cursor + Vimium + Superfile"' 2>/dev/null || true
 
     else
         # Switch to default
@@ -88,7 +102,7 @@ toggle_keymap() {
         echo "📍 State saved: default"
 
         # Show notification
-        osascript -e 'display notification "Default HJKL navigation activated" with title "Vim Keymaps" subtitle "Terminal + VSCode/Cursor"' 2>/dev/null || true
+        osascript -e 'display notification "Default HJKL navigation activated" with title "Vim Keymaps" subtitle "Terminal + VSCode/Cursor + Vimium + Superfile"' 2>/dev/null || true
     fi
 }
 

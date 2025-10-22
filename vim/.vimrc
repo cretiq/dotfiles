@@ -31,18 +31,24 @@ set clipboard=unnamed
 set timeoutlen=1000 ttimeoutlen=0
 
 set termguicolors
-colorscheme catppuccin-latte
+lua require("catppuccin").load("latte")
 hi Normal guibg=NONE ctermbg=NONE
 
 " Ghostty config syntax highlighting
 autocmd BufRead,BufNewFile */ghostty/config set filetype=conf
 autocmd BufRead,BufNewFile *.ghostty set filetype=conf
 
+" Set startup flag to suppress keymap messages during initialization
+let g:keymap_startup_mode = 1
+
 " Dynamic keymap system - load keymap based on saved state
 source ~/.dotfiles/vim/.vim/keymaps/auto-load.vim
 
 " Hot-reload system for real-time keymap switching
 source ~/.dotfiles/vim/.vim/keymaps/hotreload.vim
+
+" Clear startup flag after all initialization is done
+unlet g:keymap_startup_mode
 
 " Commands for manual keymap switching
 command! KeymapDefault source ~/.dotfiles/vim/.vim/keymaps/default.vim

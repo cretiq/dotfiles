@@ -82,3 +82,28 @@ _omz_nvm_setup_autoload() { return 0; }
 # bun completions
 [ -s "/Users/filipmellqvist/.bun/_bun" ] && source "/Users/filipmellqvist/.bun/_bun"
 
+# Ghostty Tab Title Helper - Global Function
+tt() {
+    if [ $# -eq 0 ]; then
+        # Auto-generate based on current directory and git branch
+        local dir_name=$(basename "$(pwd)")
+        local branch=""
+        if git rev-parse --git-dir > /dev/null 2>&1; then
+            branch=" ($(git branch --show-current 2>/dev/null))"
+        fi
+        local title="${dir_name}${branch}"
+        printf "\033]0;%s\007" "$title"
+        echo "Auto-set tab title: $title"
+    else
+        printf "\033]0;%s\007" "$*"
+        echo "Tab title: $*"
+    fi
+}
+
+# pnpm
+export PNPM_HOME="/Users/filipmellqvist/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end

@@ -39,4 +39,7 @@ onoremap k j
 onoremap l k
 onoremap ö l
 
-echo "Vim keymaps: Custom (JKLÖ) mode activated"
+" Print message only during interactive keymap switching, not on startup
+if !exists('g:keymap_startup_mode')
+    echo "Vim keymaps: Custom (JKLÖ) mode activated"
+endif

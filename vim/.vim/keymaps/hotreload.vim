@@ -24,15 +24,17 @@ function! CheckAndReloadKeymap()
                 execute 'source ' . l:keymap_file
                 let g:last_keymap_state = l:current_state
 
-                " Visual feedback with highlight
-                if l:current_state == 'custom'
-                    echohl WarningMsg | echo "🔄 Hot-reload: CUSTOM (JKLÖ) mode activated" | echohl None
-                else
-                    echohl MoreMsg | echo "🔄 Hot-reload: DEFAULT (HJKL) mode activated" | echohl None
-                endif
+                " Visual feedback with highlight (skip during startup)
+                if !exists('g:keymap_startup_mode')
+                    if l:current_state == 'custom'
+                        echohl WarningMsg | echo "🔄 Hot-reload: CUSTOM (JKLÖ) mode activated" | echohl None
+                    else
+                        echohl MoreMsg | echo "🔄 Hot-reload: DEFAULT (HJKL) mode activated" | echohl None
+                    endif
 
-                " Force redraw to show status line changes
-                redraw!
+                    " Force redraw to show status line changes
+                    redraw!
+                endif
             endif
         endif
     endif

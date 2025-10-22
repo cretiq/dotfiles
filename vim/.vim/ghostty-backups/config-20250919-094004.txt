@@ -14,8 +14,6 @@
 # theme = "Night Owl"
 theme = dark:nightfox,light:catppuccin-latte.conf
 
-# Cursor Color
-
 
 # Typography
 font-size = 15
@@ -29,11 +27,10 @@ background-blur-radius = 60
 # Cursor styling (Vim will override these as needed)
 cursor-style = block
 cursor-style-blink = false
-# cursor-color = ff79c6
-cursor-color = #FFA500
+cursor-color = ff79c6
 
 # Split visual effects
-unfocused-split-opacity = 0.8
+unfocused-split-opacity = 0.7
 unfocused-split-fill = 2a2a2a
 split-divider-color = 6272a4
 
@@ -42,6 +39,9 @@ mouse-hide-while-typing = false
 
 # macOS polish
 macos-window-shadow = true
+
+# Dimmed, unfocused panes
+unfocused-split-opacity = 0.9
 
 # ===============================================
 # WINDOW SETTINGS
@@ -79,8 +79,8 @@ keybind = cmd+opt+down=new_split:down
 keybind = cmd+opt+left=new_split:left
 keybind = cmd+opt+up=new_split:up
 
-keybind = cmd+shift+k=clear_screen
-keybind = cmd+opt+z=clear_screen
+keybind = cmd+alt+shift+k=clear_screen
+keybind = cmd+alt+shift+z=clear_screen
 
 # ===============================================
 # NOTES
@@ -89,15 +89,11 @@ keybind = cmd+opt+z=clear_screen
 # List themes: ghostty +list-themes
 # List fonts: ghostty +list-fonts
 # Show config: ghostty +show-config
-# Check version: ghostty --version
 keybind = shift+enter=text:\x1b\r
 
-# Text Editing
-keybind = cmd+z=text:\x1f
-
-# Split Navigation (vim-style)
-keybind = cmd+opt+shift+h=goto_split:left
-keybind = cmd+l=goto_split:right
-keybind = cmd+j=goto_split:down
-keybind = cmd+k=goto_split:up
+# Split Navigation (custom JKLÖ style)
+keybind = cmd+j=goto_split:left
+keybind = cmd+k=goto_split:down
+keybind = cmd+l=goto_split:up
+keybind = cmd+opt+ctrl+o=goto_split:right
 
