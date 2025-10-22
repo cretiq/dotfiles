@@ -167,3 +167,6 @@ _omz_nvm_setup_autoload() { return 0; }
 [ -s "/Users/filipmellqvist/.bun/_bun" ] && source "/Users/filipmellqvist/.bun/_bun"
 
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+# Claude Code - Always use WSL npm installation
+alias claude='npm exec -y @anthropic-ai/claude-code --'
