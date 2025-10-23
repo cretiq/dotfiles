@@ -10,7 +10,6 @@ TRIGGER_FILE="$VIM_DIR/keymap_trigger"
 KEYMAPS_DIR="$VIM_DIR/keymaps"
 DEFAULT_KEYMAP="$KEYMAPS_DIR/default.vim"
 CUSTOM_KEYMAP="$KEYMAPS_DIR/custom.vim"
-VSCODE_MANAGER="$HOME/.dotfiles/my_scripts/.script/vscode-vim-keymap-manager.sh"
 OBSIDIAN_MANAGER="$HOME/.dotfiles/my_scripts/.script/obsidian-keymap-manager.sh"
 
 # Ensure directories exist
@@ -50,12 +49,6 @@ trigger_vim_reload() {
         echo "✅ Hot-reload triggered for $(echo "$vim_pids" | wc -l) running Vim session(s)"
     else
         echo "📝 No running Vim instances found. Keymap will apply to new sessions."
-    fi
-
-    # Also update VSCode/Cursor if available
-    if [[ -x "$VSCODE_MANAGER" ]]; then
-        echo "🔄 Updating VSCode/Cursor keybindings..."
-        "$VSCODE_MANAGER" "$state_mode"
     fi
 
     # Also update Obsidian if available

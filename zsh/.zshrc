@@ -8,12 +8,6 @@ skip_global_compinit=1
 alias sp="spf -c ~/.spf.toml"
 alias mw="macrowhisper"
 
-# Vim keymap shortcuts
-
-# Windows Cursor keymap shortcuts
-alias cursorkeys="~/.dotfiles/my_scripts/.script/windows-cursor-keymap-manager.sh"
-alias cursortoggle="~/.dotfiles/my_scripts/.script/windows-cursor-keymap-manager.sh toggle"
-
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
