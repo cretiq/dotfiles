@@ -27,7 +27,6 @@ backup_keybindings() {
 get_default_keybindings() {
     cat << 'EOF'
 [
-    // Default HJKL navigation (Vim standard)
     {
         "key": "h",
         "command": "cursorLeft",
@@ -47,6 +46,86 @@ get_default_keybindings() {
         "key": "l",
         "command": "cursorRight",
         "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "h",
+        "command": "cursorLeftSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "j",
+        "command": "cursorDownSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "k",
+        "command": "cursorUpSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "l",
+        "command": "cursorRightSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "h",
+        "command": "cursorLeftSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "j",
+        "command": "cursorDownSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "k",
+        "command": "cursorUpSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "l",
+        "command": "cursorRightSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "h",
+        "command": "cursorLeftSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "j",
+        "command": "cursorDownSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "k",
+        "command": "cursorUpSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "l",
+        "command": "cursorRightSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "h",
+        "command": "cursorLeft",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
+    },
+    {
+        "key": "j",
+        "command": "cursorDown",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
+    },
+    {
+        "key": "k",
+        "command": "cursorUp",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
+    },
+    {
+        "key": "l",
+        "command": "cursorRight",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
     }
 ]
 EOF
@@ -56,7 +135,6 @@ EOF
 get_custom_keybindings() {
     cat << 'EOF'
 [
-    // Custom JKLÖ navigation
     {
         "key": "j",
         "command": "cursorLeft",
@@ -76,6 +154,86 @@ get_custom_keybindings() {
         "key": "ö",
         "command": "cursorRight",
         "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "j",
+        "command": "cursorLeftSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "k",
+        "command": "cursorDownSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "l",
+        "command": "cursorUpSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "ö",
+        "command": "cursorRightSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "j",
+        "command": "cursorLeftSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "k",
+        "command": "cursorDownSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "l",
+        "command": "cursorUpSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "ö",
+        "command": "cursorRightSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "j",
+        "command": "cursorLeftSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "k",
+        "command": "cursorDownSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "l",
+        "command": "cursorUpSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "ö",
+        "command": "cursorRightSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "j",
+        "command": "cursorLeft",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
+    },
+    {
+        "key": "k",
+        "command": "cursorDown",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
+    },
+    {
+        "key": "l",
+        "command": "cursorUp",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
+    },
+    {
+        "key": "ö",
+        "command": "cursorRight",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
     }
 ]
 EOF
@@ -95,12 +253,18 @@ update_keybindings() {
         backup_keybindings
     fi
 
-    # Write new keybindings based on mode
+    # Get the new keybindings and extract just the JSON array content (without outer brackets)
+    local new_bindings
     if [[ "$mode" == "custom" ]]; then
-        get_custom_keybindings > "$KEYBINDINGS_FILE"
+        new_bindings=$(get_custom_keybindings | sed '1d;$d')
     else
-        get_default_keybindings > "$KEYBINDINGS_FILE"
+        new_bindings=$(get_default_keybindings | sed '1d;$d')
     fi
+
+    # Create new keybindings file with proper JSON array
+    echo "[" > "$KEYBINDINGS_FILE"
+    echo "$new_bindings" >> "$KEYBINDINGS_FILE"
+    echo "]" >> "$KEYBINDINGS_FILE"
 
     echo "✅ Updated: $KEYBINDINGS_FILE"
     return 0
@@ -166,6 +330,15 @@ show_status() {
     # Show backup count
     local backup_count=$(ls "$BACKUP_DIR"/keybindings-*.bak 2>/dev/null | wc -l)
     echo "Backups available: $backup_count"
+
+    echo ""
+    echo "📌 IMPORTANT: Ctrl Key Configuration"
+    echo "===================================="
+    echo "To prevent Vim from using Ctrl keys (preserving Ctrl+P, etc):"
+    echo "1. In VSCode, go to Settings"
+    echo "2. Search for 'vim.commandLineModeKeyBindings' and 'vim.normalModeKeyBindings'"
+    echo "3. Disable default VSCodeVim Ctrl keybindings"
+    echo "4. Alternatively, manually edit settings.json with custom bindings that exclude Ctrl keys"
 }
 
 # Main script logic
