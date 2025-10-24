@@ -11,6 +11,7 @@ KEYMAPS_DIR="$VIM_DIR/keymaps"
 DEFAULT_KEYMAP="$KEYMAPS_DIR/default.vim"
 CUSTOM_KEYMAP="$KEYMAPS_DIR/custom.vim"
 OBSIDIAN_MANAGER="$HOME/.dotfiles/my_scripts/.script/obsidian-keymap-manager.sh"
+VSCODE_MANAGER="$HOME/.dotfiles/my_scripts/.script/vscode-keymap-manager.sh"
 
 # Ensure directories exist
 mkdir -p "$VIM_DIR" "$KEYMAPS_DIR"
@@ -55,6 +56,12 @@ trigger_vim_reload() {
     if [[ -x "$OBSIDIAN_MANAGER" ]]; then
         echo "🔄 Updating Obsidian keybindings..."
         "$OBSIDIAN_MANAGER" "$state_mode"
+    fi
+
+    # Also update VSCode if available
+    if [[ -x "$VSCODE_MANAGER" ]]; then
+        echo "🔄 Updating VSCode keybindings..."
+        "$VSCODE_MANAGER" "$state_mode"
     fi
 }
 
