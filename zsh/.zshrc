@@ -28,9 +28,6 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 # Dotnet cli through Windows (for direct access to Windows services)
 alias dotnet='dotnet.exe'
 
-# Git through Windows (for corporate network access)
-alias git='git.exe'
-
 # === DEVELOPMENT COMMANDS ===
 #
 alias npm3001="PORT=3001 npm run dev"
