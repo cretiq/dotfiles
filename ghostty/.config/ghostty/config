@@ -63,6 +63,18 @@ window-padding-y = 10
 confirm-close-surface = false
 
 # ===============================================
+# CLIPBOARD & PASTE SETTINGS
+# ===============================================
+
+# Disable paste protection warnings for multi-line commands
+# Note: This disables a security feature that warns about potentially
+# dangerous pastes (e.g., commands with newlines that auto-execute)
+clipboard-paste-protection = false
+
+# Treat bracketed pastes as safe (programs like zsh/fish handle them safely)
+clipboard-paste-bracketed-safe = true
+
+# ===============================================
 # KEYBINDINGS
 # ===============================================
 
