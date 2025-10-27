@@ -4,6 +4,28 @@
 # Manages dynamic keybinding switching for VSCode Vim extension
 # Integrates with the main vim-keymap-toggle.sh system
 
+# ============================================================================
+# PERSISTENT KEYBINDINGS CONFIGURATION
+# ============================================================================
+# Add any keybindings here that should be preserved across all keymap toggles.
+# These will be automatically merged with the movement keybindings.
+# Format: standard VSCode keybinding JSON objects
+# Example:
+#   {
+#       "key": "ctrl+p",
+#       "command": "-extension.vim_ctrl+p",
+#       "when": "condition"
+#   },
+# ============================================================================
+PERSISTENT_KEYBINDINGS='[
+    {
+        "key": "ctrl+p",
+        "command": "-extension.vim_ctrl+p",
+        "when": "editorTextFocus && vim.active && vim.use<C-p> && !inDebugRepl || vim.active && vim.use<C-p> && !inDebugRepl && vim.mode == '\''CommandlineInProgress'\'' || vim.active && vim.use<C-p> && !inDebugRepl && vim.mode == '\''SearchInProgressMode'\''"
+    }
+]'
+# ============================================================================
+
 # VSCode config locations (Windows paths via WSL2)
 VSCODE_CONFIG_DIR="/mnt/c/Users/FilipM/AppData/Roaming/Code/User"
 KEYBINDINGS_FILE="$VSCODE_CONFIG_DIR/keybindings.json"
@@ -46,66 +68,6 @@ get_default_keybindings() {
         "key": "l",
         "command": "cursorRight",
         "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
-    },
-    {
-        "key": "h",
-        "command": "cursorLeftSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
-    },
-    {
-        "key": "j",
-        "command": "cursorDownSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
-    },
-    {
-        "key": "k",
-        "command": "cursorUpSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
-    },
-    {
-        "key": "l",
-        "command": "cursorRightSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
-    },
-    {
-        "key": "h",
-        "command": "cursorLeftSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
-    },
-    {
-        "key": "j",
-        "command": "cursorDownSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
-    },
-    {
-        "key": "k",
-        "command": "cursorUpSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
-    },
-    {
-        "key": "l",
-        "command": "cursorRightSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
-    },
-    {
-        "key": "h",
-        "command": "cursorLeftSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
-    },
-    {
-        "key": "j",
-        "command": "cursorDownSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
-    },
-    {
-        "key": "k",
-        "command": "cursorUpSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
-    },
-    {
-        "key": "l",
-        "command": "cursorRightSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
     },
     {
         "key": "h",
@@ -157,66 +119,6 @@ get_custom_keybindings() {
     },
     {
         "key": "j",
-        "command": "cursorLeftSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
-    },
-    {
-        "key": "k",
-        "command": "cursorDownSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
-    },
-    {
-        "key": "l",
-        "command": "cursorUpSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
-    },
-    {
-        "key": "ö",
-        "command": "cursorRightSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
-    },
-    {
-        "key": "j",
-        "command": "cursorLeftSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
-    },
-    {
-        "key": "k",
-        "command": "cursorDownSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
-    },
-    {
-        "key": "l",
-        "command": "cursorUpSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
-    },
-    {
-        "key": "ö",
-        "command": "cursorRightSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
-    },
-    {
-        "key": "j",
-        "command": "cursorLeftSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
-    },
-    {
-        "key": "k",
-        "command": "cursorDownSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
-    },
-    {
-        "key": "l",
-        "command": "cursorUpSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
-    },
-    {
-        "key": "ö",
-        "command": "cursorRightSelect",
-        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
-    },
-    {
-        "key": "j",
         "command": "cursorLeft",
         "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
     },
@@ -253,21 +155,59 @@ update_keybindings() {
         backup_keybindings
     fi
 
-    # Get the new keybindings and extract just the JSON array content (without outer brackets)
-    local new_bindings
+    # Get the new movement keybindings as full JSON array
+    local movement_bindings
     if [[ "$mode" == "custom" ]]; then
-        new_bindings=$(get_custom_keybindings | sed '1d;$d')
+        movement_bindings=$(get_custom_keybindings)
     else
-        new_bindings=$(get_default_keybindings | sed '1d;$d')
+        movement_bindings=$(get_default_keybindings)
     fi
 
-    # Create new keybindings file with proper JSON array
-    echo "[" > "$KEYBINDINGS_FILE"
-    echo "$new_bindings" >> "$KEYBINDINGS_FILE"
-    echo "]" >> "$KEYBINDINGS_FILE"
+    # Use Python to merge keybindings (more reliable than jq)
+    python3 << PYTHON_EOF
+import json
+import sys
 
-    echo "✅ Updated: $KEYBINDINGS_FILE"
-    return 0
+# Movement keys to filter out
+MOVEMENT_KEYS = {'h', 'j', 'k', 'l', 'ö'}
+
+try:
+    # Read existing keybindings
+    existing_custom_bindings = []
+    if '$KEYBINDINGS_FILE' and __import__('os').path.isfile('$KEYBINDINGS_FILE'):
+        with open('$KEYBINDINGS_FILE', 'r', encoding='utf-8') as f:
+            existing = json.load(f)
+            # Keep only non-movement keybindings
+            existing_custom_bindings = [b for b in existing if b.get('key') not in MOVEMENT_KEYS]
+
+    # Parse new movement bindings
+    movement_bindings = json.loads('''$movement_bindings''')
+
+    # Combine: movement bindings first, then custom bindings
+    combined = movement_bindings + existing_custom_bindings
+
+    # Write the merged result
+    with open('$KEYBINDINGS_FILE', 'w', encoding='utf-8') as f:
+        json.dump(combined, f, indent=4, ensure_ascii=False)
+
+    sys.exit(0)
+
+except Exception as e:
+    print(f"❌ Error merging keybindings: {e}", file=sys.stderr)
+    sys.exit(1)
+PYTHON_EOF
+
+    if [[ $? -eq 0 ]]; then
+        echo "✅ Updated: $KEYBINDINGS_FILE (preserved custom keybindings)"
+        return 0
+    else
+        echo "❌ Failed to merge keybindings. Rolling back from backup."
+        latest_backup=$(ls -t "$BACKUP_DIR"/keybindings-*.bak 2>/dev/null | head -1)
+        if [[ -n "$latest_backup" ]]; then
+            cp "$latest_backup" "$KEYBINDINGS_FILE"
+        fi
+        return 1
+    fi
 }
 
 # Function to apply keymap mode

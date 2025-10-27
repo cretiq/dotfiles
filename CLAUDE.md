@@ -70,10 +70,51 @@ Dynamic keymap switching system supporting both terminal Vim and VSCode/Cursor:
 
 **Key Files:**
 - Main script: `my_scripts/.script/vim-keymap-toggle.sh`
-- VSCode manager: `my_scripts/.script/vscode-vim-keymap-manager.sh`
+- VSCode manager: `my_scripts/.script/vscode-keymap-manager.sh`
 - State file: `vim/.vim/keymap_state`
 - FastScripts: `~/Library/Scripts/Toggle Vim Keymaps.sh`
 - Backups: `vim/.vim/vscode-backups/`
+
+#### VSCode HJKL/JKLÖ Mapping Approach (Updated)
+
+**Problem Solved:**
+Previously, VSCode keybindings were binding movement keys in ALL Vim modes (Normal, Visual, VisualLine, VisualBlock, Replace), which caused a critical bug in Visual Line mode where:
+- Selection would only select characters to the column where cursor landed
+- Delete would only delete the original line, not all selected lines
+- Linewise selection semantics were completely broken
+
+**Root Cause:**
+VSCode keybindings were intercepting movement keys BEFORE VSCodeVim could process them with proper mode-specific behavior. In Visual Line mode, `cursorDownSelect` (character-level) was firing instead of VSCodeVim's linewise selection logic.
+
+**Solution Implemented:**
+Movement key bindings (h/j/k/l and j/k/l/ö) are now ONLY bound in:
+- **Normal mode** ✅ (standard navigation)
+- **Replace mode** ✅ (character replacement)
+
+Movement keys are NOT bound in:
+- **Visual mode** ✅ (character selection - handled by VSCodeVim)
+- **VisualLine mode** ✅ (linewise selection - handled by VSCodeVim)
+- **VisualBlock mode** ✅ (block selection - handled by VSCodeVim)
+
+**Technical Details:**
+The VSCode keybinding script (`vscode-keymap-manager.sh`) uses Python-based JSON merging to:
+1. Preserve all custom keybindings (ctrl+p, ctrl+tab, etc.)
+2. Filter out movement keys from existing file
+3. Add only Normal and Replace mode movement key bindings
+4. Merge everything together maintaining valid JSON structure
+
+**Key Implementation:**
+- Only 8 movement key bindings per mode (4 keys × 2 modes)
+- Custom keybindings are automatically preserved across toggles
+- No interference with VSCodeVim's native Visual mode handling
+- All custom keybindings persist whether added to PERSISTENT_KEYBINDINGS or directly to VSCode
+
+**Result:**
+✅ Visual Line mode now works correctly
+✅ Linewise selection includes full lines
+✅ Delete in Visual Line deletes all selected lines
+✅ All custom keybindings remain preserved
+✅ Normal mode navigation still works with HJKL/JKLÖ override
 
 ### Port Management
 The zsh configuration includes comprehensive port management aliases:
