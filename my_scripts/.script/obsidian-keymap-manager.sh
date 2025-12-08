@@ -188,7 +188,7 @@ show_status() {
         local vimrc_file="$vault_path/.obsidian.vimrc"
 
         if [[ -f "$vimrc_file" ]]; then
-            if grep -q "nmap j h" "$vimrc_file" 2>/dev/null; then
+            if grep -q "nnoremap j h" "$vimrc_file" 2>/dev/null; then
                 echo "  • $vault_name: CUSTOM (JKLÖ)"
             else
                 echo "  • $vault_name: DEFAULT (HJKL)"

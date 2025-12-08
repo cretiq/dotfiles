@@ -2,5 +2,6 @@
 
 *.swp
 
+CLAUDE.md
 vim/.vim/obsidian-backups/
 .claude/settings.local.json
