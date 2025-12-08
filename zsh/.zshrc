@@ -130,6 +130,12 @@ alias node='nvm_lazy_load && node'
 alias npm='nvm_lazy_load && npm'
 alias yarn='nvm_lazy_load && yarn'
 
+# Claude Code - always use v20.19.5 (pinned version, independent of NVM)
+# Avoids confusion when switching Node versions
+claude() {
+  /home/filip/.nvm/versions/node/v20.19.5/bin/claude "$@"
+}
+
 # Fix for Oh My Zsh NVM completion errors - remove cached functions
 _omz_nvm_setup_completion() { return 0; }
 _omz_nvm_setup_autoload() { return 0; }
