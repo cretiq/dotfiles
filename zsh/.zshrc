@@ -28,6 +28,9 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 # Dotnet cli through Windows (for direct access to Windows services)
 alias dotnet='dotnet.exe'
 
+# Git through Windows (for corporate network access)
+alias git='git.exe'
+
 # === DEVELOPMENT COMMANDS ===
 #
 alias npm3001="PORT=3001 npm run dev"
@@ -56,19 +59,7 @@ alias glab='glab.exe'
 alias devserver='cd ~/Dev/server'
 
 dev() {
-  cd ~/Dev/server
-  echo ""
-  echo "📁 You're in: $(pwd)"
-  echo ""
-  echo "🚀 Next steps (run in Windows PowerShell):"
-  echo "   Backend:   cd C:\\Dev\\server\\Phoenix\\server\\Phoenix && dotnet run"
-  echo "   Frontend:  cd C:\\Dev\\server\\Phoenix\\client\\phoenix-client && yarn dev"
-  echo ""
-  echo "📝 Git commands (run here in WSL2):"
-  echo "   git status"
-  echo "   git add ."
-  echo "   git commit -m 'message'"
-  echo ""
+  cd /mnt/c/Dev
 }
 
 # === ==================== ===
