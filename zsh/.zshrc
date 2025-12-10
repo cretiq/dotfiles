@@ -3,6 +3,10 @@ export EDITOR="nvim"
 
 # Skip compaudit checks (safe for personal systems, saves ~300ms on startup)
 skip_global_compinit=1
+# Disable OMZ auto-update prompt
+DISABLE_AUTO_UPDATE=true
+# Disable magic functions (slow on WSL2)
+DISABLE_MAGIC_FUNCTIONS=true
 
 # alias sp="spf -c ~/.config/spf/config.toml"
 alias sp="spf -c ~/.spf.toml"
@@ -12,55 +16,21 @@ alias mw="macrowhisper"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-# Add Windows Node.js tools to PATH (for .exe wrappers) - DISABLED on WSL2 due to I/O errors
-# export PATH="$PATH:/mnt/c/Program Files/nodejs"
-# Use NVM-managed Node.js instead - it's already in PATH above
-
 # openjdk
 export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
 
-# NPM Global - CRITICAL: DO NOT REMOVE OR MODIFY
-# Uses user-writable directory for global npm packages (standard best practice)
-# Avoids permission issues, prevents need for sudo, and works with nvm
-# This ensures Claude Code and other global CLI tools are accessible without sudo
-export PATH="$HOME/.npm-global/bin:$PATH"
+# Windows tools PATH (Git, VS Code, dotnet, etc)
+export PATH="/mnt/c/Program Files/Git/cmd:/mnt/c/Users/FilipM/AppData/Local/Programs/Microsoft VS Code:$PATH"
 
 # Dotnet cli through Windows (for direct access to Windows services)
 alias dotnet='dotnet.exe'
 
 # Git through Windows (for corporate network access)
 alias git='git.exe'
-
-# === DEVELOPMENT COMMANDS ===
-#
-alias npm3001="PORT=3001 npm run dev"
-alias npm3002="PORT=3002 npm run dev"
-alias npm3003="PORT=3003 npm run dev"
-
-alias kill3000='echo "Searching for and forcefully terminating processes on port 3000..."; lsof -i :3000 -t | xargs -r kill -9; if [ $? -eq 0 ]; then echo "Processes on port 3000 terminated successfully (if any were found)."; else echo "An error occurred while trying to terminate processes on port 3000."; fi'
-alias kill3001='echo "Searching for and forcefully terminating processes on port 3001..."; lsof -i :3001 -t | xargs -r kill -9; if [ $? -eq 0 ]; then echo "Processes on port 3001 terminated successfully (if any were found)."; else echo "An error occurred while trying to terminate processes on port 3001."; fi'
-alias kill3002='echo "Searching for and forcefully terminating processes on port 3002..."; lsof -i :3002 -t | xargs -r kill -9; if [ $? -eq 0 ]; then echo "Processes on port 3002 terminated successfully (if any were found)."; else echo "An error occurred while trying to terminate processes on port 3002."; fi'
-alias kill3003='echo "Searching for and forcefully terminating processes on port 3003..."; lsof -i :3003 -t | xargs -r kill -9; if [ $? -eq 0 ]; then echo "Processes on port 3003 terminated successfully (if any were found)."; else echo "An error occurred while trying to terminate processes on port 3003."; fi'
-alias kill5555='echo "Searching for and forcefully terminating processes on port 5555..."; lsof -i :5555 -t | xargs -r kill -9; if [ $? -eq 0 ]; then echo "Processes on port 5555 terminated successfully (if any were found)."; else echo "An error occurred while trying to terminate processes on port 5555."; fi'
-
-alias 3000="kill3000 && npm run dev"
-alias 3001="kill3001 && npm3001"
-alias 3002="kill3002 && npm3002"
-alias 3003="kill3003 && npm3003"
-alias 5555="kill5555 && npx prisma studio"
-
-alias killnpmall="for port in 3000 3001 3002; do echo 'Attempting to forcefully kill processes on port $port...'; lsof -i :$port -t | xargs -r kill -9; done; echo 'Done.'"
-
-alias script-export="DEBUG_CV_UPLOAD=true NODE_ENV=development npx tsx scripts/analyze-direct-upload.ts"
-
 alias glab='glab.exe'
 
-# Phoenix project shortcuts
-alias devserver='cd ~/Dev/server'
-
-dev() {
-  cd /mnt/c/Dev
-}
+# VS Code through Windows
+alias code='code.exe &'
 
 # === ==================== ===
 
@@ -68,8 +38,11 @@ ZSH_THEME="af-magic"
 
 plugins=(git)
 
-# Source Oh My Zsh after setting up other things for better performance
+# Source Oh My Zsh
 source $ZSH/oh-my-zsh.sh
+
+# Worktree navigation: cd @<worktree>/s or /c (after OMZ so compdef is available)
+source "$HOME/.dotfiles/zsh/worktree-nav.zsh"
 
 alias tm='task-master'
 # alias config='/usr/bin/git --git-dir=/Users/filipmellqvist/.dotfiles/ --work-tree=/Users/filipmellqvist' # Disabled on WSL2
@@ -78,16 +51,6 @@ bindkey '^[[1;5D' backward-word     # Ctrl+Left
 bindkey '^[[1;5C' forward-word      # Ctrl+Right
 bindkey '^W' backward-kill-word     # Ctrl+W (usually default)
 bindkey '^[d' kill-word             # Alt+d (delete word forward)
-
-# Lazy-load completion system on first use
-autoload -Uz compinit
-_load_completion() {
-    compinit
-    unfunction _load_completion
-}
-compdef _load_completion
-# Trigger completion loading on first command completion
-zstyle ':completion:*' use-cache on
 
 spf() {
     os=$(uname -s)
@@ -123,9 +86,9 @@ alias yarn='nvm_lazy_load && yarn'
 
 # Claude Code - always use v20.19.5 (pinned version, independent of NVM)
 # Avoids confusion when switching Node versions
-claude() {
-  /home/filip/.nvm/versions/node/v20.19.5/bin/claude "$@"
-}
+# claude() {
+#   /home/filip/.nvm/versions/node/v20.19.5/bin/claude "$@"
+# }
 
 # Fix for Oh My Zsh NVM completion errors - remove cached functions
 _omz_nvm_setup_completion() { return 0; }
@@ -138,3 +101,4 @@ _omz_nvm_setup_autoload() { return 0; }
 if [ -d "/home/linuxbrew/.linuxbrew/bin" ]; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv 2>/dev/null)" || true
 fi
+export PATH="$HOME/.local/bin:$PATH"

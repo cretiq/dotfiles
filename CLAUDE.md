@@ -14,7 +14,7 @@ This is a personal dotfiles repository for macOS containing configuration files 
   - Theme: Uses dark:nightfox,light:catppuccin-latte.conf
   - Font: JetBrains Mono, size 15
 - **Zsh**: Shell with Oh My Zsh framework
-  - Config: `zsh/.zshrc`
+  - Config: `zsh/.zshrc`, `zsh/worktree-nav.zsh`
   - Theme: af-magic
   - Git plugin enabled
 
@@ -129,6 +129,24 @@ The zsh configuration includes comprehensive port management aliases:
 - `mw`: Start MacroWhisper
 - `tm`: Start task-master
 
+### Worktree Navigation (@prefix)
+Quick navigation to Phoenix worktrees in `C:\Dev` (Windows) or `/mnt/c/Dev` (WSL).
+
+**Usage:**
+- `cd @` + Tab → lists worktrees (`phoenix`, `phoenix-export`, `server`)
+- `cd @phoenix` → root folder (flat: `/mnt/c/Dev/phoenix`, nested: `.../Phoenix`)
+- `cd @phoenix/s` → server folder, `cd @phoenix/c` → client folder
+- Partial match: `cd @exp/s` → `phoenix-export/server`
+- Exact match priority: `cd @phoenix` matches `phoenix` before `phoenix-export`
+
+**Detection:** Auto-detects worktrees with `.git` (file or folder) + `server/Phoenix` path.
+**Structure:** Auto-detects flat (`server/Phoenix` at root) vs nested (`Phoenix/server/Phoenix`).
+
+**Config files (keep in sync):**
+- PowerShell 5.1: `C:\Users\FilipM\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`
+- PowerShell 7+: `C:\Users\FilipM\Documents\PowerShell\Microsoft.PowerShell_profile.ps1`
+- Zsh: `zsh/worktree-nav.zsh` (sourced from `.zshrc`)
+
 ### Development Environment
 - OpenJDK 11 configured at `/opt/homebrew/opt/openjdk@11/bin`
 - Bun runtime configured
@@ -174,6 +192,8 @@ All applications use consistent theming:
 ├── ghostty/          # Terminal emulator config
 ├── vim/              # Vim editor configuration and plugins
 ├── zsh/              # Zsh shell configuration
+│   ├── .zshrc
+│   └── worktree-nav.zsh  # @prefix worktree navigation
 ├── spf/              # Superfile manager config
 ├── macrowhisper/     # Voice-to-text app config
 ├── mypaint/          # Digital painting app config
