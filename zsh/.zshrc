@@ -16,8 +16,8 @@ alias mw="macrowhisper"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-# openjdk
-export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
+# openjdk (macOS only, harmless on WSL2)
+# export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
 
 # Windows tools PATH (Git, VS Code, dotnet, etc)
 export PATH="/mnt/c/Program Files/Git/cmd:/mnt/c/Users/FilipM/AppData/Local/Programs/Microsoft VS Code:$PATH"
@@ -53,18 +53,10 @@ bindkey '^W' backward-kill-word     # Ctrl+W (usually default)
 bindkey '^[d' kill-word             # Alt+d (delete word forward)
 
 spf() {
-    os=$(uname -s)
-
-    if [[ "$os" == "Darwin" ]]; then
-        export SPF_LAST_DIR="$HOME/Library/Application Support/superfile/lastdir"
-    fi
-
     command spf "$@"
-
-    [ ! -f "$SPF_LAST_DIR" ] || {
-        . "$SPF_LAST_DIR"
-        rm -f -- "$SPF_LAST_DIR" > /dev/null
-    }
+    # Handle lastdir on macOS
+    local lastdir="$HOME/Library/Application Support/superfile/lastdir"
+    [[ -f "$lastdir" ]] && { . "$lastdir"; rm -f -- "$lastdir"; }
 }
 
 
@@ -73,15 +65,15 @@ export NVM_DIR="$HOME/.nvm"
 
 # Lazy loading function for NVM
 nvm_lazy_load() {
-  unalias nvm node npm yarn 2>/dev/null
+  unalias nvm node npm npx yarn 2>/dev/null
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 }
 
 # Create command aliases that trigger lazy loading
 alias nvm='nvm_lazy_load && nvm'
 alias node='nvm_lazy_load && node'
 alias npm='nvm_lazy_load && npm'
+alias npx='nvm_lazy_load && npx'
 alias yarn='nvm_lazy_load && yarn'
 
 # Claude Code - always use v20.19.5 (pinned version, independent of NVM)
@@ -90,15 +82,14 @@ alias yarn='nvm_lazy_load && yarn'
 #   /home/filip/.nvm/versions/node/v20.19.5/bin/claude "$@"
 # }
 
-# Fix for Oh My Zsh NVM completion errors - remove cached functions
-_omz_nvm_setup_completion() { return 0; }
-_omz_nvm_setup_autoload() { return 0; }
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
-# Only eval brew shellenv if the directory exists (fixes WSL2 I/O errors)
+# Homebrew
 if [ -d "/home/linuxbrew/.linuxbrew/bin" ]; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv 2>/dev/null)" || true
 fi
+
+# Local bin takes priority (must be after brew)
 export PATH="$HOME/.local/bin:$PATH"
