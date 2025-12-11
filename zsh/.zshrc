@@ -19,18 +19,25 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 # openjdk (macOS only, harmless on WSL2)
 # export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
 
-# Windows tools PATH (Git, VS Code, dotnet, etc)
-export PATH="/mnt/c/Program Files/Git/cmd:/mnt/c/Users/FilipM/AppData/Local/Programs/Microsoft VS Code:$PATH"
+# ============================================================
+# WINDOWS INTEROP (appendWindowsPath=false in wsl.conf)
+# Only explicitly listed paths are available from WSL
+# NOTE: PowerShell path causes input lag - use alias with full path instead
+# ============================================================
+WIN_PATHS=(
+  "/mnt/c/Users/FilipM/scoop/shims"                  # glab.exe, other scoop tools
+  "/mnt/c/Program Files/Git/cmd"                     # git.exe
+  "/mnt/c/Users/FilipM/AppData/Local/Programs/Microsoft VS Code"  # code.exe
+)
+export PATH="${(j.:.)WIN_PATHS}:$PATH"
 
-# Dotnet cli through Windows (for direct access to Windows services)
+# Windows tool aliases (use .exe versions for corporate network/services access)
 alias dotnet='dotnet.exe'
-
-# Git through Windows (for corporate network access)
 alias git='git.exe'
 alias glab='glab.exe'
-
-# VS Code through Windows
 alias code='code.exe &'
+alias powershell='/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
+# ============================================================
 
 # === ==================== ===
 
@@ -93,3 +100,6 @@ fi
 
 # Local bin takes priority (must be after brew)
 export PATH="$HOME/.local/bin:$PATH"
+
+# Claude scratch folder - quick launch
+alias cc='cd ~/claude-scratch && claude'
