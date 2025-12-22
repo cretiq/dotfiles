@@ -46,8 +46,8 @@ plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
 
-alias tm='task-master'
 alias config='/usr/bin/git --git-dir=/Users/filipmellqvist/.dotfiles/ --work-tree=/Users/filipmellqvist'
+alias cc='cd ~/.claude && claude'
 
 bindkey '^[[1;5D' backward-word     # Ctrl+Left
 bindkey '^[[1;5C' forward-word      # Ctrl+Right
@@ -70,14 +70,17 @@ spf() {
 }
 
 
-# Load NVM manually (Oh My Zsh plugin removed due to completion errors)
+# Lazy load NVM - only loads when node/npm/nvm/npx called (saves ~180ms startup)
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-# Fix for Oh My Zsh NVM completion errors - remove cached functions
-_omz_nvm_setup_completion() { return 0; }
-_omz_nvm_setup_autoload() { return 0; }
+_lazy_load_nvm() {
+  unset -f nvm node npm npx 2>/dev/null
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+}
+nvm() { _lazy_load_nvm; nvm "$@"; }
+node() { _lazy_load_nvm; node "$@"; }
+npm() { _lazy_load_nvm; npm "$@"; }
+npx() { _lazy_load_nvm; npx "$@"; }
 
 # bun completions
 [ -s "/Users/filipmellqvist/.bun/_bun" ] && source "/Users/filipmellqvist/.bun/_bun"
