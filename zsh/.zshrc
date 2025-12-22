@@ -72,15 +72,27 @@ spf() {
 
 # Lazy load NVM - only loads when node/npm/nvm/npx called (saves ~180ms startup)
 export NVM_DIR="$HOME/.nvm"
-_lazy_load_nvm() {
+nvm() {
   unset -f nvm node npm npx 2>/dev/null
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+  nvm "$@"
 }
-nvm() { _lazy_load_nvm; nvm "$@"; }
-node() { _lazy_load_nvm; node "$@"; }
-npm() { _lazy_load_nvm; npm "$@"; }
-npx() { _lazy_load_nvm; npx "$@"; }
+node() {
+  unset -f nvm node npm npx 2>/dev/null
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  node "$@"
+}
+npm() {
+  unset -f nvm node npm npx 2>/dev/null
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  npm "$@"
+}
+npx() {
+  unset -f nvm node npm npx 2>/dev/null
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  npx "$@"
+}
 
 # bun completions
 [ -s "/Users/filipmellqvist/.bun/_bun" ] && source "/Users/filipmellqvist/.bun/_bun"
