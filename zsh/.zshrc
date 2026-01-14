@@ -37,6 +37,7 @@ alias git='git.exe'
 alias glab='glab.exe'
 alias code='code.exe &'
 alias powershell='/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
+alias powershell.exe='/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
 # ============================================================
 
 # === ==================== ===
@@ -51,7 +52,7 @@ source $ZSH/oh-my-zsh.sh
 # Worktree navigation: cd @<worktree>/s or /c (after OMZ so compdef is available)
 source "$HOME/.dotfiles/zsh/worktree-nav.zsh"
 
-alias tm='task-master'
+alias lg='lazygit'
 # alias config='/usr/bin/git --git-dir=/Users/filipmellqvist/.dotfiles/ --work-tree=/Users/filipmellqvist' # Disabled on WSL2
 
 bindkey '^[[1;5D' backward-word     # Ctrl+Left
@@ -102,4 +103,6 @@ fi
 export PATH="$HOME/.local/bin:$PATH"
 
 # Claude scratch folder - quick launch
+alias c='claude'
 alias cc='cd ~/claude-scratch && claude'
+alias ccc='cd ~/claude-scratch && claude -c'
