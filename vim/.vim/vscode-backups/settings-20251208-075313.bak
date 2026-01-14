@@ -1,0 +1,158 @@
+{
+    "workbench.activityBar.location": "top",
+    "terminal.integrated.smoothScrolling": true,
+    "workbench.list.smoothScrolling": true,
+    "editor.cursorBlinking": "smooth",
+    "security.allowedUNCHosts": [
+        "wsl.localhost"
+    ],
+    "editor.fontFamily": "'JetBrains Mono', Consolas, 'Courier New', monospace",
+    "terminal.integrated.drawBoldTextInBrightColors": false,
+    "catppuccin.boldKeywords": false,
+    "extensions.experimental.affinity": {
+        "vscodevim.vim": 1
+    },
+    "diffEditor.ignoreTrimWhitespace": true,
+    "git.autofetch": true,
+    "workbench.preferredDarkColorTheme": "Catppuccin Macchiato",
+    "git.confirmSync": false,
+    "workbench.preferredLightColorTheme": "Quiet Light",
+    "files.autoSave": "onFocusChange",
+    "workbench.iconTheme": "flow-dim",
+    "editor.cursorSmoothCaretAnimation": "on",
+    "editor.smoothScrolling": true,
+    "gitlens.ai.model": "vscode",
+    "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+    "gitlens.views.searchAndCompare.files.layout": "list",
+    "editor.minimap.enabled": false,
+    "diffEditor.hideUnchangedRegions.enabled": true,
+    "editor.fontSize": 13,
+    "gitlens.graph.dimMergeCommits": true,
+    "git.openRepositoryInParentFolders": "never",
+    "vim.normalModeKeyBindingsNonRecursive": [
+        {
+            "before": [
+                "u"
+            ],
+            "commands": [
+                "undo"
+            ]
+        },
+        {
+            "before": [
+                "U"
+            ],
+            "commands": [
+                "redo"
+            ]
+        },
+        {
+            "before": [
+                "j"
+            ],
+            "after": [
+                "h"
+            ]
+        },
+        {
+            "before": [
+                "k"
+            ],
+            "after": [
+                "j"
+            ]
+        },
+        {
+            "before": [
+                "l"
+            ],
+            "after": [
+                "k"
+            ]
+        },
+        {
+            "before": [
+                "ö"
+            ],
+            "after": [
+                "l"
+            ]
+        }
+    ],
+    "vim.visualModeKeyBindingsNonRecursive": [
+        {
+            "before": [
+                "j"
+            ],
+            "after": [
+                "h"
+            ]
+        },
+        {
+            "before": [
+                "k"
+            ],
+            "after": [
+                "j"
+            ]
+        },
+        {
+            "before": [
+                "l"
+            ],
+            "after": [
+                "k"
+            ]
+        },
+        {
+            "before": [
+                "ö"
+            ],
+            "after": [
+                "l"
+            ]
+        }
+    ],
+    "vim.operatorPendingModeKeyBindingsNonRecursive": [
+        {
+            "before": [
+                "j"
+            ],
+            "after": [
+                "h"
+            ]
+        },
+        {
+            "before": [
+                "k"
+            ],
+            "after": [
+                "j"
+            ]
+        },
+        {
+            "before": [
+                "l"
+            ],
+            "after": [
+                "k"
+            ]
+        },
+        {
+            "before": [
+                "ö"
+            ],
+            "after": [
+                "l"
+            ]
+        }
+    ],
+    "workbench.colorTheme": "Night Owl",
+    "[json]": {
+        "editor.quickSuggestions": {
+            "strings": true
+        },
+        "editor.suggest.insertMode": "replace"
+    },
+    "editor.unicodeHighlight.ambiguousCharacters": false
+}

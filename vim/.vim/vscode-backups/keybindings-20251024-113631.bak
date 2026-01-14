@@ -1,0 +1,23 @@
+[
+    // Custom JKLÖ navigation
+    {
+        "key": "j",
+        "command": "cursorLeft",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "k",
+        "command": "cursorDown",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "l",
+        "command": "cursorUp",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "ö",
+        "command": "cursorRight",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    }
+]

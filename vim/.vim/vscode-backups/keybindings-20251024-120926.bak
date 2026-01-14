@@ -1,0 +1,23 @@
+[
+    // Default HJKL navigation (Vim standard)
+    {
+        "key": "h",
+        "command": "cursorLeft",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "j",
+        "command": "cursorDown",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "k",
+        "command": "cursorUp",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "l",
+        "command": "cursorRight",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    }
+]

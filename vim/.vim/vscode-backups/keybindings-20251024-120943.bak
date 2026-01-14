@@ -1,0 +1,44 @@
+[
+    // Default HJKL navigation (Vim standard) - Normal mode
+    {
+        "key": "h",
+        "command": "cursorLeft",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "j",
+        "command": "cursorDown",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "k",
+        "command": "cursorUp",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "l",
+        "command": "cursorRight",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    // Default HJKL navigation (Vim standard) - Visual/Selection mode
+    {
+        "key": "h",
+        "command": "cursorLeftSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "j",
+        "command": "cursorDownSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "k",
+        "command": "cursorUpSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "l",
+        "command": "cursorRightSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    }
+]

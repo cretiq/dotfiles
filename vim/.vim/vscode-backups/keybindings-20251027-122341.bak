@@ -1,0 +1,129 @@
+[
+    {
+        "key": "j",
+        "command": "cursorLeft",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "k",
+        "command": "cursorDown",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "l",
+        "command": "cursorUp",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "ö",
+        "command": "cursorRight",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "j",
+        "command": "cursorLeftSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "k",
+        "command": "cursorDownSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "l",
+        "command": "cursorUpSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "ö",
+        "command": "cursorRightSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "j",
+        "command": "cursorLeftSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "k",
+        "command": "cursorDownSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "l",
+        "command": "cursorUpSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "ö",
+        "command": "cursorRightSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "j",
+        "command": "cursorLeftSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "k",
+        "command": "cursorDownSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "l",
+        "command": "cursorUpSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "ö",
+        "command": "cursorRightSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "j",
+        "command": "cursorLeft",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
+    },
+    {
+        "key": "k",
+        "command": "cursorDown",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
+    },
+    {
+        "key": "l",
+        "command": "cursorUp",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
+    },
+    {
+        "key": "ö",
+        "command": "cursorRight",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
+    },
+    {
+        "key": "ctrl+p",
+        "command": "-extension.vim_ctrl+p",
+        "when": "editorTextFocus && vim.active && vim.use<C-p> && !inDebugRepl || vim.active && vim.use<C-p> && !inDebugRepl && vim.mode == 'CommandlineInProgress' || vim.active && vim.use<C-p> && !inDebugRepl && vim.mode == 'SearchInProgressMode'"
+    },
+        {
+        "key": "ctrl+shift+tab",
+        "command": "-workbench.action.quickOpenLeastRecentlyUsedEditorInGroup",
+        "when": "!activeEditorGroupEmpty"
+    },
+    {
+        "key": "ctrl+tab",
+        "command": "-workbench.action.quickOpenNavigateNextInEditorPicker",
+        "when": "inEditorsPicker && inQuickOpen"
+    },
+    {
+        "key": "ctrl+tab",
+        "command": "workbench.action.nextEditor"
+    },
+    {
+        "key": "ctrl+pagedown",
+        "command": "-workbench.action.nextEditor"
+    },
+    {
+        "key": "ctrl+shift+tab",
+        "command": "workbench.action.previousEditor"
+    }
+]

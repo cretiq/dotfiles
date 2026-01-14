@@ -1,0 +1,49 @@
+[
+    {
+        "key": "j",
+        "command": "cursorLeft",
+        "when": "editorTextFocus && vim.active "
+    },
+    {
+        "key": "k",
+        "command": "cursorDown",
+        "when": "editorTextFocus && vim.active "
+    },
+    {
+        "key": "l",
+        "command": "cursorUp",
+        "when": "editorTextFocus && vim.active "
+    },
+    {
+        "key": "ö",
+        "command": "cursorRight",
+        "when": "editorTextFocus && vim.active "
+    },
+    {
+        "key": "ctrl+p",
+        "command": "-extension.vim_ctrl+p",
+        "when": "editorTextFocus && vim.active && vim.use<C-p> && !inDebugRepl || vim.active && vim.use<C-p> && !inDebugRepl && vim.mode == 'CommandlineInProgress' || vim.active && vim.use<C-p> && !inDebugRepl && vim.mode == 'SearchInProgressMode'"
+    },
+    {
+        "key": "ctrl+shift+tab",
+        "command": "-workbench.action.quickOpenLeastRecentlyUsedEditorInGroup",
+        "when": "!activeEditorGroupEmpty"
+    },
+    {
+        "key": "ctrl+tab",
+        "command": "-workbench.action.quickOpenNavigateNextInEditorPicker",
+        "when": "inEditorsPicker && inQuickOpen"
+    },
+    {
+        "key": "ctrl+tab",
+        "command": "workbench.action.nextEditor"
+    },
+    {
+        "key": "ctrl+pagedown",
+        "command": "-workbench.action.nextEditor"
+    },
+    {
+        "key": "ctrl+shift+tab",
+        "command": "workbench.action.previousEditor"
+    }
+]

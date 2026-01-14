@@ -1,0 +1,44 @@
+[
+    // Custom JKLÖ navigation - Normal mode
+    {
+        "key": "j",
+        "command": "cursorLeft",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "k",
+        "command": "cursorDown",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "l",
+        "command": "cursorUp",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "ö",
+        "command": "cursorRight",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    // Custom JKLÖ navigation - Visual/Selection mode
+    {
+        "key": "j",
+        "command": "cursorLeftSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "k",
+        "command": "cursorDownSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "l",
+        "command": "cursorUpSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "ö",
+        "command": "cursorRightSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    }
+]

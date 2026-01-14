@@ -26,14 +26,16 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 # ============================================================
 WIN_PATHS=(
   "/mnt/c/Users/FilipM/scoop/shims"                  # glab.exe, other scoop tools
-  "/mnt/c/Program Files/Git/cmd"                     # git.exe
   "/mnt/c/Users/FilipM/AppData/Local/Programs/Microsoft VS Code"  # code.exe
 )
 export PATH="${(j.:.)WIN_PATHS}:$PATH"
 
+# Ensure Linux-native binaries take priority (prevents WSL/Plan9 deadlocks)
+export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
 # Windows tool aliases (use .exe versions for corporate network/services access)
+# NOTE: git.exe removed - causes WSL kernel deadlocks via Plan9 filesystem crossings
 alias dotnet='dotnet.exe'
-alias git='git.exe'
 alias glab='glab.exe'
 alias code='code.exe &'
 alias powershell='/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'

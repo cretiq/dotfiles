@@ -116,8 +116,14 @@ The VSCode keybinding script (`vscode-keymap-manager.sh`) uses Python-based JSON
 ✅ All custom keybindings remain preserved
 ✅ Normal mode navigation still works with HJKL/JKLÖ override
 
+### Keyboard Remap Toggle Menu
+Interactive menu: `C:\Users\FilipM\Desktop\Keys\interactive-menu-toggle-remaps.bat`
+- Toggle ESC/CapsLock, Alt+HJKL, Vim HJKL/JKLÖ remaps
+- Batch set all to Standard or Voyager mode
+- Uses: `bash-toggle-esc.sh`, `bash-toggle-alt-hjkl.sh`, `toggle-vim-layout-hjkl-jkloe.bat`, `get-all-status.sh`, `hotkeys-and-remaps.ahk`
+
 ### Port Management
-The zsh configuration includes comprehensive port management aliases:
+Zsh port management aliases:
 - `kill3000`, `kill3001`, `kill3002`, `kill3003`, `kill5555`: Kill processes on specific ports
 - `3000`, `3001`, `3002`, `3003`: Kill port processes and start development servers
 - `npm3001`, `npm3002`, `npm3003`: Start npm dev servers on specific ports

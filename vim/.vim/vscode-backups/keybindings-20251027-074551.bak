@@ -1,0 +1,107 @@
+[
+    {
+        "key": "h",
+        "command": "cursorLeft",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "j",
+        "command": "cursorDown",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "k",
+        "command": "cursorUp",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "l",
+        "command": "cursorRight",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Normal'"
+    },
+    {
+        "key": "h",
+        "command": "cursorLeftSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "j",
+        "command": "cursorDownSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "k",
+        "command": "cursorUpSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "l",
+        "command": "cursorRightSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Visual'"
+    },
+    {
+        "key": "h",
+        "command": "cursorLeftSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "j",
+        "command": "cursorDownSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "k",
+        "command": "cursorUpSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "l",
+        "command": "cursorRightSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualLine'"
+    },
+    {
+        "key": "h",
+        "command": "cursorLeftSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "j",
+        "command": "cursorDownSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "k",
+        "command": "cursorUpSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "l",
+        "command": "cursorRightSelect",
+        "when": "editorTextFocus && vim.active && vim.mode == 'VisualBlock'"
+    },
+    {
+        "key": "h",
+        "command": "cursorLeft",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
+    },
+    {
+        "key": "j",
+        "command": "cursorDown",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
+    },
+    {
+        "key": "k",
+        "command": "cursorUp",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
+    },
+    {
+        "key": "l",
+        "command": "cursorRight",
+        "when": "editorTextFocus && vim.active && vim.mode == 'Replace'"
+    },
+    {
+        "key": "ctrl+p",
+        "command": "-extension.vim_ctrl+p",
+        "when": "editorTextFocus && vim.active && vim.use<C-p> && !inDebugRepl || vim.active && vim.use<C-p> && !inDebugRepl && vim.mode == 'CommandlineInProgress' || vim.active && vim.use<C-p> && !inDebugRepl && vim.mode == 'SearchInProgressMode'"
+    }
+]
