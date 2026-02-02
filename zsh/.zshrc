@@ -7,10 +7,13 @@ skip_global_compinit=1
 DISABLE_AUTO_UPDATE=true
 # Disable magic functions (slow on WSL2)
 DISABLE_MAGIC_FUNCTIONS=true
+# Ignore EOF (ctrl+d) so it doesn't close shell - allows ctrl+d in vim for page down
+setopt IGNORE_EOF
 
 # alias sp="spf -c ~/.config/spf/config.toml"
 alias sp="spf -c ~/.spf.toml"
 alias mw="macrowhisper"
+alias vim='nvim'
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
@@ -40,6 +43,15 @@ alias glab='glab.exe'
 alias code='code.exe &'
 alias powershell='/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
 alias powershell.exe='/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
+
+# Smart git wrapper: PowerShell on /mnt/c (avoids Plan9 deadlocks), native elsewhere
+git() {
+  if [[ "$PWD" == /mnt/c/* ]]; then
+    powershell -Command "cd '$(wslpath -w .)' ; git $*"
+  else
+    command git "$@"
+  fi
+}
 # ============================================================
 
 # === ==================== ===
@@ -104,7 +116,8 @@ fi
 # Local bin takes priority (must be after brew)
 export PATH="$HOME/.local/bin:$PATH"
 
-# Claude scratch folder - quick launch
+# Claude Code aliases
 alias c='claude'
-alias cc='cd ~/claude-scratch && claude'
-alias ccc='cd ~/claude-scratch && claude -c'
+alias cc='claude --continue'
+alias ccc='cd ~/claude-scratch && claude'
+alias ccca='cd ~/claude-scratch && claude /analyze-processes'
