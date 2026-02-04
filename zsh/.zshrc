@@ -119,5 +119,6 @@ export PATH="$HOME/.local/bin:$PATH"
 # Claude Code aliases
 alias c='claude'
 alias cc='claude --continue'
+alias cr='claude --resume'
 alias ccc='cd ~/claude-scratch && claude'
-alias ccca='cd ~/claude-scratch && claude /analyze-processes'
+alias ccca='cd ~/claude-scratch && claude /analysis:analyze-processes'
