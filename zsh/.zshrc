@@ -49,7 +49,12 @@ plugins=(git)
 source $ZSH/oh-my-zsh.sh
 
 alias config='/usr/bin/git --git-dir=/Users/filipmellqvist/.dotfiles/ --work-tree=/Users/filipmellqvist'
-alias cc='cd ~/.claude && claude'
+
+# Claude Code aliases
+alias c='claude'
+alias cc='claude --continue'
+alias cr='claude --resume'
+alias ccc='cd ~/claude-scratch && claude'
 
 bindkey '^[[1;5D' backward-word     # Ctrl+Left
 bindkey '^[[1;5C' forward-word      # Ctrl+Right
@@ -124,3 +129,5 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
+
+export PATH="$HOME/.local/bin:$PATH"

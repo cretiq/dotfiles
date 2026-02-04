@@ -19,7 +19,7 @@ theme = dark:nightfox,light:catppuccin-latte.conf
 
 # Typography
 font-size = 15
-font-family = "JetBrains Mono"
+font-family = "JetBrainsMono Nerd Font"
 
 # Glass effect styling
 # background-opacity = 1
@@ -108,7 +108,7 @@ keybind = shift+enter=text:\x1b\r
 keybind = cmd+z=text:\x1f
 
 # Split Navigation (vim-style)
-keybind = cmd+opt+shift+h=goto_split:left
+keybind = cmd+h=goto_split:left
 keybind = cmd+l=goto_split:right
 keybind = cmd+j=goto_split:down
 keybind = cmd+k=goto_split:up
