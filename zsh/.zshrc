@@ -14,6 +14,9 @@ setopt IGNORE_EOF
 alias sp="spf -c ~/.spf.toml"
 alias mw="macrowhisper"
 alias vim='nvim'
+alias r='ranger'
+
+alias obs='ranger /mnt/c/Users/FilipM/Documents/Obsidian/RCO'
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
@@ -122,3 +125,4 @@ alias cc='claude --continue'
 alias cr='claude --resume'
 alias ccc='cd ~/claude-scratch && claude'
 alias ccca='cd ~/claude-scratch && claude /analysis:analyze-processes'
+alias cccu='cd ~/claude-scratch && claude /usage'
