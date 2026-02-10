@@ -28,6 +28,10 @@ This is a personal dotfiles repository for macOS containing configuration files 
   - Config: `spf/.spf.toml`
   - Theme: catppuccin-latte
   - Editor: vim
+- **Ranger**: Terminal file manager with HJKL/JKLÖ keymap integration
+  - Config: `~/.config/ranger/rc.conf`
+  - Copymap bindings toggle with main vim-keymap-toggle system
+  - Alias: `r`
 
 ### Applications
 - **MacroWhisper**: Voice-to-text application
@@ -71,9 +75,11 @@ Dynamic keymap switching system supporting both terminal Vim and VSCode/Cursor:
 **Key Files:**
 - Main script: `my_scripts/.script/vim-keymap-toggle.sh`
 - VSCode manager: `my_scripts/.script/vscode-keymap-manager.sh`
+- Obsidian manager: `my_scripts/.script/obsidian-keymap-manager.sh`
+- Ranger manager: `my_scripts/.script/ranger-keymap-manager.sh`
 - State file: `vim/.vim/keymap_state`
 - FastScripts: `~/Library/Scripts/Toggle Vim Keymaps.sh`
-- Backups: `vim/.vim/vscode-backups/`
+- Backups: `vim/.vim/vscode-backups/`, `vim/.vim/obsidian-backups/`, `vim/.vim/ranger-backups/`
 
 #### VSCode HJKL/JKLÖ Mapping Approach (Updated)
 
@@ -118,7 +124,7 @@ The VSCode keybinding script (`vscode-keymap-manager.sh`) uses Python-based JSON
 
 ### Keyboard Remap Toggle Menu
 Interactive menu: `C:\Users\FilipM\Desktop\Keys\interactive-menu-toggle-remaps.bat`
-- Toggle ESC/CapsLock, Alt+HJKL, Vim HJKL/JKLÖ remaps
+- Toggle ESC/CapsLock, Alt+HJKL, Vim/VSCode/Rider/Neovim/Obsidian/Ranger HJKL/JKLÖ remaps
 - Batch set all to Standard or Voyager mode
 - Uses: `bash-toggle-esc.sh`, `bash-toggle-alt-hjkl.sh`, `toggle-vim-layout-hjkl-jkloe.bat`, `get-all-status.sh`, `hotkeys-and-remaps.ahk`
 
@@ -133,6 +139,8 @@ Zsh port management aliases:
 ### Application Shortcuts
 - `sp`: Start SPF file manager with config
 - `mw`: Start MacroWhisper
+- `r`: Start ranger file manager
+- `obs`: Open Obsidian vault directory in ranger
 - `tm`: Start task-master
 
 ### Worktree Navigation (@prefix)
