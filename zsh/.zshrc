@@ -176,7 +176,7 @@ alias '?'='_show_help'
 
 # Claude Code aliases
 # c is a function in worktree-nav.zsh: c @phoenix launches claude in worktree
-alias cc='claude --continue'
+# cc is a function in worktree-nav.zsh: cc @phoenix launches claude --continue in worktree
 alias cr='claude --resume'
 alias ccc='cd ~/claude-scratch && claude'
 alias ccca='cd ~/claude-scratch && claude /analysis:analyze-processes'
