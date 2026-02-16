@@ -76,9 +76,49 @@ _cd_wt() {
   fi
 }
 
-# Lazy-load completion on first use (compdef may not be available at sourcing time)
+# Launch Claude in a worktree
+# Usage: c (plain claude) or c @<worktree>[/s|/c] (cd + claude)
+c() {
+  if [[ "$1" == @* ]]; then
+    local input="${1#@}"
+    input="${input%/}"
+    local wt_filter="${input%%/*}"
+    local suffix="${input#*/}"
+    [[ "$input" == "$suffix" ]] && suffix=""
+
+    local wt=$(_wt_list | grep -ix "$wt_filter" | head -1)
+    [[ -z "$wt" ]] && wt=$(_wt_list | grep -i "$wt_filter" | head -1)
+    [[ -z "$wt" ]] && { echo "No match: $wt_filter" >&2; return 1; }
+
+    local target=$(_wt_path "$wt" "$suffix")
+    builtin cd "$target" && claude "${@:2}"
+  else
+    claude "$@"
+  fi
+}
+
+# Tab completion for c - worktree names or fall through to files
+_c_wt() {
+  local cur="${words[CURRENT]}"
+  if [[ "$cur" == @*/* ]]; then
+    local wt_part="${cur#@}"; wt_part="${wt_part%%/*}"
+    local wt=$(_wt_list | grep -i "$wt_part" | head -1)
+    wt=${wt:-$wt_part}
+    compadd -Q -S '' "@$wt" "@$wt/s" "@$wt/c"
+  elif [[ "$cur" == @* ]]; then
+    local filter="${cur#@}"
+    for wt in $(_wt_list); do
+      [[ -z "$filter" || "$wt" == *"$filter"* ]] && compadd -Q -S '/' "@$wt"
+    done
+  else
+    _files
+  fi
+}
+
+# Register completions
 _wt_setup_completion() {
   compdef _cd_wt cd
+  compdef _c_wt c
   unfunction _wt_setup_completion
 }
 compdef _wt_setup_completion

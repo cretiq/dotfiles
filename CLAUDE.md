@@ -122,6 +122,16 @@ The VSCode keybinding script (`vscode-keymap-manager.sh`) uses Python-based JSON
 ✅ All custom keybindings remain preserved
 ✅ Normal mode navigation still works with HJKL/JKLÖ override
 
+### Windows Terminal Settings
+Config: `/mnt/c/Users/FilipM/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json`
+- Frequently edited — keybindings, profiles, color schemes, behavior
+- Hot-reloads on save
+- Default profile: Ubuntu (WSL), Font: JetBrains Mono size 10, Theme: Banana Blueberry
+- **Unbound keys** (`"id": null`): `Ctrl+A`, `Ctrl+W` — passed through to CLI apps (Claude Code needs them)
+- **Ctrl+V** → Paste (kept bound — required for speech-to-text/MacroWhisper clipboard paste)
+- **Custom bindings**: `Ctrl+Shift+W` close pane (built-in default), `Ctrl+H/J/K/L` move focus, `Ctrl+Backspace` delete word, `Alt+-` split down
+- To unbind a key: `{ "id": null, "keys": "ctrl+x" }` in the `keybindings` array
+
 ### Keyboard Remap Toggle Menu
 Interactive menu: `C:\Users\FilipM\Desktop\Keys\interactive-menu-toggle-remaps.bat`
 - Toggle ESC/CapsLock, Alt+HJKL, Vim/VSCode/Rider/Neovim/Obsidian/Ranger HJKL/JKLÖ remaps
@@ -142,6 +152,7 @@ Zsh port management aliases:
 - `r`: Start ranger file manager
 - `obs`: Open Obsidian vault directory in ranger
 - `tm`: Start task-master
+- `sz`: Source/reload `~/.zshrc`
 
 ### Worktree Navigation (@prefix)
 Quick navigation to Phoenix worktrees in `C:\Dev` (Windows) or `/mnt/c/Dev` (WSL).
@@ -150,8 +161,13 @@ Quick navigation to Phoenix worktrees in `C:\Dev` (Windows) or `/mnt/c/Dev` (WSL
 - `cd @` + Tab → lists worktrees (`phoenix`, `phoenix-export`, `server`)
 - `cd @phoenix` → root folder (flat: `/mnt/c/Dev/phoenix`, nested: `.../Phoenix`)
 - `cd @phoenix/s` → server folder, `cd @phoenix/c` → client folder
+- `c @phoenix` → cd to worktree + launch Claude Code
+- `c @phoenix/s` → cd to server + launch Claude Code
+- `c @phoenix --resume` → cd + launch with extra args
 - Partial match: `cd @exp/s` → `phoenix-export/server`
 - Exact match priority: `cd @phoenix` matches `phoenix` before `phoenix-export`
+
+**Note:** `c` is a function (not an alias) defined in `worktree-nav.zsh`. Plain `c` launches claude, `c @...` navigates + launches.
 
 **Detection:** Auto-detects worktrees with `.git` (file or folder) + `server/Phoenix` path.
 **Structure:** Auto-detects flat (`server/Phoenix` at root) vs nested (`Phoenix/server/Phoenix`).

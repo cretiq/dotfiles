@@ -18,6 +18,8 @@ alias r='ranger'
 
 alias obs='ranger /mnt/c/Users/FilipM/Documents/Obsidian/RCO'
 
+alias todo='vim /mnt/c/Users/FilipM/Documents/Obsidian/RCO/TODO.md'
+
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
@@ -42,18 +44,39 @@ export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 # Windows tool aliases (use .exe versions for corporate network/services access)
 # NOTE: git.exe removed - causes WSL kernel deadlocks via Plan9 filesystem crossings
 alias dotnet='dotnet.exe'
-alias glab='glab.exe'
+# glab: function wrapper below handles PowerShell quoting on /mnt/c paths
 alias code='code.exe &'
 alias powershell='/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
 alias powershell.exe='/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
 
 # Smart git wrapper: PowerShell on /mnt/c (avoids Plan9 deadlocks), native elsewhere
+# Each arg is wrapped in PS single-quotes so parens, spaces, colons are all literal
 git() {
-  if [[ "$PWD" == /mnt/c/* ]]; then
-    powershell -Command "cd '$(wslpath -w .)' ; git $*"
-  else
+  if [[ "$PWD" != /mnt/c/* ]]; then
     command git "$@"
+    return
   fi
+  local win_cwd ps_args=()
+  win_cwd="$(wslpath -w .)"
+  for arg in "$@"; do
+    # Wrap each arg in PS single quotes; escape embedded ' as ''
+    ps_args+=("'${arg//\'/'\''}'")
+  done
+  powershell -Command "cd '${win_cwd}' ; git ${ps_args[*]}"
+}
+
+# Smart glab wrapper: same quoting fix for PowerShell boundary
+glab() {
+  if [[ "$PWD" != /mnt/c/* ]]; then
+    command glab.exe "$@"
+    return
+  fi
+  local win_cwd ps_args=()
+  win_cwd="$(wslpath -w .)"
+  for arg in "$@"; do
+    ps_args+=("'${arg//\'/'\''}'")
+  done
+  powershell -Command "cd '${win_cwd}' ; glab.exe ${ps_args[*]}"
 }
 # ============================================================
 
@@ -119,8 +142,40 @@ fi
 # Local bin takes priority (must be after brew)
 export PATH="$HOME/.local/bin:$PATH"
 
+alias sz='source ~/.zshrc'
+
+# Quick reference for custom shortcuts
+_show_help() {
+  cat <<'HELP'
+
+  NAVIGATE                          NAVIGATE + CLAUDE
+  ─────────────────────────────     ─────────────────────────────
+  cd @<wt>      worktree root       c @<wt>       root + claude
+  cd @<wt>/s    server              c @<wt>/s     server + claude
+  cd @<wt>/c    client              c @<wt>/c     client + claude
+
+  Examples: cd @phoenix/s           c @exp --resume
+
+  CLAUDE CODE                       APPS & TOOLS
+  ─────────────────────────────     ─────────────────────────────
+  c             launch claude        r        ranger
+  cc            --continue           sp       superfile
+  cr            --resume             lg       lazygit
+  ccc           claude-scratch       vim      nvim
+  ccca          scratch + analyze    code     vscode
+  cccu          scratch + usage      mw       macrowhisper
+                                     obs      ranger in Obsidian
+  SHELL                              todo     vim Obsidian TODO
+  ─────────────────────────────
+  sz            source ~/.zshrc
+  ?             this help
+
+HELP
+}
+alias '?'='_show_help'
+
 # Claude Code aliases
-alias c='claude'
+# c is a function in worktree-nav.zsh: c @phoenix launches claude in worktree
 alias cc='claude --continue'
 alias cr='claude --resume'
 alias ccc='cd ~/claude-scratch && claude'
