@@ -1,3 +1,9 @@
 .DS_Store
 
 *.swp
+
+# Keymap toggle backups
+vim/.vim/ghostty-backups/
+vim/.vim/superfile-backups/
+vim/.vim/vimium-backups/
+vim/.vim/vscode-backups/
