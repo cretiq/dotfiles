@@ -83,7 +83,8 @@ keybind = cmd+t=new_tab
 keybind = cmd+opt+l=next_tab
 keybind = cmd+ctrl+opt+shift+h=previous_tab
 keybind = cmd+opt+w=close_surface
-keybind = cmd+shift+w=noop
+keybind = cmd+shift+w=ignore
+keybind = f4=ignore
 
 
 # Split Creation
