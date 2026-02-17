@@ -167,8 +167,10 @@ _show_help() {
                                      obs      ranger in Obsidian
   SHELL                              todo     vim Obsidian TODO
   ─────────────────────────────
-  sz            source ~/.zshrc
-  ?             this help
+  sz            source ~/.zshrc     WINDOWS TERMINAL
+  ?             this help           ─────────────────────────────
+                                    C-S-Up/Down   scroll line
+                                    C-S-PgUp/Dn   scroll page
 
 HELP
 }

@@ -306,6 +306,18 @@ return {
             end
           end, { "i", "s" }),
         }),
+        formatting = {
+          format = function(entry, vim_item)
+            local labels = {
+              luasnip = "cc",
+              nvim_lsp = "LSP",
+              buffer = "buf",
+              path = "path",
+            }
+            vim_item.menu = labels[entry.source.name] or entry.source.name
+            return vim_item
+          end,
+        },
         sources = cmp.config.sources({
           { name = "nvim_lsp" },
           { name = "luasnip" },
