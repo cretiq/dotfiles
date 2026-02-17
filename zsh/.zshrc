@@ -6,6 +6,8 @@ alias vim="nvim"
 # alias sp="spf -c ~/.config/spf/config.toml"
 alias sp="spf -c ~/.spf.toml"
 alias mw="macrowhisper"
+alias r="ranger"
+alias sz='source ~/.zshrc'
 
 # Vim keymap shortcuts
 alias vimkeys="~/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh"
