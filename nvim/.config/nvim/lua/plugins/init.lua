@@ -133,28 +133,18 @@ return {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     event = { "BufReadPost", "BufNewFile" },
-    opts = {
-      ensure_installed = {
-        "lua", "vim", "vimdoc", "query",
-        "javascript", "typescript", "tsx",
-        "html", "css", "json", "jsonc",
-        "markdown", "markdown_inline",
-        "bash", "regex",
-      },
-      highlight = { enable = true },
-      indent = { enable = true },
-      incremental_selection = {
-        enable = true,
-        keymaps = {
-          init_selection = "<C-space>",
-          node_incremental = "<C-space>",
-          scope_incremental = false,
-          node_decremental = "<bs>",
-        },
-      },
-    },
-    config = function(_, opts)
-      require("nvim-treesitter.configs").setup(opts)
+    config = function()
+      local ts = require("nvim-treesitter")
+      ts.setup()
+      pcall(function()
+        ts.install({
+          "lua", "vim", "vimdoc", "query",
+          "javascript", "typescript", "tsx",
+          "html", "css", "json",
+          "markdown", "markdown_inline",
+          "bash", "regex",
+        }, { summary = false })
+      end)
     end,
   },
 
@@ -224,7 +214,7 @@ return {
       })
 
       -- Configure LSP servers (Neovim 0.11+ API)
-      local servers = { "ts_ls", "html", "cssls", "jsonls" }
+      local servers = { "ts_ls", "html", "cssls", "jsonls", "pyright" }
       for _, server in ipairs(servers) do
         vim.lsp.config(server, { capabilities = capabilities })
         vim.lsp.enable(server)
