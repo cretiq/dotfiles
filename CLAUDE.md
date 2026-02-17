@@ -232,6 +232,78 @@ All applications use consistent theming:
 └── MW Macros.kmmacros # Keyboard Maestro macros
 ```
 
+## Phoenix Project (WSL2 + Windows Hybrid)
+
+### Architecture
+- Edit in WSL2 (`~/Dev/server` -> `/mnt/c/Dev/server`)
+- Run applications in Windows PowerShell (firewall blocks WSL2 -> Windows ports)
+
+### Paths
+- Frontend: `C:\Dev\server\Phoenix\client\phoenix-client`
+- Backend: `C:\Dev\server\Phoenix\server\Phoenix`
+
+### Running Applications (Windows PowerShell only)
+```powershell
+# Backend
+cd C:\Dev\server\Phoenix\server\Phoenix && dotnet run
+
+# Frontend
+cd C:\Dev\server\Phoenix\client\phoenix-client && yarn dev
+
+# Quality checks (NEVER from WSL2 - native binding issues)
+yarn format && yarn lint && yarn test
+```
+
+### Pre-Commit Quality Gates (Phoenix)
+Before EVERY commit/MR, run in order:
+1. `yarn format` - must pass with no errors
+2. `yarn lint` - must pass with no errors
+3. `yarn test` - all tests must pass
+
+### Do Not
+- Run dotnet/yarn from WSL2 (no output, firewall blocks services)
+- Use git.exe directly from WSL2 (causes deadlocks)
+- Bypass the wrappers with direct `powershell -Command ... git` calls
+
+## Git Wrappers (zsh)
+
+**Problem:** git.exe from WSL2 causes kernel deadlocks via Plan9 filesystem boundary.
+
+**Solution:** Shell wrappers in `zsh/.zshrc` handle this automatically. The `git()` and `glab()` functions detect `/mnt/c` paths and route through PowerShell with proper quoting. Just use git/glab normally:
+
+```bash
+# These all work on /mnt/c paths — wrappers handle PowerShell routing + quoting
+git status
+git add .
+git commit -m 'feat(scope): message with parens and spaces'
+git push
+glab mr create --fill
+glab mr create --title 'feat: add feature' --description 'Details here'
+```
+
+### Commit Messages with Single Quotes
+If your message contains literal single quotes, use a temp file:
+```bash
+echo "fix: don't break on edge case" > /tmp/cm.txt && git commit -F /tmp/cm.txt
+```
+
+For multi-line messages:
+```bash
+cat > /tmp/cm.txt <<'EOF'
+feat: add feature
+
+- Detail one
+- Detail two
+EOF
+git commit -F /tmp/cm.txt
+```
+
+### Git Best Practices
+- Chain commands in one call: `git add . && git commit -m 'msg' && git push`
+- If index.lock error: `rm -f .git/index.lock`
+- Never run git commands in parallel
+- Do NOT use `--fill` with `--title`/`--description` in `glab mr create`
+
 ## Best Practices
 
 When modifying configurations:
@@ -240,3 +312,4 @@ When modifying configurations:
 3. Maintain theme consistency across applications
 4. Back up existing configurations before major changes
 5. Document any new aliases or scripts added to the zsh configuration
+6. Use `function name {` syntax for zsh functions, NOT `name() {` — the latter expands aliases before parsing, causing errors on re-source (`sz`)

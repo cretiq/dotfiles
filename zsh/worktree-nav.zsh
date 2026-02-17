@@ -36,7 +36,7 @@ _wt_path() {
 }
 
 # Override cd - minimal overhead for non-@ paths
-cd() {
+function cd {
   if [[ "$1" == @* ]]; then
     local input="${1#@}"
     input="${input%/}"  # strip trailing slash
@@ -78,7 +78,7 @@ _cd_wt() {
 
 # Launch Claude in a worktree
 # Usage: c (plain claude) or c @<worktree>[/s|/c] (cd + claude)
-c() {
+function c {
   if [[ "$1" == @* ]]; then
     local input="${1#@}"
     input="${input%/}"
@@ -99,7 +99,7 @@ c() {
 
 # Continue Claude in a worktree
 # Usage: cc (plain claude --continue) or cc @<worktree>[/s|/c] (cd + claude --continue)
-cc() {
+function cc {
   if [[ "$1" == @* ]]; then
     local input="${1#@}"
     input="${input%/}"
