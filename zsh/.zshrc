@@ -9,6 +9,8 @@ DISABLE_AUTO_UPDATE=true
 DISABLE_MAGIC_FUNCTIONS=true
 # Ignore EOF (ctrl+d) so it doesn't close shell - allows ctrl+d in vim for page down
 setopt IGNORE_EOF
+# Disable flow control (ctrl+s/ctrl+q) so ctrl+s can be used in nvim
+stty -ixon
 
 # alias sp="spf -c ~/.config/spf/config.toml"
 alias sp="spf -c ~/.spf.toml"
@@ -167,8 +169,11 @@ _show_help() {
                                      obs      ranger in Obsidian
   SHELL                              todo     vim Obsidian TODO
   ─────────────────────────────
-  sz            source ~/.zshrc     WINDOWS TERMINAL
+  sz            source ~/.zshrc     WT DASHBOARD
   ?             this help           ─────────────────────────────
+                                     w        wt -w (live dashboard)
+  WINDOWS TERMINAL                   cdwt     cd into wt repo
+  ─────────────────────────────      cwt      wt repo + claude
                                     C-S-Up/Down   scroll line
                                     C-S-PgUp/Dn   scroll page
 
@@ -183,3 +188,6 @@ alias cr='claude --resume'
 alias ccc='cd ~/claude-scratch && claude'
 alias ccca='cd ~/claude-scratch && claude /analysis:analyze-processes'
 alias cccu='cd ~/claude-scratch && claude /usage'
+alias w='wt -w'
+alias cdwt='cd ~/.local/src/wt'
+alias cwt='cd ~/.local/src/wt && claude'
