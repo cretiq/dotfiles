@@ -9,8 +9,8 @@ local i = ls.insert_node
 -- Descriptions are extracted from YAML frontmatter if present.
 
 local command_dirs = {
-  vim.fn.expand("~/.claude/commands"),
-  vim.fn.expand("~/.claude_phoenix/commands"),
+  { path = vim.fn.expand("~/.claude/commands"), label = "global" },
+  { path = vim.fn.expand("~/.claude_phoenix/commands"), label = "phoenix" },
 }
 
 -- Extract description from YAML frontmatter (--- ... ---)
@@ -42,7 +42,9 @@ end
 local snippets = {}
 local seen = {} -- deduplicate across directories
 
-for _, dir in ipairs(command_dirs) do
+for _, entry in ipairs(command_dirs) do
+  local dir = entry.path
+  local label = entry.label
   if vim.fn.isdirectory(dir) == 1 then
     local files = vim.fn.globpath(dir, "**/*.md", false, true)
     for _, file in ipairs(files) do
@@ -52,7 +54,7 @@ for _, dir in ipairs(command_dirs) do
 
       if not seen[trigger] then
         seen[trigger] = true
-        local desc = get_description(file) or cmd
+        local desc = "[" .. label .. "] " .. (get_description(file) or cmd)
         table.insert(snippets, s(
           { trig = trigger, desc = desc },
           { t("/" .. cmd .. " "), i(1) }

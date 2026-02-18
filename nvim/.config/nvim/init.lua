@@ -74,13 +74,7 @@ require("lazy").setup({
   checker = { enabled = true, notify = false },
 })
 
--- Save and quit with Ctrl+S (must run after defaults load, so use VimEnter)
-vim.api.nvim_create_autocmd('VimEnter', {
-  callback = function()
-    pcall(vim.keymap.del, 'i', '<C-s>')  -- remove default LSP signature_help
-    vim.keymap.set({'n', 'i'}, '<C-s>', '<cmd>wq<CR>', { noremap = true, desc = 'Save and quit' })
-  end,
-})
+vim.keymap.set({'n', 'i'}, '<C-A-s>', '<cmd>wq<CR>', { noremap = true, desc = 'Save and quit' })
 
 -- Load custom keymaps (managed by neovim-keymap-manager.sh)
 local ok, keymaps = pcall(require, "keymaps")
