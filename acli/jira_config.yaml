@@ -1,0 +1,20 @@
+version: 1
+current_profile: 7911bcff-e1fe-4730-932a-49974556dc71:712020:aa2a1e6d-6a43-456b-8b45-3d258fdab6af
+profiles:
+    - site: rcogroup.atlassian.net
+      cloud_id: 7911bcff-e1fe-4730-932a-49974556dc71
+      account_id: 712020:aa2a1e6d-6a43-456b-8b45-3d258fdab6af
+      display_name: Filip.Mellqvist
+      email: filip.mellqvist@rco.se
+      auth_type: api_token
+      token: !!binary |
+        MbloBYiB+cnRB69ZLQUP6jx8rufSxTTz3Y8GgatssGs6OjpjY2JlYjIwNDU2YmMxNmRiYW
+        Q3ZjI1YzdjM2JiNzA2MGViNDUwOWRhNzAyOGJmZmEzOWMzZDc1M2I3MjFhNDU1MzZhMzE0
+        YzY1YjJmZmUyZmEzODhkZjhlOTNmYjQwYzYwNTg0ZjA1M2RmNjI4ZTY5ZDFiYjE3M2M2NW
+        MyNTFiMjljNjQ0ZmFjMjc1N2MxN2IxMzE5ZDM3OGY4ZmNiZDA5NTUyYjNmMGYyOGVkMTYy
+        NzBlZWE0ZTJhYzFhMTIzNmY0NTc5NTliYmMwZTAwM2VkZmYwYWY0ZDEyN2ZjYzY1Y2U1Y2
+        JlMDdlNThmZWEyODNlNDAyZGE3ZjI3ZDVmNjJiMTFlOGUzMWE1OGE3ZGVlNDJmMDg4OGZl
+        YWVmZmEyOWQzY2Q1MmIyNWZmOTU4YTZhYmQ1Y2Q3OGNhM2QxZDFlODQxMjYzOGZlM2RjN2
+        JiZGU5ZmNkYTk3M2I3ZmY2YmEwNmE3YzFkNzIxZmVjNDdkYzM0ZTM3N2RmNzI4NzdiYjE1
+        NWExMThkNzU3ZTRjNmRkN2Q3MTZjMDYxYTQwYmQ4MGQ4MGVjZWI5MDkwNWU5MjBkYWI5ZD
+        lhMQ==
