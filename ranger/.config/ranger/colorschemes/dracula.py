@@ -1,12 +1,12 @@
 # Dracula color scheme for ranger
 from ranger.gui.colorscheme import ColorScheme
-from ranger.gui.color import Color, reverse, bold, normal
+from ranger.gui.color import default_colors, reverse, bold, normal
 
 class Dracula(ColorScheme):
     progress_bar_color = 50
 
     def use(self, context):
-        fg, bg, attr = context.keys
+        fg, bg, attr = default_colors
 
         if context.highlight:
             attr |= reverse
@@ -22,17 +22,15 @@ class Dracula(ColorScheme):
 
         if context.directory:
             fg = 4
-        elif context.executable and not any((context.Media, context.Image, context.Video, context.Audio)):
+        elif context.executable and not any((context.media, context.image, context.video, context.audio)):
             fg = 2
         elif context.link:
-            fg = 5
-        elif context.broken:
-            fg = 1
+            fg = 5 if context.good else 1
         elif context.tag_marker and not context.selected:
             fg = 1
         elif any((context.image, context.video, context.audio)):
             fg = 3
-        elif context.document and context.image_ext:
+        elif context.document:
             fg = 3
 
         if context.selected:

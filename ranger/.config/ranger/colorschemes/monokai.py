@@ -1,12 +1,12 @@
 # Monokai color scheme for ranger
 from ranger.gui.colorscheme import ColorScheme
-from ranger.gui.color import Color, reverse, bold, normal
+from ranger.gui.color import default_colors, reverse, bold, normal
 
 class Monokai(ColorScheme):
     progress_bar_color = 208
 
     def use(self, context):
-        fg, bg, attr = context.keys
+        fg, bg, attr = default_colors
 
         if context.highlight:
             attr |= reverse
@@ -25,14 +25,12 @@ class Monokai(ColorScheme):
         elif context.executable and not any((context.media, context.image, context.video, context.audio)):
             fg = 148
         elif context.link:
-            fg = 208
-        elif context.broken:
-            fg = 196
+            fg = 208 if context.good else 196
         elif context.tag_marker and not context.selected:
             fg = 196
         elif any((context.image, context.video, context.audio)):
             fg = 228
-        elif context.document and context.image_ext:
+        elif context.document:
             fg = 228
 
         if context.selected:
