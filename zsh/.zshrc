@@ -64,7 +64,7 @@ git() {
     # Wrap each arg in PS single quotes; escape embedded ' as ''
     ps_args+=("'${arg//\'/'\''}'")
   done
-  powershell -Command "cd '${win_cwd}' ; git ${ps_args[*]}"
+  powershell -Command "\$env:PATH = 'C:\Users\FilipM\AppData\Local\MinGit\cmd;' + \$env:PATH ; cd '${win_cwd}' ; git ${ps_args[*]}"
 }
 
 # Smart glab wrapper: same quoting fix for PowerShell boundary
@@ -110,27 +110,9 @@ spf() {
 }
 
 
-# Lazy load NVM - only load when node/npm/yarn/nvm command is used
-export NVM_DIR="$HOME/.nvm"
-
-# Lazy loading function for NVM
-nvm_lazy_load() {
-  unalias nvm node npm npx yarn 2>/dev/null
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-}
-
-# Create command aliases that trigger lazy loading
-alias nvm='nvm_lazy_load && nvm'
-alias node='nvm_lazy_load && node'
-alias npm='nvm_lazy_load && npm'
-alias npx='nvm_lazy_load && npx'
-alias yarn='nvm_lazy_load && yarn'
-
-# Claude Code - always use v20.19.5 (pinned version, independent of NVM)
-# Avoids confusion when switching Node versions
-# claude() {
-#   /home/filip/.nvm/versions/node/v20.19.5/bin/claude "$@"
-# }
+# fnm (Fast Node Manager)
+export PATH="$HOME/.local/share/fnm:$PATH"
+eval "$(fnm env --use-on-cd --shell zsh)"
 
 
 # bun completions
