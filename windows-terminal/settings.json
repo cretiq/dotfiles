@@ -23,9 +23,9 @@
             "command": 
             {
                 "action": "newTab",
-                "profile": "{a29a38c1-313e-533d-adca-a4929487a848}"
+                "profile": "{63d5e97e-570b-4e52-be30-6c9eb4b9e06d}"
             },
-            "id": "User.newTab.Ubuntu"
+            "id": "User.newTab.Debian"
         },
         {
             "command": 
@@ -65,7 +65,11 @@
     "alwaysShowTabs": false,
     "copyFormatting": "none",
     "copyOnSelect": false,
-    "defaultProfile": "{a29a38c1-313e-533d-adca-a4929487a848}",
+    "defaultProfile": "{63d5e97e-570b-4e52-be30-6c9eb4b9e06d}",
+    "disabledProfileSources":
+    [
+        "Windows.Terminal.Wsl"
+    ],
     "keybindings": 
     [
         {
@@ -197,7 +201,7 @@
             "keys": "ctrl+alt+shift+f"
         },
         {
-            "id": "User.newTab.Ubuntu",
+            "id": "User.newTab.Debian",
             "keys": "ctrl+alt+shift+g"
         }
     ],
@@ -214,21 +218,23 @@
         [
             {
                 "colorScheme": "Banana Blueberry",
+                "commandline": "C:\\Windows\\system32\\wsl.exe --distribution-id {705784e1-89c5-48a4-b572-b4e9252a1570} --cd ~",
                 "cursorShape": "filledBox",
                 "experimental.retroTerminalEffect": false,
-                "font": 
+                "font":
                 {
                     "builtinGlyphs": true,
                     "colorGlyphs": true,
                     "face": "JetBrains Mono",
                     "size": 10
                 },
-                "guid": "{a29a38c1-313e-533d-adca-a4929487a848}",
+                "guid": "{63d5e97e-570b-4e52-be30-6c9eb4b9e06d}",
                 "hidden": false,
                 "intenseTextStyle": "bright",
-                "name": "Ubuntu",
+                "icon": "https://raw.githubusercontent.com/mdo/debian-logo/master/debian-logo.png",
+                "name": "Debian",
+                "pathTranslationStyle": "wsl",
                 "scrollbarState": "visible",
-                "source": "Microsoft.WSL",
                 "useAcrylic": false
             },
             {
@@ -257,8 +263,8 @@
                 "name": "Command Prompt"
             },
             {
-                "colorScheme": "Banana Blueberry",
-                "commandline": "C:\\Windows\\system32\\wsl.exe --distribution-id {9f0f6b17-2f99-47e7-b881-340e7995ca13} --cd ~",
+                "colorScheme": "Night Owl",
+                "commandline": "C:\\Windows\\system32\\wsl.exe --distribution-id {705784e1-89c5-48a4-b572-b4e9252a1570} --cd ~",
                 "cursorShape": "filledBox",
                 "experimental.retroTerminalEffect": false,
                 "font": 
@@ -270,7 +276,7 @@
                 },
                 "guid": "{d63cd39d-714d-4c4b-8117-bcb95e8286e3}",
                 "hidden": false,
-                "icon": "C:\\Users\\FilipM\\Pictures\\Papirus-Team-Papirus-Apps-Nvim.32.png",
+                "icon": "ms-appx:///ProfileIcons/{9acb9455-ca41-5af7-950f-6bca1bc9722f}.png",
                 "intenseTextStyle": "bright",
                 "name": "nvim",
                 "padding": "0",
@@ -293,8 +299,31 @@
             }
         ]
     },
-    "schemes": 
+    "schemes":
     [
+        {
+            "name": "Night Owl",
+            "cursorColor": "#80a4c2",
+            "selectionBackground": "#1d3b53",
+            "background": "#011627",
+            "foreground": "#D6DEEB",
+            "black": "#011627",
+            "blue": "#82AAFF",
+            "cyan": "#21C7A8",
+            "green": "#22DA6E",
+            "purple": "#C792EA",
+            "red": "#EF5350",
+            "white": "#FFFFFF",
+            "yellow": "#c5e478",
+            "brightBlack": "#575656",
+            "brightBlue": "#82AAFF",
+            "brightCyan": "#7FDBCA",
+            "brightGreen": "#22DA6E",
+            "brightPurple": "#C792EA",
+            "brightRed": "#EF5350",
+            "brightWhite": "#FFFFFF",
+            "brightYellow": "#FFEB95"
+        },
         {
             "background": "#1F1D45",
             "black": "#050404",
@@ -524,6 +553,52 @@
             "selectionBackground": "#1E1F22",
             "white": "#B5B9B6",
             "yellow": "#E4B55E"
+        },
+        {
+            "name": "Dracula",
+            "cursorColor": "#F8F8F2",
+            "selectionBackground": "#44475A",
+            "background": "#282A36",
+            "foreground": "#F8F8F2",
+            "black": "#21222C",
+            "blue": "#BD93F9",
+            "cyan": "#8BE9FD",
+            "green": "#50FA7B",
+            "purple": "#FF79C6",
+            "red": "#FF5555",
+            "white": "#F8F8F2",
+            "yellow": "#F1FA8C",
+            "brightBlack": "#6272A4",
+            "brightBlue": "#D6ACFF",
+            "brightCyan": "#A4FFFF",
+            "brightGreen": "#69FF94",
+            "brightPurple": "#FF92DF",
+            "brightRed": "#FF6E6E",
+            "brightWhite": "#FFFFFF",
+            "brightYellow": "#FFFFA5"
+        },
+        {
+            "name": "Ayu Dark",
+            "background": "#0A0E14",
+            "foreground": "#B3B1AD",
+            "cursorColor": "#E6B450",
+            "selectionBackground": "#253340",
+            "black": "#01060E",
+            "red": "#EA6C73",
+            "green": "#91B362",
+            "yellow": "#F9AF4F",
+            "blue": "#53BDFA",
+            "purple": "#FAE994",
+            "cyan": "#90E1C6",
+            "white": "#C7C7C7",
+            "brightBlack": "#686868",
+            "brightRed": "#F07178",
+            "brightGreen": "#C2D94C",
+            "brightYellow": "#FFB454",
+            "brightBlue": "#59C2FF",
+            "brightPurple": "#FFEE99",
+            "brightCyan": "#95E6CB",
+            "brightWhite": "#FFFFFF"
         },
         {
             "background": "#332A57",
