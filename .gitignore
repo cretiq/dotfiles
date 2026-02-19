@@ -1,6 +1,8 @@
 .DS_Store
 
 *.swp
+*.deb
+__pycache__/
 
 CLAUDE.md
 vim/.vim/obsidian-backups/
