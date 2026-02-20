@@ -44,6 +44,19 @@ vim.opt.splitbelow = true
 vim.opt.mouse = "a"
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
+-- WSL clipboard integration (clip.exe for copy, PowerShell for paste)
+vim.g.clipboard = {
+  name = "WslClipboard",
+  copy = {
+    ["+"] = "/mnt/c/Windows/System32/clip.exe",
+    ["*"] = "/mnt/c/Windows/System32/clip.exe",
+  },
+  paste = {
+    ["+"] = 'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+    ["*"] = 'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+  },
+  cache_enabled = 0,
+}
 vim.opt.clipboard = "unnamedplus"
 vim.opt.scrolloff = 8
 vim.opt.cursorline = true

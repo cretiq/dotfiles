@@ -112,7 +112,7 @@ spf() {
 
 # fnm (Fast Node Manager)
 export PATH="$HOME/.local/share/fnm:$PATH"
-eval "$(fnm env --use-on-cd --shell zsh)"
+eval "$(fnm env --use-on-cd --log-level quiet --shell zsh)"
 
 
 # bun completions
