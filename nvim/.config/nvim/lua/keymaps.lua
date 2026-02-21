@@ -36,6 +36,9 @@ function M.setup()
     vim.keymap.set({'n', 'v', 'o'}, 'l', 'l', { noremap = true, desc = 'Move right' })
   end
 
+  -- Cmd+S (via Ghostty CSI u) = save and quit
+  vim.keymap.set({'n', 'i', 'v'}, '<M-s>', '<Cmd>wq<CR>', { noremap = true, desc = 'Save and quit' })
+
   -- Page up/down bindings
   vim.keymap.set('n', '<C-k>', '<C-d>', { noremap = true, desc = 'Page down' })
   vim.keymap.set('n', '<C-l>', '<C-u>', { noremap = true, desc = 'Page up' })

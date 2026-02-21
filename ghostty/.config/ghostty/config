@@ -83,7 +83,7 @@ keybind = cmd+t=new_tab
 keybind = cmd+opt+l=next_tab
 keybind = cmd+ctrl+opt+shift+h=previous_tab
 keybind = cmd+opt+w=close_surface
-keybind = cmd+shift+w=ignore
+keybind = cmd+shift+w=close_surface
 keybind = f4=ignore
 
 
@@ -92,6 +92,14 @@ keybind = cmd+opt+right=new_split:right
 keybind = cmd+opt+down=new_split:down
 keybind = cmd+opt+left=new_split:left
 keybind = cmd+opt+up=new_split:up
+keybind = shift+opt+minus=new_split:right
+keybind = shift+opt+slash=new_split:down
+
+# Split Resize
+keybind = shift+opt+left=resize_split:left,20
+keybind = shift+opt+right=resize_split:right,20
+keybind = shift+opt+up=resize_split:up,20
+keybind = shift+opt+down=resize_split:down,20
 
 keybind = cmd+shift+k=clear_screen
 keybind = cmd+opt+z=clear_screen
@@ -108,6 +116,7 @@ keybind = shift+enter=text:\x1b\r
 
 # Text Editing
 keybind = cmd+z=text:\x1f
+keybind = cmd+s=text:\x1bs
 
 # Split Navigation (vim-style)
 keybind = cmd+h=goto_split:left
