@@ -1,6 +1,7 @@
 export ZSH="$HOME/.oh-my-zsh"
 export EDITOR="nvim"
 export VISUAL="nvim"
+alias v="nvim"
 alias vim="nvim"
 
 # alias sp="spf -c ~/.config/spf/config.toml"
