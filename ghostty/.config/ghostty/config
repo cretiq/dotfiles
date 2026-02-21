@@ -12,7 +12,7 @@
 # theme = catppuccin-mocha
 # theme = "Night Owlish Light"
 # theme = "Night Owl"
-theme = dark:nightfox,light:catppuccin-latte.conf
+theme = "dark:Apple System Colors,light:Apple System Colors Light"
 
 # Cursor Color
 
@@ -84,6 +84,7 @@ keybind = cmd+opt+l=next_tab
 keybind = cmd+ctrl+opt+shift+h=previous_tab
 keybind = cmd+opt+w=close_surface
 keybind = cmd+shift+w=close_surface
+keybind = cmd+shift+r=prompt_surface_title
 keybind = f4=ignore
 
 
