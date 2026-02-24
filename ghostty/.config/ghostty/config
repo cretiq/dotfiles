@@ -12,7 +12,7 @@
 # theme = catppuccin-mocha
 # theme = "Night Owlish Light"
 # theme = "Night Owl"
-theme = "dark:Apple System Colors,light:Apple System Colors Light"
+theme = "dark:nightfox,light:GitHub Light Default"
 
 # Cursor Color
 
@@ -104,6 +104,12 @@ keybind = shift+opt+down=resize_split:down,20
 
 keybind = cmd+shift+k=clear_screen
 keybind = cmd+opt+z=clear_screen
+
+# Scrollback (works with BTT opt+./opt+m → Page Up/Down)
+keybind = page_up=scroll_page_up
+keybind = page_down=scroll_page_down
+keybind = shift+alt+k=scroll_page_lines:-5
+keybind = shift+alt+j=scroll_page_lines:5
 
 # ===============================================
 # NOTES
