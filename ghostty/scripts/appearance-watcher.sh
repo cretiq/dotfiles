@@ -20,8 +20,8 @@ update_config() {
     local opacity fill
 
     if [[ "$mode" == "dark" ]]; then
-        opacity="0.8"
-        fill="2a2a2a"
+        opacity="0.85"
+        fill="333333"
     else
         opacity="0.8"
         fill="b8b8b8"
