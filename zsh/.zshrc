@@ -38,6 +38,7 @@ alias kill3003='echo "Searching for and forcefully terminating processes on port
 alias kill5555='echo "Searching for and forcefully terminating processes on port 5555..."; lsof -i :5555 -t | xargs -r kill -9; if [ $? -eq 0 ]; then echo "Processes on port 5555 terminated successfully (if any were found)."; else echo "An error occurred while trying to terminate processes on port 5555."; fi'
 
 alias 3000="kill3000 && npm run dev"
+alias pdev="kill3000 && pnpm dev"
 alias 3001="kill3001 && npm3001"
 alias 3002="kill3002 && npm3002"
 alias 3003="kill3003 && npm3003"
@@ -49,7 +50,7 @@ alias script-export="DEBUG_CV_UPLOAD=true NODE_ENV=development npx tsx scripts/a
 
 # === ==================== ===
 
-ZSH_THEME="af-magic" 
+ZSH_THEME="robbyrussell"
 
 plugins=(git)
 
