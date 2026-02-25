@@ -9,7 +9,7 @@
 # ===============================================
 
 # Color scheme
-theme = "dark:catppuccin-mocha,light:catppuccin-latte"
+theme = "dark:Catppuccin Mocha,light:Catppuccin Latte"
 
 # Cursor Color
 
@@ -163,4 +163,8 @@ keybind = cmd+l=text:\x0c
 # Tmux window navigation (sends M-H/M-L/M-t)
 keybind = cmd+shift+l=text:\x1bL
 keybind = cmd+t=text:\x1bt
+keybind = cmd+tab=text:\x1bL
+keybind = cmd+shift+tab=text:\x1bH
+keybind = ctrl+tab=text:\x1b[9;5u
+keybind = ctrl+shift+tab=text:\x1b[9;6u
 
