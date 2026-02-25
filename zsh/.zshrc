@@ -8,6 +8,10 @@ alias vim="nvim"
 alias sp="spf -c ~/.spf.toml"
 alias mw="macrowhisper"
 alias r="ranger"
+alias t="tmux"
+alias ta="tmux attach -t"
+alias tl="tmux list-sessions"
+alias tn="tmux new -s"
 alias sz='source ~/.zshrc'
 
 # Vim keymap shortcuts
@@ -49,7 +53,7 @@ alias script-export="DEBUG_CV_UPLOAD=true NODE_ENV=development npx tsx scripts/a
 
 # === ==================== ===
 
-ZSH_THEME="af-magic" 
+ZSH_THEME="robbyrussell"
 
 plugins=(git)
 

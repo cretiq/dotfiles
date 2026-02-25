@@ -9,10 +9,7 @@
 # ===============================================
 
 # Color scheme
-# theme = catppuccin-mocha
-# theme = "Night Owlish Light"
-# theme = "Night Owl"
-theme = "dark:Apple System Colors,light:Apple System Colors Light"
+theme = "dark:catppuccin-mocha,light:catppuccin-latte"
 
 # Cursor Color
 
@@ -34,7 +31,7 @@ cursor-color = #FFA500
 
 # Split visual effects (opacity & fill managed by ghostty-appearance-watcher.sh)
 unfocused-split-opacity = 0.8
-unfocused-split-fill = b8b8b8
+unfocused-split-fill = e6e9ef
 split-divider-color = 6272a4
 
 # Mouse behavior
@@ -42,6 +39,13 @@ mouse-hide-while-typing = false
 
 # macOS polish
 macos-window-shadow = true
+
+# ===============================================
+# UPDATES
+# ===============================================
+
+# Use tip (nightly) channel to get crash-on-wake fix (fixed in 1.3, not yet stable)
+auto-update-channel = tip
 
 # ===============================================
 # WINDOW SETTINGS
@@ -56,8 +60,8 @@ window-width = 160
 window-height = 40
 
 # Padding for breathing room
-window-padding-x = 10
-window-padding-y = 10
+window-padding-x = 0
+window-padding-y = 0
 
 # No annoying close confirmations
 confirm-close-surface = false
@@ -79,37 +83,56 @@ clipboard-paste-bracketed-safe = true
 # ===============================================
 
 # Tab Navigation
-keybind = cmd+t=new_tab
-keybind = cmd+opt+l=next_tab
-keybind = cmd+ctrl+opt+shift+h=previous_tab
+# keybind = cmd+t=new_tab
+# keybind = cmd+opt+l=next_tab
+keybind = cmd+ctrl+opt+shift+h=unbind
+keybind = cmd+ctrl+opt+shift+h=text:\x1bH
 keybind = cmd+opt+w=close_surface
 keybind = cmd+shift+w=close_surface
 keybind = cmd+shift+r=prompt_surface_title
 keybind = f4=ignore
+keybind = cmd+d=ignore
 
 
-# Split Creation
-keybind = cmd+opt+right=new_split:right
-keybind = cmd+opt+down=new_split:down
-keybind = cmd+opt+left=new_split:left
-keybind = cmd+opt+up=new_split:up
-keybind = shift+opt+minus=new_split:right
-keybind = shift+opt+slash=new_split:down
+# Split Creation — disabled, using tmux pane splits instead
+# keybind = cmd+opt+right=new_split:right
+# keybind = cmd+opt+down=new_split:down
+# keybind = cmd+opt+left=new_split:left
+# keybind = cmd+opt+up=new_split:up
+# keybind = shift+opt+minus=new_split:right
+# keybind = shift+opt+slash=new_split:down
 
-# Split Resize
-keybind = shift+opt+left=resize_split:left,20
-keybind = shift+opt+right=resize_split:right,20
-keybind = shift+opt+up=resize_split:up,20
-keybind = shift+opt+down=resize_split:down,20
+# Tmux pane splits (+ key = US minus, - key = US slash on Swedish kb)
+keybind = shift+opt+minus=text:\x1b=
+keybind = shift+opt+slash=text:\x1b-
 
-keybind = cmd+shift+k=clear_screen
-keybind = cmd+opt+z=clear_screen
+# Split Resize — disabled, using tmux pane resize instead
+# keybind = shift+opt+left=resize_split:left,20
+# keybind = shift+opt+right=resize_split:right,20
+# keybind = shift+opt+up=resize_split:up,20
+# keybind = shift+opt+down=resize_split:down,20
 
-# Scrollback (works with BTT opt+./opt+m → Page Up/Down)
+# Tmux pane resize (sends M-Left/Right/Up/Down)
+keybind = shift+opt+left=text:\x1b[1;3D
+keybind = shift+opt+right=text:\x1b[1;3C
+keybind = shift+opt+up=text:\x1b[1;3A
+keybind = shift+opt+down=text:\x1b[1;3B
+
+# Clear screen — disabled, using tmux send-keys instead
+# keybind = cmd+shift+k=clear_screen
+# keybind = cmd+opt+z=clear_screen
+keybind = cmd+shift+k=text:\x1bK
+keybind = cmd+opt+z=text:\x1bK
+
+# Close pane (sends M-w)
+keybind = cmd+opt+w=text:\x1bw
+keybind = cmd+shift+w=text:\x1bw
+
+# Scrollback (sends M-k/M-j for tmux scroll)
 keybind = page_up=scroll_page_up
 keybind = page_down=scroll_page_down
-keybind = shift+alt+k=scroll_page_lines:-5
-keybind = shift+alt+j=scroll_page_lines:5
+keybind = shift+alt+k=text:\x1bk
+keybind = shift+alt+j=text:\x1bj
 
 # ===============================================
 # NOTES
@@ -125,9 +148,19 @@ keybind = shift+enter=text:\x1b\r
 keybind = cmd+z=text:\x1f
 keybind = cmd+s=text:\x1bs
 
-# Split Navigation (vim-style)
-keybind = cmd+h=goto_split:left
-keybind = cmd+l=goto_split:right
-keybind = cmd+j=goto_split:down
-keybind = cmd+k=goto_split:up
+# Split Navigation (vim-style) — disabled, using tmux pane/window nav instead
+# keybind = cmd+h=goto_split:left
+# keybind = cmd+l=goto_split:right
+# keybind = cmd+j=goto_split:down
+# keybind = cmd+k=goto_split:up
+
+# Tmux pane navigation (sends C-h/j/k/l for vim-tmux-navigator)
+keybind = cmd+h=text:\x08
+keybind = cmd+j=text:\x0a
+keybind = cmd+k=text:\x0b
+keybind = cmd+l=text:\x0c
+
+# Tmux window navigation (sends M-H/M-L/M-t)
+keybind = cmd+shift+l=text:\x1bL
+keybind = cmd+t=text:\x1bt
 
