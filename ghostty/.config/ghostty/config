@@ -60,8 +60,8 @@ window-width = 160
 window-height = 40
 
 # Padding for breathing room
-window-padding-x = 0
-window-padding-y = 0
+window-padding-x = 8
+window-padding-y = 8
 
 # No annoying close confirmations
 confirm-close-surface = false
