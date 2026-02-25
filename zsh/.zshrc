@@ -14,6 +14,10 @@ alias sz='source ~/.zshrc'
 alias vimkeys="~/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh"
 alias vimtoggle="~/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh toggle"
 
+# Ghostty appearance watcher (LaunchAgent management)
+alias ghostty-watcher-load='ln -sf ~/.dotfiles/ghostty/scripts/com.filipmellqvist.ghostty-appearance.plist ~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/com.filipmellqvist.ghostty-appearance.plist'
+alias ghostty-watcher-unload='launchctl unload ~/Library/LaunchAgents/com.filipmellqvist.ghostty-appearance.plist && rm -f ~/Library/LaunchAgents/com.filipmellqvist.ghostty-appearance.plist'
+
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
