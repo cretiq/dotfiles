@@ -20,15 +20,19 @@ update_config() {
     local opacity fill
 
     if [[ "$mode" == "dark" ]]; then
-        opacity="0.85"
-        fill="333333"
+        opacity="0.9"
+        fill="2a2a2a"
     else
-        opacity="0.8"
-        fill="b8b8b8"
+        opacity="0.88"
+        fill="cfcfcf"
     fi
 
-    sed -i '' "s/^unfocused-split-opacity = .*/unfocused-split-opacity = $opacity/" "$GHOSTTY_CONFIG"
-    sed -i '' "s/^unfocused-split-fill = .*/unfocused-split-fill = $fill/" "$GHOSTTY_CONFIG"
+    # Avoid sed -i which replaces the file (new inode), breaking Ghostty's file watcher.
+    # Write in-place via > to preserve the inode so Ghostty auto-reloads.
+    local tmp
+    tmp=$(sed "s/^unfocused-split-opacity = .*/unfocused-split-opacity = $opacity/" "$GHOSTTY_CONFIG")
+    tmp=$(printf '%s' "$tmp" | sed "s/^unfocused-split-fill = .*/unfocused-split-fill = $fill/")
+    printf '%s\n' "$tmp" > "$GHOSTTY_CONFIG"
 }
 
 while true; do

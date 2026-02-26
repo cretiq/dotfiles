@@ -8,9 +8,18 @@ local i = ls.insert_node
 -- Type "cgit:" to see all git commands, "cconfig:" for config, etc.
 -- Descriptions are extracted from YAML frontmatter if present.
 
+local cwd = vim.fn.getcwd()
+
 local command_dirs = {
   vim.fn.expand("~/.claude/commands"),
   vim.fn.expand("~/.claude_phoenix/commands"),
+  cwd .. "/.claude/commands",
+}
+
+local skill_dirs = {
+  vim.fn.expand("~/.claude/skills"),
+  vim.fn.expand("~/.claude_phoenix/skills"),
+  cwd .. "/.claude/skills",
 }
 
 -- Extract description from YAML frontmatter (--- ... ---)
@@ -56,6 +65,26 @@ for _, dir in ipairs(command_dirs) do
         table.insert(snippets, s(
           { trig = trigger, desc = desc },
           { t("/" .. cmd .. " "), i(1) }
+        ))
+      end
+    end
+  end
+end
+
+for _, dir in ipairs(skill_dirs) do
+  if vim.fn.isdirectory(dir) == 1 then
+    local files = vim.fn.globpath(dir, "*/SKILL.md", false, true)
+    for _, file in ipairs(files) do
+      local name = vim.fn.fnamemodify(file, ":h:t")
+      local trigger = "/" .. name
+
+      if not seen[trigger] then
+        seen[trigger] = true
+        local desc = get_description(file) or name
+        desc = "[Skill] " .. desc
+        table.insert(snippets, s(
+          { trig = trigger, desc = desc },
+          { t("/" .. name .. " "), i(1) }
         ))
       end
     end

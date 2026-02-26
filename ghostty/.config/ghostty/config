@@ -33,8 +33,8 @@ cursor-style-blink = false
 cursor-color = #FFA500
 
 # Split visual effects (opacity & fill managed by ghostty-appearance-watcher.sh)
-unfocused-split-opacity = 0.8
-unfocused-split-fill = e6e9ef
+unfocused-split-opacity = 0.88
+unfocused-split-fill = cfcfcf
 split-divider-color = 6272a4
 
 # Mouse behavior
@@ -123,11 +123,11 @@ keybind = shift+enter=text:\x1b\r
 
 # Text Editing
 keybind = cmd+z=text:\x1f
-keybind = cmd+s=text:\x1bs
+keybind = cmd+s=text:\x1b:w\x0d
+keybind = cmd+shift+s=text:\x1b:wq\x0d
 
 # Split Navigation (vim-style)
 keybind = cmd+h=goto_split:left
 keybind = cmd+l=goto_split:right
 keybind = cmd+j=goto_split:down
 keybind = cmd+k=goto_split:up
-
