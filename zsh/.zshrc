@@ -56,6 +56,9 @@ plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
 
+# Brighten af-magic dashed separator (default FG[237] is too dark with Apple System Colors)
+FG[237]=$FG[245]
+
 alias config='/usr/bin/git --git-dir=/Users/filipmellqvist/.dotfiles/ --work-tree=/Users/filipmellqvist'
 
 # Claude Code aliases
