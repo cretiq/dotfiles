@@ -41,6 +41,7 @@ vim.opt.smartcase = true
 vim.opt.clipboard = "unnamedplus"
 vim.opt.scrolloff = 8
 vim.opt.cursorline = true
+vim.o.winborder = "rounded"
 
 -- Auto save on focus lost
 vim.api.nvim_create_autocmd({ "FocusLost", "BufLeave" }, {

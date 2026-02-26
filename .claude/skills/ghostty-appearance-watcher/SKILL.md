@@ -20,13 +20,13 @@ Bridges Ghostty's lack of `dark:`/`light:` support for `unfocused-split-opacity`
 1. Script polls `defaults read -g AppleInterfaceStyle` every 5 seconds
 2. Tracks last known mode to skip redundant writes
 3. On change, uses `sed -i ''` to update opacity + fill values in Ghostty config
-4. Ghostty auto-reloads on config file change
+4. Sends `SIGUSR2` to Ghostty to force config reload (Ghostty doesn't auto-detect changes through symlinks)
 
 ### Current Values
 | Mode  | Opacity | Fill   |
 |-------|---------|--------|
-| Dark  | 0.8     | 2a2a2a |
-| Light | 0.8     | d0d0d0 |
+| Dark  | 0.9     | 363636 |
+| Light | 0.88    | c2c2c2 |
 
 ### LaunchAgent
 - `KeepAlive: true`, `RunAtLoad: true`
@@ -38,11 +38,14 @@ Bridges Ghostty's lack of `dark:`/`light:` support for `unfocused-split-opacity`
 ### sed doesn't work on symlinks
 `sed -i ''` fails with "in-place editing only works for regular files" on symlinks. The script resolves the symlink with `readlink -f` before editing.
 
+### Ghostty doesn't auto-detect config changes through symlinks
+`sed -i ''` replaces the file (new inode), and Ghostty's file watcher loses track through the symlink. The watcher sends `pkill -SIGUSR2 ghostty` after each update to force a config reload. **SIGUSR2 only reloads config — it does not restart Ghostty.** Other signals will crash it.
+
 ### Restarting after value changes
-Editing the script doesn't take effect until the watcher restarts. The LaunchAgent's `KeepAlive` auto-restarts it after `pkill -f appearance-watcher`.
+Editing the script doesn't take effect until the watcher restarts. The running bash process keeps old values in memory. Use `launchctl bootout`/`bootstrap` to restart.
 
 ### LaunchAgent reload
-Must `launchctl unload` before `launchctl load` — loading an already-registered agent fails with I/O error.
+Use `launchctl bootout gui/$(id -u)` + `launchctl bootstrap gui/$(id -u)` (modern API). The old `launchctl unload`/`load` is deprecated.
 
 ## Management
 
@@ -54,14 +57,14 @@ ghostty-watcher-load
 ghostty-watcher-unload
 
 # Check if running
-ps aux | grep appearance-watcher
+launchctl list | grep ghostty-appearance
 
 # Check logs
 cat /tmp/ghostty-appearance-watcher.log
 
 # Restart after editing values
-pkill -f appearance-watcher
-# KeepAlive auto-restarts it
+launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.filipmellqvist.ghostty-appearance.plist
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.filipmellqvist.ghostty-appearance.plist
 ```
 
 ## Modifying Opacity/Fill Values
