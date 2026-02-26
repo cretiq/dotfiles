@@ -33,8 +33,8 @@ cursor-style-blink = false
 cursor-color = #FFA500
 
 # Split visual effects (opacity & fill managed by ghostty-appearance-watcher.sh)
-unfocused-split-opacity = 0.85
-unfocused-split-fill = 333333
+unfocused-split-opacity = 0.8
+unfocused-split-fill = e6e9ef
 split-divider-color = 6272a4
 
 # Mouse behavior
