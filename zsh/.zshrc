@@ -139,3 +139,6 @@ esac
 # pnpm end
 
 export PATH="$HOME/.local/bin:$PATH"
+
+# Tauri code signing
+export APPLE_SIGNING_IDENTITY="Apple Development: filip_mellqvist@msn.com (6KS7CT9WPG)"
