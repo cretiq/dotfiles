@@ -57,7 +57,8 @@ plugins=(git)
 source $ZSH/oh-my-zsh.sh
 
 # Brighten af-magic dashed separator (default FG[237] is too dark with Apple System Colors)
-FG[237]=$FG[245]
+PS1="%{$FG[245]%}\${(l.\$(afmagic_dashes)..-.)}%{$reset_color%}
+%{$FG[032]%}%~\$(git_prompt_info)\$(hg_prompt_info) %{$FG[105]%}%(!.#.»)%{$reset_color%} "
 
 alias config='/usr/bin/git --git-dir=/Users/filipmellqvist/.dotfiles/ --work-tree=/Users/filipmellqvist'
 
