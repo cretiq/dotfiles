@@ -50,15 +50,11 @@ alias script-export="DEBUG_CV_UPLOAD=true NODE_ENV=development npx tsx scripts/a
 
 # === ==================== ===
 
-ZSH_THEME="af-magic"
+ZSH_THEME="lambda"
 
 plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
-
-# Brighten af-magic dashed separator (default FG[237] is too dark with Apple System Colors)
-PS1="%{$FG[245]%}\${(l.\$(afmagic_dashes)..-.)}%{$reset_color%}
-%{$FG[032]%}%~\$(git_prompt_info)\$(hg_prompt_info) %{$FG[105]%}%(!.#.»)%{$reset_color%} "
 
 alias config='/usr/bin/git --git-dir=/Users/filipmellqvist/.dotfiles/ --work-tree=/Users/filipmellqvist'
 
