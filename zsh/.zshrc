@@ -51,6 +51,9 @@ alias code='code.exe &'
 alias powershell='/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
 alias powershell.exe='/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
 
+alias dev='cd /mnt/c/Dev/'
+alias own='cd /mnt/c/Dev/Own/'
+
 # Smart git wrapper: PowerShell on /mnt/c (avoids Plan9 deadlocks), native elsewhere
 # Each arg is wrapped in PS single-quotes so parens, spaces, colons are all literal
 git() {
