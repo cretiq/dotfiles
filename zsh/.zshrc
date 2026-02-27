@@ -57,7 +57,7 @@ alias own='cd /mnt/c/Dev/Own/'
 # Smart git wrapper: PowerShell on /mnt/c (avoids Plan9 deadlocks), native elsewhere
 # Each arg is wrapped in PS single-quotes so parens, spaces, colons are all literal
 git() {
-  if [[ "$PWD" != /mnt/c/* ]]; then
+  if [[ "$PWD" != /mnt/c/* || "$PWD" == /mnt/c/Dev/Own/* ]]; then
     command git "$@"
     return
   fi
