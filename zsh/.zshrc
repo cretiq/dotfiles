@@ -50,7 +50,7 @@ alias script-export="DEBUG_CV_UPLOAD=true NODE_ENV=development npx tsx scripts/a
 
 # === ==================== ===
 
-ZSH_THEME="lambda"
+ZSH_THEME="macovsky"
 
 plugins=(git)
 
