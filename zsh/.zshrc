@@ -142,3 +142,6 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # Tauri code signing
 export APPLE_SIGNING_IDENTITY="Apple Development: filip_mellqvist@msn.com (6KS7CT9WPG)"
+
+# Chrome with remote debugging for DevTools MCP
+alias chrome-debug='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug'
