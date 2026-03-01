@@ -23,8 +23,8 @@ update_config() {
         opacity="0.9"
         fill="363636"
     else
-        opacity="0.88"
-        fill="c2c2c2"
+        opacity="0.82"
+        fill="a8a8a8"
     fi
 
     sed -i '' "s/^unfocused-split-opacity = .*/unfocused-split-opacity = $opacity/" "$GHOSTTY_CONFIG"

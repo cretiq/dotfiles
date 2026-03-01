@@ -12,7 +12,7 @@
 # theme = catppuccin-mocha
 # theme = "Night Owlish Light"
 # theme = "Night Owl"
-theme = "dark:Apple System Colors,light:Apple System Colors Light"
+theme = "dark:Apple System Colors,light:Farmhouse Light"
 
 # Cursor Color
 
@@ -33,8 +33,8 @@ cursor-style-blink = false
 cursor-color = #FFA500
 
 # Split visual effects (opacity & fill managed by ghostty-appearance-watcher.sh)
-unfocused-split-opacity = 0.88
-unfocused-split-fill = c2c2c2
+unfocused-split-opacity = 0.82
+unfocused-split-fill = a8a8a8
 split-divider-color = 6272a4
 
 # Mouse behavior

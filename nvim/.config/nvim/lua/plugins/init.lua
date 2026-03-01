@@ -1,31 +1,13 @@
 return {
   -- Colorscheme
   {
-    "catppuccin/nvim",
-    name = "catppuccin",
+    "rafamadriz/neon",
     priority = 1000,
-    opts = {
-      flavour = "auto",
-      background = {
-        light = "latte",
-        dark = "mocha",
-      },
-      custom_highlights = function(colors)
-        return {
-          FloatBorder = { bg = colors.base },
-        }
-      end,
-      integrations = {
-        cmp = true,
-        gitsigns = true,
-        nvimtree = true,
-        treesitter = true,
-        mason = true,
-      },
-    },
-    config = function(_, opts)
-      require("catppuccin").setup(opts)
-      vim.cmd.colorscheme("catppuccin")
+    config = function()
+      vim.g.neon_style = "default"
+      vim.g.neon_italic_keyword = true
+      vim.g.neon_italic_function = true
+      vim.cmd.colorscheme("neon")
     end,
   },
 
@@ -65,7 +47,7 @@ return {
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
       options = {
-        theme = "catppuccin",
+        theme = "auto",
         component_separators = { left = "", right = "" },
         section_separators = { left = "", right = "" },
       },
