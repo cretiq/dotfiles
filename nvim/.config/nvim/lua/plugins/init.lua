@@ -16,10 +16,12 @@ return {
     "f-person/auto-dark-mode.nvim",
     opts = {
       set_dark_mode = function()
-        vim.o.background = "dark"
+        vim.g.neon_style = "default"
+        vim.cmd.colorscheme("neon")
       end,
       set_light_mode = function()
-        vim.o.background = "light"
+        vim.g.neon_style = "light"
+        vim.cmd.colorscheme("neon")
       end,
     },
   },
