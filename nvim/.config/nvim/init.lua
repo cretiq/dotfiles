@@ -44,16 +44,16 @@ vim.opt.splitbelow = true
 vim.opt.mouse = "a"
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
--- WSL clipboard integration via win32yank (fast, no PowerShell cold-start)
+-- WSL clipboard integration via WSLg Wayland (native, no Windows .exe overhead)
 vim.g.clipboard = {
-  name = "win32yank-wsl",
+  name = "wl-clipboard",
   copy = {
-    ["+"] = "win32yank.exe -i --crlf",
-    ["*"] = "win32yank.exe -i --crlf",
+    ["+"] = "wl-copy",
+    ["*"] = "wl-copy",
   },
   paste = {
-    ["+"] = "win32yank.exe -o --lf",
-    ["*"] = "win32yank.exe -o --lf",
+    ["+"] = "wl-paste --no-newline",
+    ["*"] = "wl-paste --no-newline",
   },
   cache_enabled = 0,
 }
