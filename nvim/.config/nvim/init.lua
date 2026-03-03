@@ -44,16 +44,16 @@ vim.opt.splitbelow = true
 vim.opt.mouse = "a"
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
--- WSL clipboard integration (clip.exe for copy, PowerShell for paste)
+-- WSL clipboard integration via win32yank (fast, no PowerShell cold-start)
 vim.g.clipboard = {
-  name = "WslClipboard",
+  name = "win32yank-wsl",
   copy = {
-    ["+"] = "/mnt/c/Windows/System32/clip.exe",
-    ["*"] = "/mnt/c/Windows/System32/clip.exe",
+    ["+"] = "win32yank.exe -i --crlf",
+    ["*"] = "win32yank.exe -i --crlf",
   },
   paste = {
-    ["+"] = 'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-    ["*"] = 'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+    ["+"] = "win32yank.exe -o --lf",
+    ["*"] = "win32yank.exe -o --lf",
   },
   cache_enabled = 0,
 }

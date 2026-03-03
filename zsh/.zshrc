@@ -12,10 +12,11 @@ setopt IGNORE_EOF
 # Disable flow control (ctrl+s/ctrl+q) so ctrl+s can be used in nvim
 stty -ixon
 
-# alias sp="spf -c ~/.config/spf/config.toml"
 alias sp="spf -c ~/.spf.toml"
 alias mw="macrowhisper"
 alias vim='nvim'
+alias vim='nvim'
+alias v='nvim'
 alias r='ranger'
 
 alias obs='ranger /mnt/c/Users/FilipM/Documents/Obsidian/RCO'
