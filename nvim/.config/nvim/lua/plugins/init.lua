@@ -5,7 +5,11 @@ return {
     name = "catppuccin",
     priority = 1000,
     opts = {
-      flavour = "mocha",
+      flavour = "auto",
+      background = {
+        light = "latte",
+        dark = "mocha",
+      },
       integrations = {
         cmp = true,
         gitsigns = true,
@@ -16,7 +20,32 @@ return {
     },
     config = function(_, opts)
       require("catppuccin").setup(opts)
+
+      local function detect_windows_theme()
+        local result = vim.fn.system(
+          '/mnt/c/Windows/System32/reg.exe query "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize" /v AppsUseLightTheme'
+        )
+        return result:match("0x1") and "light" or "dark"
+      end
+
+      vim.o.background = detect_windows_theme()
       vim.cmd.colorscheme("catppuccin")
+
+      vim.api.nvim_create_autocmd("FocusGained", {
+        callback = function()
+          local new_bg = detect_windows_theme()
+          if vim.o.background ~= new_bg then
+            vim.o.background = new_bg
+          end
+        end,
+      })
+
+      vim.api.nvim_create_autocmd("OptionSet", {
+        pattern = "background",
+        callback = function()
+          vim.cmd.colorscheme("catppuccin")
+        end,
+      })
     end,
   },
 
