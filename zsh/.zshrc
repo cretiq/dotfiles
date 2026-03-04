@@ -72,7 +72,12 @@ git() {
   powershell -Command "\$env:PATH = 'C:\Users\FilipM\AppData\Local\MinGit\cmd;' + \$env:PATH ; cd '${win_cwd}' ; git ${ps_args[*]}"
 }
 
-# Smart glab wrapper: PowerShell only in phoenix worktrees (Windows git dir resolution)
+# glab wrapper for phoenix worktrees
+# WHY PowerShell: WSL can't reach corporate GitLab (Global Secure Access/SASE routes
+#   traffic through Windows network stack only). glab.exe runs via PS to use Windows networking.
+# WHY --repo: glab.exe can't resolve git worktree .git pointer files (produces mixed
+#   WSL/Windows paths like /mnt/c/.../C:/Dev/...). --repo bypasses local git resolution.
+# WHY phoenix* only: other repos (e.g. /mnt/c/Dev/Own) don't need this.
 glab() {
   if [[ "$PWD" != /mnt/c/Dev/phoenix* ]]; then
     command glab.exe "$@"
@@ -83,7 +88,7 @@ glab() {
   for arg in "$@"; do
     ps_args+=("'${arg//\'/'\''}'")
   done
-  powershell -Command "cd '${win_cwd}' ; glab.exe ${ps_args[*]}"
+  powershell -Command "cd '${win_cwd}' ; glab.exe --repo m5/phoenix ${ps_args[*]}"
 }
 
 # ============================================================
