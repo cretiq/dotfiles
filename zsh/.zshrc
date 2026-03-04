@@ -72,9 +72,9 @@ git() {
   powershell -Command "\$env:PATH = 'C:\Users\FilipM\AppData\Local\MinGit\cmd;' + \$env:PATH ; cd '${win_cwd}' ; git ${ps_args[*]}"
 }
 
-# Smart glab wrapper: same quoting fix for PowerShell boundary
+# Smart glab wrapper: PowerShell only in phoenix worktrees (Windows git dir resolution)
 glab() {
-  if [[ "$PWD" != /mnt/c/* ]]; then
+  if [[ "$PWD" != /mnt/c/Dev/phoenix* ]]; then
     command glab.exe "$@"
     return
   fi
@@ -85,6 +85,7 @@ glab() {
   done
   powershell -Command "cd '${win_cwd}' ; glab.exe ${ps_args[*]}"
 }
+
 # ============================================================
 
 # === ==================== ===
