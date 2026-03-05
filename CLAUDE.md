@@ -4,312 +4,84 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a personal dotfiles repository for macOS containing configuration files and scripts for various development tools and applications. The repository uses a bare git repository approach for dotfiles management.
-
-## Key Tools and Applications
-
-### Terminal and Shell
-- **Ghostty**: Modern terminal emulator with glass effects and theme support
-  - Config: `ghostty/.config/ghostty/config`
-  - Theme: Uses dark:nightfox,light:catppuccin-latte.conf
-  - Font: JetBrains Mono, size 15
-- **Zsh**: Shell with Oh My Zsh framework
-  - Config: `zsh/.zshrc`, `zsh/worktree-nav.zsh`
-  - Theme: af-magic
-  - Git plugin enabled
-
-### Development Environment
-- **Vim**: Text editor with minimal plugin setup
-  - Config: `vim/.vimrc`
-  - Plugin manager: vim-plug
-  - Theme: catppuccin-latte
-  - Cursor shapes configured for Ghostty terminal
-- **SPF (Superfile)**: Terminal file manager
-  - Config: `spf/.spf.toml`
-  - Theme: catppuccin-latte
-  - Editor: vim
-- **Ranger**: Terminal file manager with HJKL/JKLÖ keymap integration
-  - Config: `~/.config/ranger/rc.conf`
-  - Copymap bindings toggle with main vim-keymap-toggle system
-  - Alias: `r`
-
-### Applications
-- **MacroWhisper**: Voice-to-text application
-  - Config: `macrowhisper/.config/macrowhisper/`
-- **MyPaint**: Digital painting application
-  - Config: `mypaint/.config/mypaint/`
-- **iTerm2**: Alternative terminal (legacy configuration)
-  - Config: `iterm/Default.json` and `iterm/Untitled.itermkeymap`
-
-## Git Configuration Management
-
-This repository uses the bare repository approach for dotfiles management:
+Personal dotfiles repository for macOS and WSL2. Uses bare git repository approach for dotfiles management.
 
 ```bash
-# Main command alias for managing dotfiles
+# macOS
 alias config='/usr/bin/git --git-dir=/Users/filipmellqvist/.dotfiles/ --work-tree=/Users/filipmellqvist'
-
-# Usage examples:
-config status
-config add .vimrc
-config commit -m "update vim config"
-config push
+# WSL2
+alias config='/usr/bin/git --git-dir=/home/filip/.dotfiles/ --work-tree=/home/filip'
 ```
 
-## Development Aliases and Scripts
+## Key Tools
 
-### Vim Keymap Management
-Dynamic keymap switching system supporting both terminal Vim and VSCode/Cursor:
-- `vimtoggle`: Toggle between default (HJKL) and custom (JKLÖ) keymaps
-- `vimkeys status`: Show current keymap status
-- `vimkeys default`: Force default HJKL mode
-- `vimkeys custom`: Force custom JKLÖ mode
+- **Ghostty**: Terminal emulator — `ghostty/.config/ghostty/config`
+- **Zsh**: Oh My Zsh — `zsh/.zshrc`, `zsh/worktree-nav.zsh`
+- **Neovim**: lazy.nvim plugin manager — `nvim/.config/nvim/init.lua`
+- **Vim**: vim-plug — `vim/.vimrc`
+- **Ranger**: File manager with HJKL/JKLÖ keymap integration — `ranger/`
+- **SPF (Superfile)**: File manager — `spf/.spf.toml`
 
-**Integration Features:**
-- **Real-time hot-reload**: All running Vim instances switch automatically
-- **VSCode/Cursor support**: Dynamically updates VSCodeVim extension settings
-- **State persistence**: Remembers keymap choice across sessions
-- **FastScripts integration**: System-wide keyboard shortcut access
-- **Visual feedback**: Status line indicators and macOS notifications
+## Vim Keymap Management
 
-**Key Files:**
-- Main script: `my_scripts/.script/vim-keymap-toggle.sh`
-- VSCode manager: `my_scripts/.script/vscode-keymap-manager.sh`
-- Obsidian manager: `my_scripts/.script/obsidian-keymap-manager.sh`
-- Ranger manager: `my_scripts/.script/ranger-keymap-manager.sh`
-- State file: `vim/.vim/keymap_state`
-- FastScripts: `~/Library/Scripts/Toggle Vim Keymaps.sh`
-- Backups: `vim/.vim/vscode-backups/`, `vim/.vim/obsidian-backups/`, `vim/.vim/ranger-backups/`
+- `vimtoggle`: Toggle between HJKL and JKLÖ keymaps
+- `vimkeys status|default|custom`: Query or force keymap mode
+- Integrates with Vim, VSCode/Cursor, Obsidian, Ranger (scripts in `my_scripts/.script/`)
+- See `vscode-keymap-rationale` skill for Visual mode fix details.
 
-#### VSCode HJKL/JKLÖ Mapping Approach (Updated)
+## Windows Terminal Settings
 
-**Problem Solved:**
-Previously, VSCode keybindings were binding movement keys in ALL Vim modes (Normal, Visual, VisualLine, VisualBlock, Replace), which caused a critical bug in Visual Line mode where:
-- Selection would only select characters to the column where cursor landed
-- Delete would only delete the original line, not all selected lines
-- Linewise selection semantics were completely broken
-
-**Root Cause:**
-VSCode keybindings were intercepting movement keys BEFORE VSCodeVim could process them with proper mode-specific behavior. In Visual Line mode, `cursorDownSelect` (character-level) was firing instead of VSCodeVim's linewise selection logic.
-
-**Solution Implemented:**
-Movement key bindings (h/j/k/l and j/k/l/ö) are now ONLY bound in:
-- **Normal mode** ✅ (standard navigation)
-- **Replace mode** ✅ (character replacement)
-
-Movement keys are NOT bound in:
-- **Visual mode** ✅ (character selection - handled by VSCodeVim)
-- **VisualLine mode** ✅ (linewise selection - handled by VSCodeVim)
-- **VisualBlock mode** ✅ (block selection - handled by VSCodeVim)
-
-**Technical Details:**
-The VSCode keybinding script (`vscode-keymap-manager.sh`) uses Python-based JSON merging to:
-1. Preserve all custom keybindings (ctrl+p, ctrl+tab, etc.)
-2. Filter out movement keys from existing file
-3. Add only Normal and Replace mode movement key bindings
-4. Merge everything together maintaining valid JSON structure
-
-**Key Implementation:**
-- Only 8 movement key bindings per mode (4 keys × 2 modes)
-- Custom keybindings are automatically preserved across toggles
-- No interference with VSCodeVim's native Visual mode handling
-- All custom keybindings persist whether added to PERSISTENT_KEYBINDINGS or directly to VSCode
-
-**Result:**
-✅ Visual Line mode now works correctly
-✅ Linewise selection includes full lines
-✅ Delete in Visual Line deletes all selected lines
-✅ All custom keybindings remain preserved
-✅ Normal mode navigation still works with HJKL/JKLÖ override
-
-### Windows Terminal Settings
 Config: `/mnt/c/Users/FilipM/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json`
-- Frequently edited — keybindings, profiles, color schemes, behavior
-- Hot-reloads on save
-- Default profile: Ubuntu (WSL), Font: JetBrains Mono size 10, Theme: Banana Blueberry
 - **Unbound keys** (`"id": null`): `Ctrl+A`, `Ctrl+W` — passed through to CLI apps (Claude Code needs them)
-- **Ctrl+V** → Paste (kept bound — required for speech-to-text/MacroWhisper clipboard paste)
-- **Custom bindings**: `Ctrl+Shift+W` close pane (built-in default), `Ctrl+H/J/K/L` move focus, `Ctrl+Backspace` delete word, `Alt+-` split down
-- To unbind a key: `{ "id": null, "keys": "ctrl+x" }` in the `keybindings` array
+- **Ctrl+V** kept bound for speech-to-text clipboard paste
+- Unbind pattern: `{ "id": null, "keys": "ctrl+x" }`
 
-### Keyboard Remap Toggle Menu
-Interactive menu: `C:\Users\FilipM\Desktop\Keys\interactive-menu-toggle-remaps.bat`
-- Toggle ESC/CapsLock, Alt+HJKL, Vim/VSCode/Rider/Neovim/Obsidian/Ranger HJKL/JKLÖ remaps
-- Batch set all to Standard or Voyager mode
-- Uses: `bash-toggle-esc.sh`, `bash-toggle-alt-hjkl.sh`, `toggle-vim-layout-hjkl-jkloe.bat`, `get-all-status.sh`, `hotkeys-and-remaps.ahk`
+## Keyboard Remap Toggle Menu
 
-### Port Management
-Zsh port management aliases:
-- `kill3000`, `kill3001`, `kill3002`, `kill3003`, `kill5555`: Kill processes on specific ports
-- `3000`, `3001`, `3002`, `3003`: Kill port processes and start development servers
-- `npm3001`, `npm3002`, `npm3003`: Start npm dev servers on specific ports
-- `5555`: Kill port 5555 and start Prisma Studio
-- `killnpmall`: Kill all npm development ports (3000-3002)
+Interactive menu: `C:\Users\FilipM\Desktop\Keys\interactive-menu-toggle-remaps.bat` — toggles ESC/CapsLock, Alt+HJKL, per-app HJKL/JKLÖ remaps.
 
-### Application Shortcuts
-- `sp`: Start SPF file manager with config
-- `mw`: Start MacroWhisper
-- `r`: Start ranger file manager
-- `obs`: Open Obsidian vault directory in ranger
-- `tm`: Start task-master
-- `sz`: Source/reload `~/.zshrc`
+## Worktree Navigation (@prefix)
 
-### Worktree Navigation (@prefix)
-Quick navigation to Phoenix worktrees in `C:\Dev` (Windows) or `/mnt/c/Dev` (WSL).
+Quick navigation to Phoenix worktrees in `/mnt/c/Dev` (WSL) or `C:\Dev` (Windows).
 
-**Usage:**
-- `cd @` + Tab → lists worktrees (`phoenix`, `phoenix-export`, `server`)
-- `cd @phoenix` → root folder (flat: `/mnt/c/Dev/phoenix`, nested: `.../Phoenix`)
-- `cd @phoenix/s` → server folder, `cd @phoenix/c` → client folder
-- `c @phoenix` → cd to worktree + launch Claude Code
-- `c @phoenix/s` → cd to server + launch Claude Code
-- `c @phoenix --resume` → cd + launch with extra args
+- `cd @phoenix` → root, `cd @phoenix/s` → server, `cd @phoenix/c` → client
+- `c @phoenix` → cd + launch Claude Code, `c @phoenix --resume` → with args
 - Partial match: `cd @exp/s` → `phoenix-export/server`
-- Exact match priority: `cd @phoenix` matches `phoenix` before `phoenix-export`
-
-**Note:** `c` is a function (not an alias) defined in `worktree-nav.zsh`. Plain `c` launches claude, `c @...` navigates + launches.
-
-**Detection:** Auto-detects worktrees with `.git` (file or folder) + `server/Phoenix` path.
-**Structure:** Auto-detects flat (`server/Phoenix` at root) vs nested (`Phoenix/server/Phoenix`).
+- `c` is a function in `worktree-nav.zsh`, not an alias
 
 **Config files (keep in sync):**
 - PowerShell 5.1: `C:\Users\FilipM\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`
 - PowerShell 7+: `C:\Users\FilipM\Documents\PowerShell\Microsoft.PowerShell_profile.ps1`
-- Zsh: `zsh/worktree-nav.zsh` (sourced from `.zshrc`)
-
-### Development Environment
-- OpenJDK 11 configured at `/opt/homebrew/opt/openjdk@11/bin`
-- Bun runtime configured
-- Node.js development focused with TypeScript script execution
-
-## Script Collection
-
-The `my_scripts/.script/` directory contains various utility scripts:
-
-### Certificate Management
-- `ca-cert-creator/`: Scripts for creating CA certificates and SSL certificates
-  - `creator.sh`, `creator_noconf.sh`, `creator_CA.sh`
-
-### Audio Configuration
-- `pulseaudio/`: PulseAudio configuration scripts
-- `pulseaudio_volume.sh`: Volume control script
-- `pulseaudio_sink_switch.sh`: Audio sink switching
-- `sony_wh-1000xm3.sh`: Sony headphones configuration
-
-### System Utilities
-- `wacom-config.sh`, `wacom_precision_toggler.sh`: Wacom tablet configuration
-- `feh_random_wallpaper.sh`, `feh_95_wallpaper.sh`: Wallpaper management
-- `keyboard_layouts/`: Keyboard layout configurations
-- `miniscripts/`: Collection of small utility scripts
-
-## Configuration Patterns
-
-### Theme Consistency
-All applications use consistent theming:
-- **Light theme**: catppuccin-latte
-- **Dark theme**: catppuccin-mocha/nightfox
-- **Font**: JetBrains Mono across all applications
-
-### Editor Integration
-- Vim configured with terminal cursor shape integration
-- Consistent editor (vim) across file managers and configuration tools
-- System clipboard integration enabled
+- Zsh: `zsh/worktree-nav.zsh`
 
 ## File Structure
 
 ```
-.
-├── ghostty/          # Terminal emulator config
-├── vim/              # Vim editor configuration and plugins
-├── zsh/              # Zsh shell configuration
-│   ├── .zshrc
-│   └── worktree-nav.zsh  # @prefix worktree navigation
-├── spf/              # Superfile manager config
-├── macrowhisper/     # Voice-to-text app config
-├── mypaint/          # Digital painting app config
-├── iterm/            # Legacy iTerm2 configuration
-├── my_scripts/       # Collection of utility scripts
-└── MW Macros.kmmacros # Keyboard Maestro macros
+acli/          commands/      ghostty/       git/
+htop/          lazygit/       macrowhisper/  my_scripts/
+nvim/          powershell/    ranger/        spf/
+vim/           windows-terminal/             zsh/
 ```
 
 ## Phoenix Project (WSL2 + Windows Hybrid)
 
-### Architecture
 - Edit in WSL2 (`~/Dev/server` -> `/mnt/c/Dev/server`)
-- Run applications in Windows PowerShell (firewall blocks WSL2 -> Windows ports)
-
-### Paths
+- Run dotnet/yarn in Windows PowerShell only (firewall blocks WSL2 ports)
 - Frontend: `C:\Dev\server\Phoenix\client\phoenix-client`
 - Backend: `C:\Dev\server\Phoenix\server\Phoenix`
-
-### Running Applications (Windows PowerShell only)
-```powershell
-# Backend
-cd C:\Dev\server\Phoenix\server\Phoenix && dotnet run
-
-# Frontend
-cd C:\Dev\server\Phoenix\client\phoenix-client && yarn dev
-
-# Quality checks (NEVER from WSL2 - native binding issues)
-yarn format && yarn lint && yarn test
-```
-
-### Pre-Commit Quality Gates (Phoenix)
-Before EVERY commit/MR, run in order:
-1. `yarn format` - must pass with no errors
-2. `yarn lint` - must pass with no errors
-3. `yarn test` - all tests must pass
-
-### Do Not
-- Run dotnet/yarn from WSL2 (no output, firewall blocks services)
-- Use git.exe directly from WSL2 (causes deadlocks)
-- Bypass the wrappers with direct `powershell -Command ... git` calls
+- Pre-commit: `yarn format && yarn lint && yarn test` (Windows PowerShell only)
 
 ## Git Wrappers (zsh)
 
-**Problem:** git.exe from WSL2 causes kernel deadlocks via Plan9 filesystem boundary.
+Shell wrappers in `zsh/.zshrc` route git/glab through PowerShell on `/mnt/c` paths to avoid WSL2 kernel deadlocks via Plan9 filesystem. Just use git/glab normally.
 
-**Solution:** Shell wrappers in `zsh/.zshrc` handle this automatically. The `git()` and `glab()` functions detect `/mnt/c` paths and route through PowerShell with proper quoting. Just use git/glab normally:
-
-```bash
-# These all work on /mnt/c paths — wrappers handle PowerShell routing + quoting
-git status
-git add .
-git commit -m 'feat(scope): message with parens and spaces'
-git push
-glab mr create --fill
-glab mr create --title 'feat: add feature' --description 'Details here'
-```
-
-### Commit Messages with Single Quotes
-If your message contains literal single quotes, use a temp file:
+**Single quotes in commit messages** — use a temp file:
 ```bash
 echo "fix: don't break on edge case" > /tmp/cm.txt && git commit -F /tmp/cm.txt
 ```
 
-For multi-line messages:
-```bash
-cat > /tmp/cm.txt <<'EOF'
-feat: add feature
+## Gotchas
 
-- Detail one
-- Detail two
-EOF
-git commit -F /tmp/cm.txt
-```
-
-### Git Best Practices
-- Chain commands in one call: `git add . && git commit -m 'msg' && git push`
-- If index.lock error: `rm -f .git/index.lock`
-- Never run git commands in parallel
+- Use `function name {` syntax for zsh functions, NOT `name() {` — the latter expands aliases before parsing, causing errors on re-source (`sz`)
 - Do NOT use `--fill` with `--title`/`--description` in `glab mr create`
-
-## Best Practices
-
-When modifying configurations:
-1. Test changes in the target application before committing
-2. Use the `config` alias for all git operations in this repository
-3. Maintain theme consistency across applications
-4. Back up existing configurations before major changes
-5. Document any new aliases or scripts added to the zsh configuration
-6. Use `function name {` syntax for zsh functions, NOT `name() {` — the latter expands aliases before parsing, causing errors on re-source (`sz`)
+- Never run git commands in parallel on `/mnt/c` paths
