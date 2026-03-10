@@ -11,7 +11,7 @@ This is a personal dotfiles repository for macOS containing configuration files 
 ### Terminal and Shell
 - **Ghostty**: Modern terminal emulator with glass effects and theme support
   - Config: `ghostty/.config/ghostty/config`
-  - Theme: Uses dark:nightfox,light:catppuccin-latte.conf
+  - Theme: dark:Under The Sea, light:Farmhouse Light
   - Font: JetBrains Mono, size 15
 - **Zsh**: Shell with Oh My Zsh framework
   - Config: `zsh/.zshrc`
@@ -24,6 +24,11 @@ This is a personal dotfiles repository for macOS containing configuration files 
   - Plugin manager: vim-plug
   - Theme: catppuccin-latte
   - Cursor shapes configured for Ghostty terminal
+- **Neovim**: Modern Vim with extended features
+  - Config: `~/.config/nvim/init.lua`
+  - Plugin manager: lazy.nvim
+  - Theme: Oceanic-Material (dark ocean blues)
+  - LSP enabled with mason, treesitter, completion
 - **SPF (Superfile)**: Terminal file manager
   - Config: `spf/.spf.toml`
   - Theme: catppuccin-latte
@@ -117,8 +122,8 @@ The `my_scripts/.script/` directory contains various utility scripts:
 
 ### Theme Consistency
 All applications use consistent theming:
-- **Light theme**: catppuccin-latte
-- **Dark theme**: catppuccin-mocha/nightfox
+- **Light theme**: Farmhouse Light (Ghostty), catppuccin-latte (Vim)
+- **Dark theme**: Under The Sea (Ghostty), Oceanic-Material (Neovim)
 - **Font**: JetBrains Mono across all applications
 
 ### Editor Integration

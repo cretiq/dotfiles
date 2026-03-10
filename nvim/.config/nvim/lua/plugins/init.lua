@@ -1,29 +1,12 @@
 return {
   -- Colorscheme
   {
-    "rafamadriz/neon",
+    "mhartington/oceanic-next",
     priority = 1000,
+    lazy = false,
     config = function()
-      vim.g.neon_style = "default"
-      vim.g.neon_italic_keyword = true
-      vim.g.neon_italic_function = true
-      vim.cmd.colorscheme("neon")
+      vim.cmd.colorscheme("OceanicNext")
     end,
-  },
-
-  -- Auto dark/light mode
-  {
-    "f-person/auto-dark-mode.nvim",
-    opts = {
-      set_dark_mode = function()
-        vim.g.neon_style = "default"
-        vim.cmd.colorscheme("neon")
-      end,
-      set_light_mode = function()
-        vim.g.neon_style = "light"
-        vim.cmd.colorscheme("neon")
-      end,
-    },
   },
 
   -- File explorer

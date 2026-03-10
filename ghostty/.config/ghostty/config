@@ -12,7 +12,7 @@
 # theme = catppuccin-mocha
 # theme = "Night Owlish Light"
 # theme = "Night Owl"
-theme = "dark:Apple System Colors,light:Farmhouse Light"
+theme = "dark:Under The Sea,light:Farmhouse Light"
 
 # Cursor Color
 
@@ -77,6 +77,9 @@ clipboard-paste-bracketed-safe = true
 # ===============================================
 # KEYBINDINGS
 # ===============================================
+
+# macOS: Treat Option key as Alt for terminal bindings (enables alt+p, etc.)
+macos-option-as-alt = true
 
 # Tab Navigation
 keybind = cmd+t=new_tab
