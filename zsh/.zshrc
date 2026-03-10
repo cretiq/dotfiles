@@ -92,6 +92,22 @@ glab() {
 }
 
 # ============================================================
+# Phoenix jcodemunch (Claude Code MCP) setup
+# Sets shared index path for all Phoenix worktrees
+# ============================================================
+_setup_phoenix_jcodemunch() {
+  if [[ "$PWD" == /mnt/c/Dev/phoenix* ]]; then
+    export CODE_INDEX_PATH=~/.code-index-phoenix
+  else
+    unset CODE_INDEX_PATH
+  fi
+}
+
+# Call on shell init and on every directory change
+_setup_phoenix_jcodemunch
+chpwd_functions+=(_setup_phoenix_jcodemunch)
+
+# ============================================================
 
 # === ==================== ===
 

@@ -1,25 +1,10 @@
 return {
   -- Colorscheme
   {
-    "catppuccin/nvim",
-    name = "catppuccin",
+    "EdenEast/nightfox.nvim",
     priority = 1000,
-    opts = {
-      flavour = "auto",
-      background = {
-        light = "latte",
-        dark = "mocha",
-      },
-      integrations = {
-        cmp = true,
-        gitsigns = true,
-        nvimtree = true,
-        treesitter = true,
-        mason = true,
-      },
-    },
-    config = function(_, opts)
-      require("catppuccin").setup(opts)
+    config = function()
+      require("nightfox").setup()
 
       local function detect_windows_theme()
         local result = vim.fn.system(
@@ -29,7 +14,7 @@ return {
       end
 
       vim.o.background = detect_windows_theme()
-      vim.cmd.colorscheme("catppuccin")
+      vim.cmd.colorscheme("nightfox")
 
       vim.api.nvim_create_autocmd("FocusGained", {
         callback = function()
@@ -43,7 +28,7 @@ return {
       vim.api.nvim_create_autocmd("OptionSet", {
         pattern = "background",
         callback = function()
-          vim.cmd.colorscheme("catppuccin")
+          vim.cmd.colorscheme("nightfox")
         end,
       })
     end,
@@ -72,7 +57,7 @@ return {
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
       options = {
-        theme = "catppuccin",
+        theme = "nightfox",
         component_separators = { left = "", right = "" },
         section_separators = { left = "", right = "" },
       },
