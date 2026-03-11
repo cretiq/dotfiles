@@ -172,17 +172,23 @@ _show_help() {
   c             launch claude        r        ranger
   cc            --continue           sp       superfile
   cr            --resume             lg       lazygit
-  ccc           claude-scratch       vim      nvim
-  ccca          scratch + analyze    code     vscode
-  cccu          scratch + usage      mw       macrowhisper
-                                     obs      ranger in Obsidian
-  SHELL                              todo     vim Obsidian TODO
+  ch            haiku model          vim      nvim
+  cs            sonnet               code     vscode
+  csh           sonnet high          mw       macrowhisper
+  csm           sonnet max           obs      ranger in Obsidian
+  co            opus                 todo     vim Obsidian TODO
+  coh           opus high
+  com           opus max
+  ccc           claude-scratch
+  ccca          scratch + analyze
+  cccu          scratch + usage
+  SHELL                              WT DASHBOARD
+  ─────────────────────────────      ─────────────────────────────
+  sz            source ~/.zshrc      w        wt -w (live dashboard)
+  ?             this help            cdwt     cd into wt repo
+                                     cwt      wt repo + claude
+  WINDOWS TERMINAL
   ─────────────────────────────
-  sz            source ~/.zshrc     WT DASHBOARD
-  ?             this help           ─────────────────────────────
-                                     w        wt -w (live dashboard)
-  WINDOWS TERMINAL                   cdwt     cd into wt repo
-  ─────────────────────────────      cwt      wt repo + claude
                                     C-S-Up/Down   scroll line
                                     C-S-PgUp/Dn   scroll page
 
@@ -191,11 +197,18 @@ HELP
 alias '?'='_show_help'
 
 # Claude Code aliases
-# c is a function in worktree-nav.zsh: c @phoenix launches claude in worktree
-# cc is a function in worktree-nav.zsh: cc @phoenix launches claude --continue in worktree
+# c is a function in worktree-nav.zsh: c @phoenix launches claude in worktree (always opus --effort max)
+# cc is a function in worktree-nav.zsh: cc @phoenix launches claude --continue in worktree (always opus --effort max)
 alias cr='claude --resume'
+alias ch='claude --model haiku'
+alias cs='claude --model sonnet'
+alias csh='claude --model sonnet --effort high'
+alias csm='claude --model sonnet --effort max'
+alias co='claude --model opus'
+alias coh='claude --model opus --effort high'
+alias com='claude --model opus --effort max'
 alias ccc='cd ~/claude-scratch && claude'
-alias ccca='cd ~/claude-scratch && claude /analysis:analyze-processes'
+alias ccca='cd ~/claude-scratch && claude --model haiku /analysis:analyze-processes'
 alias cccu='cd ~/claude-scratch && claude /usage'
 alias w='wt -w'
 alias cdwt='cd ~/.local/src/wt'

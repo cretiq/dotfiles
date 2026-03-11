@@ -36,9 +36,11 @@ Config: `/mnt/c/Users/FilipM/AppData/Local/Packages/Microsoft.WindowsTerminal_8w
 - **Ctrl+V** kept bound for speech-to-text clipboard paste
 - Unbind pattern: `{ "id": null, "keys": "ctrl+x" }`
 
-## Keyboard Remap Toggle Menu
+## AutoHotkey
 
-Interactive menu: `C:\Users\FilipM\Desktop\Keys\interactive-menu-toggle-remaps.bat` — toggles ESC/CapsLock, Alt+HJKL, per-app HJKL/JKLÖ remaps.
+Script: `C:\Users\FilipM\Desktop\Keys\hotkeys-and-remaps.ahk` — app launcher hotkeys using Ctrl+Alt+Shift+Win combinations. Supports left/right modifier distinction via `<^<#<!<+` (left) / `>^>#>!>+` (right) prefixes.
+
+Related: `C:\Users\FilipM\Desktop\Keys\interactive-menu-toggle-remaps.bat` — toggles ESC/CapsLock, Alt+HJKL, per-app HJKL/JKLÖ remaps.
 
 ## Worktree Navigation (@prefix)
 
@@ -53,6 +55,25 @@ Quick navigation to Phoenix worktrees in `/mnt/c/Dev` (WSL) or `C:\Dev` (Windows
 - PowerShell 5.1: `C:\Users\FilipM\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`
 - PowerShell 7+: `C:\Users\FilipM\Documents\PowerShell\Microsoft.PowerShell_profile.ps1`
 - Zsh: `zsh/worktree-nav.zsh`
+
+## Claude Code Aliases
+
+Defined in `zsh/.zshrc` (lines 199-215) and `zsh/worktree-nav.zsh`:
+
+**Functions (Opus max by default):**
+- `c` — Launch Claude Code (always Opus max)
+- `cc` — `--continue` (always Opus max)
+
+**Model shortcuts:**
+- `cr` — `--resume`
+- `ch` — Haiku | `cs` — Sonnet | `co` — Opus
+- `csh` — Sonnet high | `csm` — Sonnet max
+- `coh` — Opus high | `com` — Opus max
+
+**Scratch workspace:**
+- `ccc` — cd ~/claude-scratch + launch
+- `ccca` — scratch + /analysis:analyze-processes
+- `cccu` — scratch + /usage
 
 ## File Structure
 

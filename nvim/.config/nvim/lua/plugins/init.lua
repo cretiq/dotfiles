@@ -1,36 +1,39 @@
 return {
   -- Colorscheme
   {
-    "EdenEast/nightfox.nvim",
+    "mhartington/oceanic-next",
+    lazy = false,
     priority = 1000,
+  },
+
+  -- Light mode colorscheme
+  {
+    "EdenEast/nightfox.nvim",
+    lazy = false,
+    priority = 999,
+  },
+
+  -- Auto dark mode
+  {
+    "f-person/auto-dark-mode.nvim",
+    lazy = false,
+    priority = 1001,
     config = function()
-      require("nightfox").setup()
+      local auto_dark_mode = require("auto-dark-mode")
 
-      local function detect_windows_theme()
-        local result = vim.fn.system(
-          '/mnt/c/Windows/System32/reg.exe query "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize" /v AppsUseLightTheme'
-        )
-        return result:match("0x1") and "light" or "dark"
-      end
-
-      vim.o.background = detect_windows_theme()
-      vim.cmd.colorscheme("nightfox")
-
-      vim.api.nvim_create_autocmd("FocusGained", {
-        callback = function()
-          local new_bg = detect_windows_theme()
-          if vim.o.background ~= new_bg then
-            vim.o.background = new_bg
-          end
+      auto_dark_mode.setup({
+        update_interval = 1000,
+        set_dark_mode = function()
+          vim.cmd.colorscheme("OceanicNext")
+          vim.o.background = "dark"
+        end,
+        set_light_mode = function()
+          vim.cmd.colorscheme("dayfox")
+          vim.o.background = "light"
         end,
       })
 
-      vim.api.nvim_create_autocmd("OptionSet", {
-        pattern = "background",
-        callback = function()
-          vim.cmd.colorscheme("nightfox")
-        end,
-      })
+      auto_dark_mode.init()
     end,
   },
 
@@ -57,7 +60,7 @@ return {
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
       options = {
-        theme = "nightfox",
+        theme = "auto",
         component_separators = { left = "", right = "" },
         section_separators = { left = "", right = "" },
       },
@@ -146,7 +149,6 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
-    event = { "BufReadPost", "BufNewFile" },
     opts = {
       ensure_installed = {
         "lua", "vim", "vimdoc", "query",
@@ -167,9 +169,6 @@ return {
         },
       },
     },
-    config = function(_, opts)
-      require("nvim-treesitter.configs").setup(opts)
-    end,
   },
 
   -- Mason (package manager for LSP servers)

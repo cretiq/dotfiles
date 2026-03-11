@@ -83,7 +83,10 @@ require("lazy").setup({
   spec = {
     { import = "plugins" },
   },
-  install = { colorscheme = { "catppuccin", "habamax" } },
+  install = {
+    missing = true,
+    colorscheme = { "OceanicNext", "habamax" }
+  },
   checker = { enabled = true, notify = false },
 })
 
