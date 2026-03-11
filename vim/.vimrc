@@ -10,7 +10,7 @@ set ignorecase
 
 call plug#begin('~/.vim/plugged')
 
-Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
+Plug 'nvimdev/oceanic-material'
 
 call plug#end()
 
@@ -31,7 +31,7 @@ set clipboard=unnamed
 set timeoutlen=1000 ttimeoutlen=0
 
 set termguicolors
-lua require("catppuccin").load("latte")
+lua require("oceanic_material").setup() vim.cmd.colorscheme("oceanic_material")
 hi Normal guibg=NONE ctermbg=NONE
 
 " Ghostty config syntax highlighting
