@@ -4,8 +4,36 @@ return {
     "mhartington/oceanic-next",
     lazy = false,
     priority = 1000,
+  },
+
+  -- Light mode colorscheme
+  {
+    "EdenEast/nightfox.nvim",
+    lazy = false,
+    priority = 999,
+  },
+
+  -- Auto dark mode
+  {
+    "f-person/auto-dark-mode.nvim",
+    lazy = false,
+    priority = 1001,
     config = function()
-      vim.cmd.colorscheme("OceanicNext")
+      local auto_dark_mode = require("auto-dark-mode")
+
+      auto_dark_mode.setup({
+        update_interval = 1000,
+        set_dark_mode = function()
+          vim.cmd.colorscheme("OceanicNext")
+          vim.o.background = "dark"
+        end,
+        set_light_mode = function()
+          vim.cmd.colorscheme("dayfox")
+          vim.o.background = "light"
+        end,
+      })
+
+      auto_dark_mode.init()
     end,
   },
 
