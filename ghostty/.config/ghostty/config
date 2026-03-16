@@ -79,7 +79,7 @@ clipboard-paste-bracketed-safe = true
 # ===============================================
 
 # macOS: Treat Option key as Alt for terminal bindings (enables alt+p, etc.)
-macos-option-as-alt = true
+macos-option-as-alt = left
 
 # Tab Navigation
 keybind = cmd+t=new_tab

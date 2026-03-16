@@ -62,7 +62,16 @@ alias config='/usr/bin/git --git-dir=/Users/filipmellqvist/.dotfiles/ --work-tre
 alias c='claude'
 alias cc='claude --continue'
 alias cr='claude --resume'
+alias ch='claude --model haiku'
+alias cs='claude --model sonnet'
+alias csh='claude --model sonnet --effort high'
+alias csm='claude --model sonnet --effort max'
+alias co='claude --model opus'
+alias coh='claude --model opus --effort high'
+alias com='claude --model opus --effort max'
 alias ccc='cd ~/claude-scratch && claude'
+alias ccca='cd ~/claude-scratch && claude --model haiku /analysis:analyze-processes'
+alias cccu='cd ~/claude-scratch && claude /usage'
 
 bindkey '^[[1;5D' backward-word     # Ctrl+Left
 bindkey '^[[1;5C' forward-word      # Ctrl+Right
@@ -145,3 +154,5 @@ export APPLE_SIGNING_IDENTITY="Apple Development: filip_mellqvist@msn.com (6KS7C
 
 # Chrome with remote debugging for DevTools MCP
 alias chrome-debug='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug'
+
+alias vm="node /Users/filipmellqvist/CursorProjects/consoleapps/version-master/dist/vm.mjs"

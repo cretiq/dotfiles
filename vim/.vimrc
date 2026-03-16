@@ -23,7 +23,7 @@ let &t_SI = "\e[6 q"    " Insert mode - vertical line
 let &t_EI = "\e[2 q"    " Normal mode - block
 let &t_SR = "\e[4 q"    " Replace mode - underline
 
-autocmd VimLeave * silent !echo -ne "\e[6 q"
+autocmd VimLeave * silent !echo -ne "\e[2 q"
 
 set guifont=JetBrains\ Mono:h15
 
