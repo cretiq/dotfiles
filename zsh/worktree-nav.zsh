@@ -91,9 +91,9 @@ function c {
     [[ -z "$wt" ]] && { echo "No match: $wt_filter" >&2; return 1; }
 
     local target=$(_wt_path "$wt" "$suffix")
-    builtin cd "$target" && claude --model opus --effort max "${@:2}"
+    builtin cd "$target" && claude --model "opus[1m]" --effort max "${@:2}"
   else
-    claude --model opus --effort max "$@"
+    claude --model "opus[1m]" --effort max "$@"
   fi
 }
 
@@ -112,9 +112,9 @@ function cc {
     [[ -z "$wt" ]] && { echo "No match: $wt_filter" >&2; return 1; }
 
     local target=$(_wt_path "$wt" "$suffix")
-    builtin cd "$target" && claude --continue --model opus --effort max "${@:2}"
+    builtin cd "$target" && claude --continue --model "opus[1m]" --effort max "${@:2}"
   else
-    claude --continue --model opus --effort max "$@"
+    claude --continue --model "opus[1m]" --effort max "$@"
   fi
 }
 

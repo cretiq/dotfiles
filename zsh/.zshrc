@@ -36,7 +36,7 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 # NOTE: PowerShell path causes input lag - use alias with full path instead
 # ============================================================
 WIN_PATHS=(
-  "/mnt/c/Users/FilipM/scoop/shims"                  # glab.exe, other scoop tools
+  "/mnt/c/Users/FilipM/AppData/Local/Programs/glab"   # glab.exe
   "/mnt/c/Users/FilipM/AppData/Local/Programs/Microsoft VS Code"  # code.exe
 )
 export PATH="${(j.:.)WIN_PATHS}:$PATH"
@@ -204,12 +204,13 @@ alias ch='claude --model haiku'
 alias cs='claude --model sonnet'
 alias csh='claude --model sonnet --effort high'
 alias csm='claude --model sonnet --effort max'
-alias co='claude --model opus'
-alias coh='claude --model opus --effort high'
-alias com='claude --model opus --effort max'
+alias co='claude --model "opus[1m]"'
+alias coh='claude --model "opus[1m]" --effort high'
+alias com='claude --model "opus[1m]" --effort max'
 alias ccc='cd ~/claude-scratch && claude'
 alias ccca='cd ~/claude-scratch && claude --model haiku /analysis:analyze-processes'
 alias cccu='cd ~/claude-scratch && claude /usage'
+alias cv='powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Dev\Own\Convey\dev.ps1"'
 alias w='wt -w'
 alias cdwt='cd ~/.local/src/wt'
 alias cwt='cd ~/.local/src/wt && claude'
