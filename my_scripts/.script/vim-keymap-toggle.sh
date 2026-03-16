@@ -13,6 +13,7 @@ CUSTOM_KEYMAP="$KEYMAPS_DIR/custom.vim"
 OBSIDIAN_MANAGER="$HOME/.dotfiles/my_scripts/.script/obsidian-keymap-manager.sh"
 VSCODE_MANAGER="$HOME/.dotfiles/my_scripts/.script/vscode-keymap-manager.sh"
 RANGER_MANAGER="$HOME/.dotfiles/my_scripts/.script/ranger-keymap-manager.sh"
+TREEBOARD_MANAGER="$HOME/.dotfiles/my_scripts/.script/treeboard-keymap-manager.sh"
 
 # Ensure directories exist
 mkdir -p "$VIM_DIR" "$KEYMAPS_DIR"
@@ -29,6 +30,10 @@ get_current_state() {
 # Function to set state
 set_state() {
     echo "$1" > "$STATE_FILE"
+    # Also write to Windows-accessible path for Treeboard (Tauri runs on Windows)
+    local win_dir="/mnt/c/Users/FilipM/.config/treeboard"
+    mkdir -p "$win_dir" 2>/dev/null
+    echo "$1" > "$win_dir/keymap_state" 2>/dev/null
 }
 
 # Function to trigger hot-reload in all running Vim instances
@@ -69,6 +74,11 @@ trigger_vim_reload() {
     if [[ -x "$RANGER_MANAGER" ]]; then
         echo "🔄 Updating Ranger keybindings..."
         "$RANGER_MANAGER" "$state_mode"
+    fi
+
+    # Also update Treeboard if available
+    if [[ -x "$TREEBOARD_MANAGER" ]]; then
+        "$TREEBOARD_MANAGER" "$state_mode"
     fi
 }
 
