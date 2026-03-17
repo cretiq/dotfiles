@@ -76,9 +76,29 @@ _cd_wt() {
   fi
 }
 
+# Least recently active phoenix worktree (from treeboard cache, excludes "phoenix")
+_wt_least_recent() {
+  local cache="$HOME/.cache/treeboard/worktrees.json"
+  [[ -f "$cache" ]] || { echo "$DEV_ROOT/phoenix"; return; }
+  local result
+  result=$(jq -r '.all.data | map(select(.name != "phoenix")) | sort_by(.session.last_activity // "") | .[0].path // empty' "$cache" 2>/dev/null)
+  echo "${result:-$DEV_ROOT/phoenix}"
+}
+
 # Launch Claude in a worktree
 # Usage: c (plain claude) or c @<worktree>[/s|/c] (cd + claude)
+#        c mr <iid>        — review MR in /mnt/c/Dev/phoenix
+#        c jira <key>      — analyze Jira ticket in least recently used worktree
 function c {
+  if [[ "$1" == "mr" && -n "$2" ]]; then
+    builtin cd "$DEV_ROOT/phoenix" && claude --model "opus[1m]" --effort max "/mr:review $2"
+    return
+  fi
+  if [[ "$1" == "jira" && -n "$2" ]]; then
+    local target=$(_wt_least_recent)
+    builtin cd "$target" && claude --model "opus[1m]" --effort max "/analyze-jira $2"
+    return
+  fi
   if [[ "$1" == @* ]]; then
     local input="${1#@}"
     input="${input%/}"

@@ -155,6 +155,12 @@ export PATH="$HOME/.local/bin:$PATH"
 
 alias sz='source ~/.zshrc'
 
+# Run init script when pane opened via wt split-pane
+if [[ -f /tmp/wt-init.zsh ]]; then
+  source /tmp/wt-init.zsh
+  rm -f /tmp/wt-init.zsh
+fi
+
 # Quick reference for custom shortcuts
 _show_help() {
   cat <<'HELP'
@@ -164,8 +170,12 @@ _show_help() {
   cd @<wt>      worktree root       c @<wt>       root + claude
   cd @<wt>/s    server              c @<wt>/s     server + claude
   cd @<wt>/c    client              c @<wt>/c     client + claude
-
   Examples: cd @phoenix/s           c @exp --resume
+
+  CLAUDE QUICK ACTIONS
+  ─────────────────────────────
+  c mr <iid>    review MR in phoenix
+  c jira <key>  analyze ticket in oldest wt
 
   CLAUDE CODE                       APPS & TOOLS
   ─────────────────────────────     ─────────────────────────────
@@ -182,9 +192,9 @@ _show_help() {
   ccc           claude-scratch
   ccca          scratch + analyze
   cccu          scratch + usage
-  SHELL                              WT DASHBOARD
+  SHELL                              WORKTREE DASHBOARD
   ─────────────────────────────      ─────────────────────────────
-  sz            source ~/.zshrc      w        wt -w (live dashboard)
+  sz            source ~/.zshrc      w        worktree -w (live dashboard)
   ?             this help            cdwt     cd into wt repo
                                      cwt      wt repo + claude
   WINDOWS TERMINAL
@@ -211,6 +221,16 @@ alias ccc='cd ~/claude-scratch && claude'
 alias ccca='cd ~/claude-scratch && claude --model haiku /analysis:analyze-processes'
 alias cccu='cd ~/claude-scratch && claude /usage'
 alias cv='powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Dev\Own\Convey\dev.ps1"'
-alias w='wt -w'
+# Windows Terminal CLI wrapper (wt.exe is a UWP alias, invoke via PowerShell)
+wt() {
+  powershell.exe -NoProfile -Command "wt.exe $args"
+}
+
+alias tb='cargo run --manifest-path ~/Dev/treeboard-ratatui/Cargo.toml'
+cmr() { cd /mnt/c/Dev/phoenix && claude --model "opus[1m]" --effort high "/mr:review $1"; }
+alias w='worktree -w'
 alias cdwt='cd ~/.local/src/wt'
 alias cwt='cd ~/.local/src/wt && claude'
+
+# Auto-run init script from treeboard WT pane launch (must be after PATH setup)
+[[ -f /tmp/wt-init.zsh ]] && { source /tmp/wt-init.zsh; rm -f /tmp/wt-init.zsh }
