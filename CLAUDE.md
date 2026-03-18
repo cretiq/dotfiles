@@ -22,6 +22,14 @@ alias config='/usr/bin/git --git-dir=/home/filip/.dotfiles/ --work-tree=/home/fi
 - **Ranger**: File manager with HJKL/JKLÖ keymap integration — `ranger/`
 - **SPF (Superfile)**: File manager — `spf/.spf.toml`
 
+## Zsh Configuration
+
+Local secrets and machine-specific settings go in `~/.zshrc.local` (git-ignored):
+- Jira credentials: `JIRA_API_TOKEN`, `JIRA_EMAIL`
+- Any machine-specific exports
+
+See template in `~/.zshrc.local` (created on first use).
+
 ## Vim Keymap Management
 
 - `vimtoggle`: Toggle between HJKL and JKLÖ keymaps

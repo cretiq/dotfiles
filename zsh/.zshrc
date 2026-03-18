@@ -1,6 +1,9 @@
 export ZSH="$HOME/.oh-my-zsh"
 export EDITOR="nvim"
 
+# Load local secrets/credentials (git-ignored) — JIRA_API_TOKEN, JIRA_EMAIL, etc.
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+
 # Skip compaudit checks (safe for personal systems, saves ~300ms on startup)
 skip_global_compinit=1
 # Disable OMZ auto-update prompt
