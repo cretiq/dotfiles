@@ -177,8 +177,8 @@ _show_help() {
 
   CLAUDE QUICK ACTIONS
   ─────────────────────────────
-  c mr <iid>    review MR in phoenix
-  c jira <key>  analyze ticket in oldest wt
+  cmr <iid>    review MR in phoenix
+  cjira <key>  analyze ticket in oldest wt
 
   CLAUDE CODE                       APPS & TOOLS
   ─────────────────────────────     ─────────────────────────────
@@ -231,6 +231,7 @@ wt() {
 
 alias tb='cargo run --manifest-path ~/Dev/treeboard-ratatui/Cargo.toml'
 cmr() { cd /mnt/c/Dev/phoenix && claude --model "opus[1m]" --effort high "/mr:review $1"; }
+cjira() { cd /mnt/c/Dev/phoenix && claude --model "opus[1m]" --effort high "/jira:analyze $1"; }
 alias w='worktree -w'
 alias cdwt='cd ~/.local/src/wt'
 alias cwt='cd ~/.local/src/wt && claude'
