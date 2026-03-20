@@ -49,7 +49,14 @@ export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
 # Windows tool aliases (use .exe versions for corporate network/services access)
 # NOTE: git.exe removed - causes WSL kernel deadlocks via Plan9 filesystem crossings
-alias dotnet='dotnet.exe'
+# dotnet: use native Linux SDK on ~/Dev paths, dotnet.exe on /mnt/c
+dotnet() {
+  if [[ "$PWD" == /mnt/c/* ]]; then
+    dotnet.exe "$@"
+  else
+    command dotnet "$@"
+  fi
+}
 # glab: function wrapper below handles PowerShell quoting on /mnt/c paths
 alias code='code.exe &'
 alias powershell='/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
@@ -59,47 +66,45 @@ alias cdev='cd /mnt/c/Dev/'
 alias cown='cd /mnt/c/Dev/Own/'
 alias dev='cd ~/Dev/'
 
-# Smart git wrapper: PowerShell on /mnt/c (avoids Plan9 deadlocks), native elsewhere
-# Each arg is wrapped in PS single-quotes so parens, spaces, colons are all literal
+# Smart git wrapper:
+#   /mnt/c/* (except Own): ALL ops via git.exe (avoids Plan9 deadlocks)
+#   ~/Dev/phoenix*:        fully native (port proxy at 127.0.0.1:8888 tunnels to gitlab.rco.local)
+#   everywhere else:       native git
+MINGIT="/mnt/c/Users/FilipM/AppData/Local/MinGit/cmd/git.exe"
+git_via_windows() {
+  "$MINGIT" -C "$(wslpath -w .)" "$@"
+}
 git() {
-  if [[ "$PWD" != /mnt/c/* || "$PWD" == /mnt/c/Dev/Own/* ]]; then
-    command git "$@"
+  # /mnt/c paths (except Own): all commands via git.exe
+  if [[ "$PWD" == /mnt/c/* && "$PWD" != /mnt/c/Dev/Own/* ]]; then
+    git_via_windows "$@"
     return
   fi
-  local win_cwd ps_args=()
-  win_cwd="$(wslpath -w .)"
-  for arg in "$@"; do
-    # Wrap each arg in PS single quotes; escape embedded ' as ''
-    ps_args+=("'${arg//\'/'\''}'")
-  done
-  powershell -Command "\$env:PATH = 'C:\Users\FilipM\AppData\Local\MinGit\cmd;' + \$env:PATH ; cd '${win_cwd}' ; git ${ps_args[*]}"
+  command git "$@"
 }
 
 # glab wrapper for phoenix worktrees
-# WHY PowerShell: WSL can't reach corporate GitLab (Global Secure Access/SASE routes
-#   traffic through Windows network stack only). glab.exe runs via PS to use Windows networking.
-# WHY --repo: glab.exe can't resolve git worktree .git pointer files (produces mixed
-#   WSL/Windows paths like /mnt/c/.../C:/Dev/...). --repo bypasses local git resolution.
-# WHY phoenix* only: other repos (e.g. /mnt/c/Dev/Own) don't need this.
+# Native glab uses port proxy (127.0.0.1:8888 → gitlab.rco.local).
+# --repo needed because worktree .git pointer files confuse repo detection.
+# /mnt/c/ paths still use glab.exe (Windows networking).
 glab() {
-  if [[ "$PWD" != /mnt/c/Dev/phoenix* ]]; then
-    command glab.exe "$@"
+  if [[ "$PWD" == "$HOME/Dev/phoenix"* ]]; then
+    command glab --repo m5/phoenix "$@"
     return
   fi
-  local win_cwd ps_args=()
-  win_cwd="$(wslpath -w .)"
-  for arg in "$@"; do
-    ps_args+=("'${arg//\'/'\''}'")
-  done
-  powershell -Command "cd '${win_cwd}' ; glab.exe --repo m5/phoenix ${ps_args[*]}"
+  if [[ "$PWD" == /mnt/c/Dev/phoenix* ]]; then
+    glab.exe --repo m5/phoenix "$@"
+    return
+  fi
+  command glab "$@"
 }
 
 # ============================================================
 # Phoenix jcodemunch (Claude Code MCP) setup
 # Sets shared index path for all Phoenix worktrees
 # ============================================================
-_setup_phoenix_jcodemunch() {
-  if [[ "$PWD" == /mnt/c/Dev/phoenix* ]]; then
+setup_phoenix_jcodemunch() {
+  if [[ "$PWD" == /mnt/c/Dev/phoenix* || "$PWD" == "$HOME/Dev/phoenix"* ]]; then
     export CODE_INDEX_PATH=~/.code-index-phoenix
   else
     unset CODE_INDEX_PATH
@@ -107,8 +112,8 @@ _setup_phoenix_jcodemunch() {
 }
 
 # Call on shell init and on every directory change
-_setup_phoenix_jcodemunch
-chpwd_functions+=(_setup_phoenix_jcodemunch)
+setup_phoenix_jcodemunch
+chpwd_functions+=(setup_phoenix_jcodemunch)
 
 # ============================================================
 
@@ -140,6 +145,10 @@ spf() {
 }
 
 
+# dotnet (native Linux SDK — used on ~/Dev/* paths)
+export DOTNET_ROOT="$HOME/.dotnet"
+export PATH="$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools"
+
 # fnm (Fast Node Manager)
 export PATH="$HOME/.local/share/fnm:$PATH"
 eval "$(fnm env --use-on-cd --log-level quiet --shell zsh)"
@@ -158,11 +167,6 @@ export PATH="$HOME/.local/bin:$PATH"
 
 alias sz='source ~/.zshrc'
 
-# Run init script when pane opened via wt split-pane
-if [[ -f /tmp/wt-init.zsh ]]; then
-  source /tmp/wt-init.zsh
-  rm -f /tmp/wt-init.zsh
-fi
 
 # Quick reference for custom shortcuts
 _show_help() {
@@ -200,6 +204,11 @@ _show_help() {
   sz            source ~/.zshrc      w        worktree -w (live dashboard)
   ?             this help            cdwt     cd into wt repo
                                      cwt      wt repo + claude
+
+  SYSTEM MAINTAINANCE
+  ─────────────────────────────
+  disable-alt-shift   disable Alt+Shift language switch
+
   WINDOWS TERMINAL
   ─────────────────────────────
                                     C-S-Up/Down   scroll line
@@ -221,7 +230,7 @@ alias co='claude --model "opus[1m]"'
 alias coh='claude --model "opus[1m]" --effort high'
 alias com='claude --model "opus[1m]" --effort max'
 alias ccc='cd ~/claude-scratch && claude'
-alias ccca='cd ~/claude-scratch && claude --model haiku /analysis:analyze-processes'
+alias ccca='cd ~/claude-scratch && claude --model haiku /analysis:processes'
 alias cccu='cd ~/claude-scratch && claude /usage'
 alias cv='powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Dev\Own\Convey\dev.ps1"'
 # Windows Terminal CLI wrapper (wt.exe is a UWP alias, invoke via PowerShell)
@@ -236,5 +245,17 @@ alias w='worktree -w'
 alias cdwt='cd ~/.local/src/wt'
 alias cwt='cd ~/.local/src/wt && claude'
 
+# System utilities
+disable-alt-shift() {
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Dev\Own\scripts\disable-alt-shift-lang.ps1"
+}
+
 # Auto-run init script from treeboard WT pane launch (must be after PATH setup)
 [[ -f /tmp/wt-init.zsh ]] && { source /tmp/wt-init.zsh; rm -f /tmp/wt-init.zsh }
+
+# fnm
+FNM_PATH="/home/filip/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="$FNM_PATH:$PATH"
+  eval "$(fnm env --shell zsh)"
+fi

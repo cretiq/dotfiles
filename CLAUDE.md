@@ -48,7 +48,7 @@ Config: `/mnt/c/Users/FilipM/AppData/Local/Packages/Microsoft.WindowsTerminal_8w
 
 Script: `C:\Users\FilipM\Desktop\Keys\hotkeys-and-remaps.ahk` — app launcher hotkeys using Ctrl+Alt+Shift+Win combinations. Supports left/right modifier distinction via `<^<#<!<+` (left) / `>^>#>!>+` (right) prefixes.
 
-Related: `C:\Users\FilipM\Desktop\Keys\interactive-menu-toggle-remaps.bat` — toggles ESC/CapsLock, Alt+HJKL, per-app HJKL/JKLÖ remaps.
+Related: `C:\Users\FilipM\Desktop\Keys\interactive-menu-toggle-remaps.bat` — toggles ESC/CapsLock, Alt+HJKL, per-app HJKL/JKLÖ remaps, and Window Switcher mode (Voyager/Standard).
 
 ## Worktree Navigation (@prefix)
 

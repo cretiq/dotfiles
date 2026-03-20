@@ -1,38 +1,32 @@
 # Worktree navigation with @ prefix
-# Usage: cd @<worktree> (root) or cd @<worktree>/s (server) or cd @<worktree>/c (client)
+# Usage: cd @<worktree> (root), @<worktree>/s (server), @<worktree>/c (client)
+#        cd @<worktree>/ss (server + start), @<worktree>/cc (client + start)
 # Performance: No scanning on load - only scans when Tab pressed or cd @ executed
 
-DEV_ROOT="/mnt/c/Dev"
+# Two roots: native WSL (primary) and legacy Windows (fallback)
+PHOENIX_ROOT="$HOME/Dev/phoenix"
+LEGACY_ROOT="/mnt/c/Dev"
 
 # Get worktrees - only called on demand
+# Native: ~/Dev/phoenix/p1, p2, ...
+# Legacy: /mnt/c/Dev/phoenix, phoenix-second, ...
 _wt_list() {
-  for dir in "$DEV_ROOT"/*/; do
+  # Native worktrees only (p1, p2, ...)
+  for dir in "$PHOENIX_ROOT"/*/; do
     [[ -d "$dir" ]] || continue
     local name=${dir%/}; name=${name##*/}
-    # Must have .git AND Phoenix server path (flat or nested)
-    [[ -e "$dir/.git" ]] || continue
-    [[ -d "$dir/server/Phoenix" || -d "$dir/Phoenix/server/Phoenix" ]] && echo "$name"
+    [[ -e "$dir/.git" && -d "$dir/server/Phoenix" ]] && echo "$name"
   done
 }
 
-# Resolve path - called on cd execution
-# $2: s=server, c=client, empty=root
+# Resolve path
 _wt_path() {
-  local base="$DEV_ROOT/$1"
-
-  if [[ -d "$base/server/Phoenix" ]]; then
-    case "$2" in
-      s) echo "$base/server/Phoenix" ;;
-      c) echo "$base/client/phoenix-client" ;;
-      *) echo "$base" ;;
-    esac
-  else
-    case "$2" in
-      s) echo "$base/Phoenix/server/Phoenix" ;;
-      c) echo "$base/Phoenix/client/phoenix-client" ;;
-      *) echo "$base/Phoenix" ;;
-    esac
-  fi
+  local name="$1" sub="$2"
+  case "$sub" in
+    s) echo "$PHOENIX_ROOT/$name/server/Phoenix" ;;
+    c) echo "$PHOENIX_ROOT/$name/client/phoenix-client" ;;
+    *) echo "$PHOENIX_ROOT/$name" ;;
+  esac
 }
 
 # Override cd - minimal overhead for non-@ paths
@@ -51,7 +45,9 @@ function cd {
 
     case "$suffix" in
       s|c|"") builtin cd "$(_wt_path "$wt" "$suffix")" ;;
-      *) echo "Usage: cd @<worktree>[/s|/c]" >&2; return 1 ;;
+      ss) builtin cd "$(_wt_path "$wt" s)" && dotnet run ;;
+      cc) builtin cd "$(_wt_path "$wt" c)" && CAROOT=~/.vite-plugin-mkcert TRUST_STORES=none npx vite --host ;;
+      *) echo "Usage: cd @<worktree>[/s|/c|/ss|/cc]" >&2; return 1 ;;
     esac
   else
     builtin cd "$@"
@@ -65,7 +61,7 @@ _cd_wt() {
     local wt_part="${cur#@}"; wt_part="${wt_part%%/*}"
     local wt=$(_wt_list | grep -i "$wt_part" | head -1)
     wt=${wt:-$wt_part}
-    compadd -Q -S '' "@$wt" "@$wt/s" "@$wt/c"
+    compadd -Q -S '' "@$wt" "@$wt/s" "@$wt/c" "@$wt/ss" "@$wt/cc"
   elif [[ "$cur" == @* ]]; then
     local filter="${cur#@}"
     for wt in $(_wt_list); do
@@ -76,22 +72,22 @@ _cd_wt() {
   fi
 }
 
-# Least recently active phoenix worktree (from treeboard cache, excludes "phoenix")
+# Least recently active phoenix worktree (from treeboard cache)
 _wt_least_recent() {
   local cache="$HOME/.cache/treeboard/worktrees.json"
-  [[ -f "$cache" ]] || { echo "$DEV_ROOT/phoenix"; return; }
+  [[ -f "$cache" ]] || { echo "$PHOENIX_ROOT/p1"; return; }
   local result
   result=$(jq -r '.all.data | map(select(.name != "phoenix")) | sort_by(.session.last_activity // "") | .[0].path // empty' "$cache" 2>/dev/null)
-  echo "${result:-$DEV_ROOT/phoenix}"
+  echo "${result:-$PHOENIX_ROOT/p1}"
 }
 
 # Launch Claude in a worktree
 # Usage: c (plain claude) or c @<worktree>[/s|/c] (cd + claude)
-#        c mr <iid>        — review MR in /mnt/c/Dev/phoenix
+#        c mr <iid>        — review MR in p1
 #        c jira <key>      — analyze Jira ticket in least recently used worktree
 function c {
   if [[ "$1" == "mr" && -n "$2" ]]; then
-    builtin cd "$DEV_ROOT/phoenix" && claude --model "opus[1m]" --effort max "/mr:review $2"
+    builtin cd "$PHOENIX_ROOT/p1" && claude --model "opus[1m]" --effort max "/mr:review $2"
     return
   fi
   if [[ "$1" == "jira" && -n "$2" ]]; then
@@ -118,7 +114,6 @@ function c {
 }
 
 # Continue Claude in a worktree
-# Usage: cc (plain claude --continue) or cc @<worktree>[/s|/c] (cd + claude --continue)
 function cc {
   if [[ "$1" == @* ]]; then
     local input="${1#@}"
