@@ -121,23 +121,58 @@ npx() {
 # bun completions
 [ -s "/Users/filipmellqvist/.bun/_bun" ] && source "/Users/filipmellqvist/.bun/_bun"
 
-# Ghostty Tab Title Helper - Global Function
-tt() {
-    if [ $# -eq 0 ]; then
-        # Auto-generate based on current directory and git branch
-        local dir_name=$(basename "$(pwd)")
-        local branch=""
-        if git rev-parse --git-dir > /dev/null 2>&1; then
-            branch=" ($(git branch --show-current 2>/dev/null))"
-        fi
-        local title="${dir_name}${branch}"
-        printf "\033]0;%s\007" "$title"
-        echo "Auto-set tab title: $title"
-    else
-        printf "\033]0;%s\007" "$*"
-        echo "Tab title: $*"
+# Auto-set Ghostty tab title: repo name + Claude session name (if active)
+_ghostty_tab_title() {
+  # 1. Determine base name (git repo or abbreviated path)
+  local title="" dir="$PWD"
+  while [[ "$dir" != "/" ]]; do
+    if [[ -d "$dir/.git" ]]; then
+      title="${dir##*/}"
+      break
     fi
+    dir="${dir:h}"
+  done
+  [[ -z "$title" ]] && title="${PWD/#$HOME/~}"
+
+  # 2. Check for active Claude Code session in this terminal
+  local session_name=""
+  local session_dir="$HOME/.claude/sessions"
+  if [[ -d "$session_dir" ]]; then
+    local pid_file child_pid session_id cache_file
+    for pid_file in "$session_dir"/*.json(N); do
+      child_pid="${pid_file:t:r}"
+      # Check if this process is a child of our shell
+      if [[ "$(ps -p "$child_pid" -o ppid= 2>/dev/null | tr -d ' ')" == "$$" ]]; then
+        session_id=$(command grep -o '"sessionId":"[^"]*"' "$pid_file" 2>/dev/null | cut -d'"' -f4)
+        if [[ -n "$session_id" ]]; then
+          cache_file="$HOME/.claude/cache/sn-${session_id}.txt"
+          [[ -f "$cache_file" ]] && session_name=$(<"$cache_file")
+        fi
+        break
+      fi
+    done
+  fi
+
+  # 3. Set title: "path/repo | session" or just "path/repo"
+  local cwd="${PWD/#$HOME/~}"
+  if [[ -n "$session_name" ]]; then
+    printf "\033]0;%s\007" "$cwd | $session_name"
+  else
+    printf "\033]0;%s\007" "$cwd"
+  fi
 }
+
+# Manual override: tt "custom title" (or tt to reset to auto)
+tt() {
+  if [ $# -eq 0 ]; then
+    _ghostty_tab_title
+  else
+    printf "\033]0;%s\007" "$*"
+  fi
+}
+
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _ghostty_tab_title
 
 # pnpm
 export PNPM_HOME="/Users/filipmellqvist/Library/pnpm"
@@ -156,3 +191,29 @@ export APPLE_SIGNING_IDENTITY="Apple Development: filip_mellqvist@msn.com (6KS7C
 alias chrome-debug='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug'
 
 alias vm="node /Users/filipmellqvist/CursorProjects/consoleapps/version-master/dist/vm.mjs"
+
+# cd @<tab> to jump to CursorProjects repos (flat lookup across all groups)
+cd() {
+  if [[ "$1" == @* ]]; then
+    local name="${1#@}"
+    local match=$(find "$HOME/CursorProjects" -mindepth 2 -maxdepth 2 -type d -name "$name" | head -1)
+    if [[ -n "$match" ]]; then
+      builtin cd "$match"
+    else
+      echo "No project found: $name" >&2
+      return 1
+    fi
+  else
+    builtin cd "$@"
+  fi
+}
+_cd_at() {
+  if [[ "${words[CURRENT]}" == @* ]]; then
+    local -a repos
+    repos=(${$(find "$HOME/CursorProjects" -mindepth 2 -maxdepth 2 -type d -not -name node_modules -not -name .git 2>/dev/null):t})
+    compadd -P "@" -- ${repos}
+  else
+    _cd "$@"
+  fi
+}
+compdef _cd_at cd

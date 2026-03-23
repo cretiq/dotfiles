@@ -37,6 +37,12 @@ unfocused-split-opacity = 0.9
 unfocused-split-fill = 363636
 split-divider-color = 6272a4
 
+# Let zsh control tab titles (disable Ghostty's default title management)
+shell-integration-features = no-title
+
+# Stay on stable release channel (tip builds cause memory leaks)
+auto-update-channel = stable
+
 # Mouse behavior
 mouse-hide-while-typing = false
 
@@ -79,7 +85,7 @@ clipboard-paste-bracketed-safe = true
 # ===============================================
 
 # macOS: Treat Option key as Alt for terminal bindings (enables alt+p, etc.)
-macos-option-as-alt = left
+macos-option-as-alt = right
 
 # Tab Navigation
 keybind = cmd+t=new_tab
@@ -88,6 +94,8 @@ keybind = cmd+ctrl+opt+shift+h=previous_tab
 keybind = cmd+opt+w=close_surface
 keybind = cmd+shift+w=close_surface
 keybind = cmd+shift+r=prompt_surface_title
+keybind = cmd+shift+t=prompt_tab_title
+keybind = cmd+p=toggle_command_palette
 keybind = f4=ignore
 
 
