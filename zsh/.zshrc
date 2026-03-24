@@ -22,9 +22,9 @@ alias vim='nvim'
 alias v='nvim'
 alias r='ranger'
 
-alias obs='ranger /mnt/c/Users/FilipM/Documents/Obsidian/RCO'
+alias obs='ranger ~/Documents/Obsidian/RCO'
 
-alias todo='vim /mnt/c/Users/FilipM/Documents/Obsidian/RCO/TODO.md'
+alias todo='vim ~/Documents/Obsidian/RCO/TODO.md'
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
@@ -33,67 +33,15 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 # openjdk (macOS only, harmless on WSL2)
 # export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
 
-# ============================================================
-# WINDOWS INTEROP (appendWindowsPath=false in wsl.conf)
-# Only explicitly listed paths are available from WSL
-# NOTE: PowerShell path causes input lag - use alias with full path instead
-# ============================================================
-WIN_PATHS=(
-  "/mnt/c/Users/FilipM/AppData/Local/Programs/glab"   # glab.exe
-  "/mnt/c/Users/FilipM/AppData/Local/Programs/Microsoft VS Code"  # code.exe
-)
-export PATH="${(j.:.)WIN_PATHS}:$PATH"
-
-# Ensure Linux-native binaries take priority (prevents WSL/Plan9 deadlocks)
-export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
-
-# Windows tool aliases (use .exe versions for corporate network/services access)
-# NOTE: git.exe removed - causes WSL kernel deadlocks via Plan9 filesystem crossings
-# dotnet: use native Linux SDK on ~/Dev paths, dotnet.exe on /mnt/c
-dotnet() {
-  if [[ "$PWD" == /mnt/c/* ]]; then
-    dotnet.exe "$@"
-  else
-    command dotnet "$@"
-  fi
-}
-# glab: function wrapper below handles PowerShell quoting on /mnt/c paths
+# VS Code (Windows GUI app — needs .exe)
 alias code='code.exe &'
-alias powershell='/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
-alias powershell.exe='/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
-
-alias cdev='cd /mnt/c/Dev/'
-alias cown='cd /mnt/c/Dev/Own/'
 alias dev='cd ~/Dev/'
 
-# Smart git wrapper:
-#   /mnt/c/* (except Own): ALL ops via git.exe (avoids Plan9 deadlocks)
-#   ~/Dev/phoenix*:        fully native (port proxy at 127.0.0.1:8888 tunnels to gitlab.rco.local)
-#   everywhere else:       native git
-MINGIT="/mnt/c/Users/FilipM/AppData/Local/MinGit/cmd/git.exe"
-git_via_windows() {
-  "$MINGIT" -C "$(wslpath -w .)" "$@"
-}
-git() {
-  # /mnt/c paths (except Own): all commands via git.exe
-  if [[ "$PWD" == /mnt/c/* && "$PWD" != /mnt/c/Dev/Own/* ]]; then
-    git_via_windows "$@"
-    return
-  fi
-  command git "$@"
-}
-
 # glab wrapper for phoenix worktrees
-# Native glab uses port proxy (127.0.0.1:8888 → gitlab.rco.local).
 # --repo needed because worktree .git pointer files confuse repo detection.
-# /mnt/c/ paths still use glab.exe (Windows networking).
 glab() {
   if [[ "$PWD" == "$HOME/Dev/phoenix"* ]]; then
     command glab --repo m5/phoenix "$@"
-    return
-  fi
-  if [[ "$PWD" == /mnt/c/Dev/phoenix* ]]; then
-    glab.exe --repo m5/phoenix "$@"
     return
   fi
   command glab "$@"
@@ -104,7 +52,7 @@ glab() {
 # Sets shared index path for all Phoenix worktrees
 # ============================================================
 setup_phoenix_jcodemunch() {
-  if [[ "$PWD" == /mnt/c/Dev/phoenix* || "$PWD" == "$HOME/Dev/phoenix"* ]]; then
+  if [[ "$PWD" == "$HOME/Dev/phoenix"* ]]; then
     export CODE_INDEX_PATH=~/.code-index-phoenix
   else
     unset CODE_INDEX_PATH
@@ -128,6 +76,7 @@ source $ZSH/oh-my-zsh.sh
 
 # Worktree navigation: cd @<worktree>/s or /c (after OMZ so compdef is available)
 source "$HOME/.dotfiles/zsh/worktree-nav.zsh"
+source "$HOME/.dotfiles/zsh/phoenix-wsl.zsh"
 
 alias lg='lazygit'
 # alias config='/usr/bin/git --git-dir=/Users/filipmellqvist/.dotfiles/ --work-tree=/Users/filipmellqvist' # Disabled on WSL2
@@ -181,8 +130,8 @@ _show_help() {
 
   CLAUDE QUICK ACTIONS
   ─────────────────────────────
-  cmr <iid>    review MR in phoenix
-  cjira <key>  analyze ticket in oldest wt
+  c mr <iid>   review MR in p1
+  c jira <key>  analyze ticket in oldest wt
 
   CLAUDE CODE                       APPS & TOOLS
   ─────────────────────────────     ─────────────────────────────
@@ -204,6 +153,12 @@ _show_help() {
   sz            source ~/.zshrc      w        worktree -w (live dashboard)
   ?             this help            cdwt     cd into wt repo
                                      cwt      wt repo + claude
+
+  PHOENIX WSL
+  ─────────────────────────────
+  pwsl            apply WSL overrides + verify
+  pwsl-check      verify only
+  pwsl-save       save golden copies from current wt
 
   SYSTEM MAINTAINANCE
   ─────────────────────────────
@@ -232,22 +187,19 @@ alias com='claude --model "opus[1m]" --effort max'
 alias ccc='cd ~/claude-scratch && claude'
 alias ccca='cd ~/claude-scratch && claude --model haiku /analysis:processes'
 alias cccu='cd ~/claude-scratch && claude /usage'
-alias cv='powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Dev\Own\Convey\dev.ps1"'
 # Windows Terminal CLI wrapper (wt.exe is a UWP alias, invoke via PowerShell)
 wt() {
   powershell.exe -NoProfile -Command "wt.exe $args"
 }
 
 alias tb='cargo run --manifest-path ~/Dev/treeboard-ratatui/Cargo.toml'
-cmr() { cd /mnt/c/Dev/phoenix && claude --model "opus[1m]" --effort high "/mr:review $1"; }
-cjira() { cd /mnt/c/Dev/phoenix && claude --model "opus[1m]" --effort high "/jira:analyze $1"; }
 alias w='worktree -w'
 alias cdwt='cd ~/.local/src/wt'
 alias cwt='cd ~/.local/src/wt && claude'
 
 # System utilities
 disable-alt-shift() {
-  powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Dev\Own\scripts\disable-alt-shift-lang.ps1"
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File 'C:\Dev\Own\scripts\disable-alt-shift-lang.ps1'
 }
 
 # Auto-run init script from treeboard WT pane launch (must be after PATH setup)

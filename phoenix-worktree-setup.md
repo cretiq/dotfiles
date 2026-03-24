@@ -5,20 +5,19 @@ Scaffold my Phoenix development environment with git worktrees and shared Claude
 ## 1. Clone the main repo
 
 ```bash
-cd /mnt/c/Dev
+cd ~/Dev
 git clone http://gitlab.rco.local/m5/phoenix.git phoenix
 ```
 
 ## 2. Create worktrees
 
-From inside the main repo, create worktrees at the same directory level:
+From inside the main repo, create worktrees as subdirectories:
 
 ```bash
-cd /mnt/c/Dev/phoenix
-git worktree add ../phoenix-main main
-git worktree add ../phoenix-second -b second
-git worktree add ../phoenix-third -b third
-git worktree add ../phoenix-fourth -b fourth
+cd ~/Dev/phoenix
+git worktree add p1 main
+git worktree add p2 -b second
+git worktree add p3 -b third
 ```
 
 Adjust branch names as needed — these are just slots for parallel work.
@@ -38,35 +37,31 @@ This repo contains:
 
 ## 4. Symlink .claude into every worktree
 
-Each worktree (and the main repo) needs a `.claude` symlink pointing to the shared config:
+Each worktree needs a `.claude` symlink pointing to the shared config:
 
 ```bash
-ln -s /home/filip/.claude_phoenix /mnt/c/Dev/phoenix/.claude
-ln -s /home/filip/.claude_phoenix /mnt/c/Dev/phoenix-main/.claude
-ln -s /home/filip/.claude_phoenix /mnt/c/Dev/phoenix-second/.claude
-ln -s /home/filip/.claude_phoenix /mnt/c/Dev/phoenix-third/.claude
-ln -s /home/filip/.claude_phoenix /mnt/c/Dev/phoenix-fourth/.claude
+ln -sf ~/.claude_phoenix ~/Dev/phoenix/p1/.claude
+ln -sf ~/.claude_phoenix ~/Dev/phoenix/p2/.claude
+ln -sf ~/.claude_phoenix ~/Dev/phoenix/p3/.claude
 ```
 
 **Why symlinks?** All worktrees share the same Claude Code config — one place to update CLAUDE.md, permissions, commands, and skills.
-
-**Important:** The symlink target is a WSL path (`/home/...`), not a Windows path. This works because Claude Code runs inside WSL.
 
 ## 5. Verify
 
 ```bash
 # Check worktrees
-cd /mnt/c/Dev/phoenix && git worktree list
+cd ~/Dev/phoenix && git worktree list
 
 # Check symlinks
-ls -la /mnt/c/Dev/phoenix*/.claude
+ls -la ~/Dev/phoenix/p*/.claude
 
 # Each should show: .claude -> /home/filip/.claude_phoenix
 ```
 
 ## Notes
 
-- The main repo at `/mnt/c/Dev/phoenix/` has the full `.git/` directory; worktrees have `.git` files pointing back to it
+- The main repo at `~/Dev/phoenix/` has the full `.git/` directory; worktrees have `.git` files pointing back to it
 - All worktrees share git objects — disk efficient
 - Adjust username in symlink paths for the new machine
 - The `.claude_phoenix` repo is independent of the Phoenix repo — update and push it separately

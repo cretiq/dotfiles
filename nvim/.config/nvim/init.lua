@@ -19,9 +19,6 @@ vim.opt.rtp:prepend(lazypath)
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
--- Git executable (for Fugitive on WSL)
-vim.g.fugitive_git_executable = "git.exe"
-
 -- Fugitive worktree support
 vim.g.fugitive_force_bash_on_windows = 1
 

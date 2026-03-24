@@ -3,13 +3,9 @@
 #        cd @<worktree>/ss (server + start), @<worktree>/cc (client + start)
 # Performance: No scanning on load - only scans when Tab pressed or cd @ executed
 
-# Two roots: native WSL (primary) and legacy Windows (fallback)
 PHOENIX_ROOT="$HOME/Dev/phoenix"
-LEGACY_ROOT="/mnt/c/Dev"
 
-# Get worktrees - only called on demand
-# Native: ~/Dev/phoenix/p1, p2, ...
-# Legacy: /mnt/c/Dev/phoenix, phoenix-second, ...
+# Get worktrees - only called on demand (p1, p2, ...)
 _wt_list() {
   # Native worktrees only (p1, p2, ...)
   for dir in "$PHOENIX_ROOT"/*/; do

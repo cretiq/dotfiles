@@ -1,0 +1,7 @@
+#!/bin/bash
+# Auto-restore Phoenix WSL overrides after git operations that reset assume-unchanged.
+# Installed as: post-checkout, post-rewrite, post-merge (via pwsl-install-hooks).
+[[ -f /proc/version ]] && grep -qi microsoft /proc/version 2>/dev/null || exit 0
+[[ -d "server/Phoenix" && -d "client/phoenix-client" ]] || exit 0
+echo "pwsl: restoring WSL overrides..."
+zsh -c 'source ~/.dotfiles/zsh/phoenix-wsl.zsh && pwsl "$PWD" > /dev/null 2>&1'
