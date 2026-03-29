@@ -59,19 +59,15 @@ source $ZSH/oh-my-zsh.sh
 alias config='/usr/bin/git --git-dir=/Users/filipmellqvist/.dotfiles/ --work-tree=/Users/filipmellqvist'
 
 # Claude Code aliases
-alias c='claude'
-alias cc='claude --continue'
-alias cr='claude --resume'
-alias ch='claude --model haiku'
-alias cs='claude --model sonnet'
-alias csh='claude --model sonnet --effort high'
-alias csm='claude --model sonnet --effort max'
-alias co='claude --model opus'
-alias coh='claude --model opus --effort high'
-alias com='claude --model opus --effort max'
-alias ccc='cd ~/claude-scratch && claude'
-alias ccca='cd ~/claude-scratch && claude --model haiku /analysis:analyze-processes'
-alias cccu='cd ~/claude-scratch && claude /usage'
+alias c='claude --effort max'
+alias cc='claude --continue --effort max'
+alias cr='claude --resume --effort max'
+alias ch='claude --model haiku --effort max'
+alias cs='claude --model sonnet --effort max'
+alias co='claude --model opus --effort max'
+alias ccc='cd ~/claude-scratch && claude --effort max'
+alias ccca='cd ~/claude-scratch && claude --model haiku --effort max /analysis:analyze-processes'
+alias cccu='cd ~/claude-scratch && claude --effort max /usage'
 
 bindkey '^[[1;5D' backward-word     # Ctrl+Left
 bindkey '^[[1;5C' forward-word      # Ctrl+Right
