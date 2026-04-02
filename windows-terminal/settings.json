@@ -225,7 +225,7 @@
                 {
                     "builtinGlyphs": true,
                     "colorGlyphs": true,
-                    "face": "JetBrains Mono",
+                    "face": "JetBrainsMono Nerd Font",
                     "size": 10
                 },
                 "guid": "{63d5e97e-570b-4e52-be30-6c9eb4b9e06d}",
@@ -243,7 +243,7 @@
                 "cursorShape": "filledBox",
                 "font": 
                 {
-                    "face": "JetBrains Mono",
+                    "face": "JetBrainsMono Nerd Font",
                     "size": 10
                 },
                 "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
@@ -255,7 +255,7 @@
                 "commandline": "%SystemRoot%\\System32\\cmd.exe",
                 "font": 
                 {
-                    "face": "JetBrains Mono",
+                    "face": "JetBrainsMono Nerd Font",
                     "size": 10
                 },
                 "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
@@ -271,7 +271,7 @@
                 {
                     "builtinGlyphs": true,
                     "colorGlyphs": true,
-                    "face": "JetBrains Mono",
+                    "face": "JetBrainsMono Nerd Font",
                     "size": 10
                 },
                 "guid": "{d63cd39d-714d-4c4b-8117-bcb95e8286e3}",

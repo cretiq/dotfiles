@@ -2,8 +2,8 @@
 # Ensures per-worktree ports, PFX cert, SQL rewrite, vite proxy are correct for WSL2.
 #
 # Port scheme (N = trailing digit of worktree dir name, default 1):
-#   Backend (Kestrel):  500N   (via settings.Development.json)
-#   Vite proxy target:  500N   (via BACKEND_PORT in .env → vite.config.ts reads it)
+#   Backend (Kestrel):  501N   (via settings.Development.json)
+#   Vite proxy target:  501N   (via BACKEND_PORT in .env → vite.config.ts reads it)
 #   Vite dev server:    517N   (via VITE_PORT in .env → vite.config.ts reads it)
 #   gRPC:               5320   (shared, not per-worktree)
 #
@@ -71,15 +71,15 @@ _pwsl_verify() {
   local c="$root/server/Phoenix/ConnectionManager.cs"
   local envfile="$root/client/phoenix-client/.env"
 
-  echo "  worktree number: $n (backend=500$n, vite=517$n)"
+  echo "  worktree number: $n (backend=501$n, vite=517$n)"
   echo ""
 
   # --- Backend port in settings.Development.json ---
-  if grep -q "\"Url\": \"https://\*:500${n}\"" "$s" 2>/dev/null; then
-    echo "  OK   backend port 500$n"
+  if grep -q "\"Url\": \"https://\*:501${n}\"" "$s" 2>/dev/null; then
+    echo "  OK   backend port 501$n"
   else
     local actual=$(grep -o '"Url": "https://\*:[0-9]*"' "$s" 2>/dev/null)
-    echo "  FAIL backend port is NOT 500$n (found: $actual)"
+    echo "  FAIL backend port is NOT 501$n (found: $actual)"
     ((fails++))
   fi
 
@@ -100,10 +100,10 @@ _pwsl_verify() {
   fi
 
   # --- .env port vars ---
-  if grep -q "^BACKEND_PORT=500${n}$" "$envfile" 2>/dev/null; then
-    echo "  OK   .env BACKEND_PORT=500$n"
+  if grep -q "^BACKEND_PORT=501${n}$" "$envfile" 2>/dev/null; then
+    echo "  OK   .env BACKEND_PORT=501$n"
   else
-    echo "  FAIL .env BACKEND_PORT is NOT 500$n"
+    echo "  FAIL .env BACKEND_PORT is NOT 501$n"
     ((fails++))
   fi
 
@@ -186,12 +186,12 @@ pwsl() {
 
   # Patch backend port in settings.Development.json (only file with hardcoded port)
   local s="$root/server/Phoenix/settings.Development.json"
-  sed -i "s|https://\*:500[0-9]|https://*:500${n}|" "$s"
+  sed -i "s|https://\*:501[0-9]|https://*:501${n}|" "$s"
 
   # Write port vars to .env (creates if missing, preserves existing E2E vars)
   local envfile="$root/client/phoenix-client/.env"
   _pwsl_set_env "$envfile" "VITE_PORT" "517${n}"
-  _pwsl_set_env "$envfile" "BACKEND_PORT" "500${n}"
+  _pwsl_set_env "$envfile" "BACKEND_PORT" "501${n}"
 
   # Set assume-unchanged
   for f in "${_PWSL_FILES[@]}"; do
@@ -235,7 +235,11 @@ _pwsl_auto_check() {
   local root
   root="$(_pwsl_find_root)" || { _PWSL_CHECKING=0; return; }
   local n="$(_pwsl_wt_number "$root")"
-  grep -q "500${n}" "$root/server/Phoenix/settings.Development.json" 2>/dev/null && return
+  local envfile="$root/client/phoenix-client/.env"
+  grep -q "501${n}" "$root/server/Phoenix/settings.Development.json" 2>/dev/null \
+    && grep -q "^VITE_PORT=517${n}$" "$envfile" 2>/dev/null \
+    && grep -q "^BACKEND_PORT=501${n}$" "$envfile" 2>/dev/null \
+    && { _PWSL_CHECKING=0; return; }
   echo "pwsl: auto-fixing WSL overrides for $(basename "$root")..."
   pwsl "$root" > /dev/null 2>&1
   _PWSL_CHECKING=0
@@ -258,15 +262,15 @@ pwsl-install-hooks() {
 }
 
 # Save current worktree files as new golden copies
-# Golden copies use base port 5001 in settings.Development.json.
+# Golden copies use base port 5011 in settings.Development.json.
 # vite.config.ts golden copy has NO hardcoded ports (uses loadEnv).
 pwsl-save() {
   local root
   root="$(_pwsl_find_root "${1:-}")" || { echo "ERROR: not in a Phoenix worktree."; return 1; }
 
   local s="$root/server/Phoenix/settings.Development.json"
-  if ! grep -q ':500[0-9]' "$s" 2>/dev/null; then
-    echo "ERROR: settings.Development.json does NOT have WSL port (500x) — refusing to save."
+  if ! grep -q ':501[0-9]' "$s" 2>/dev/null; then
+    echo "ERROR: settings.Development.json does NOT have WSL port (501x) — refusing to save."
     return 1
   fi
 
@@ -277,8 +281,8 @@ pwsl-save() {
 
   # Normalize settings.Development.json to base port 5001
   local gs="$_PWSL_OVERRIDES/settings.Development.json"
-  sed -i 's|https://\*:500[0-9]|https://*:5001|' "$gs"
+  sed -i 's|https://\*:501[0-9]|https://*:5011|' "$gs"
 
-  echo "Golden copies saved (settings normalized to port 5001) at $_PWSL_OVERRIDES/"
+  echo "Golden copies saved (settings normalized to port 5011) at $_PWSL_OVERRIDES/"
   ls -la "$_PWSL_OVERRIDES/"
 }

@@ -47,6 +47,20 @@ glab() {
   command glab "$@"
 }
 
+# Fix stale netsh portproxy when gitlab.rco.local IP changes.
+# Symptom: glab/git fails with "connection reset by peer" on 127.0.0.1:8888.
+fix-gitlab() {
+  local PWSH="/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"
+  local ip=$($PWSH -Command "[System.Net.Dns]::GetHostAddresses('gitlab.rco.local') | Where-Object { \$_.AddressFamily -eq 'InterNetwork' } | Select-Object -First 1 -ExpandProperty IPAddressToString" 2>/dev/null | tr -d '\r')
+  if [[ -z "$ip" ]]; then
+    echo "DNS resolution failed for gitlab.rco.local"
+    return 1
+  fi
+  echo "Updating port proxy: 127.0.0.1:8888 → ${ip}:80"
+  $PWSH -Command "Start-Process powershell -Verb RunAs -ArgumentList '-Command netsh interface portproxy set v4tov4 listenport=8888 listenaddress=127.0.0.1 connectport=80 connectaddress=$ip'"
+  echo "Done (UAC prompt may have appeared on Windows)"
+}
+
 # ============================================================
 # Phoenix jcodemunch (Claude Code MCP) setup
 # Sets shared index path for all Phoenix worktrees
@@ -192,6 +206,7 @@ wt() {
   powershell.exe -NoProfile -Command "wt.exe $args"
 }
 
+alias cco='node ~/Dev/cco-tui/bin/cli.mjs'
 alias tb='cargo run --manifest-path ~/Dev/treeboard-ratatui/Cargo.toml'
 alias w='worktree -w'
 alias cdwt='cd ~/.local/src/wt'
