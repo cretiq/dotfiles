@@ -1,3 +1,6 @@
+# Reset cursor to line on each prompt
+precmd() { printf '\e[6 q' }
+
 export ZSH="$HOME/.oh-my-zsh"
 export EDITOR="nvim"
 export VISUAL="nvim"
@@ -17,6 +20,10 @@ alias vimtoggle="~/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh toggle"
 # Ghostty appearance watcher (LaunchAgent management)
 alias ghostty-watcher-load='ln -sf ~/.dotfiles/ghostty/scripts/com.filipmellqvist.ghostty-appearance.plist ~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/com.filipmellqvist.ghostty-appearance.plist'
 alias ghostty-watcher-unload='launchctl unload ~/Library/LaunchAgents/com.filipmellqvist.ghostty-appearance.plist && rm -f ~/Library/LaunchAgents/com.filipmellqvist.ghostty-appearance.plist'
+
+# Ghostty display font watcher (LaunchAgent management)
+alias ghostty-font-load='swiftc -O ~/.dotfiles/ghostty/scripts/display-font-watcher.swift -o ~/.dotfiles/ghostty/scripts/display-font-watcher && ln -sf ~/.dotfiles/ghostty/scripts/com.filipmellqvist.ghostty-display-font.plist ~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/com.filipmellqvist.ghostty-display-font.plist'
+alias ghostty-font-unload='launchctl unload ~/Library/LaunchAgents/com.filipmellqvist.ghostty-display-font.plist && rm -f ~/Library/LaunchAgents/com.filipmellqvist.ghostty-display-font.plist'
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
@@ -192,7 +199,7 @@ alias vm="node /Users/filipmellqvist/CursorProjects/consoleapps/version-master/d
 cd() {
   if [[ "$1" == @* ]]; then
     local name="${1#@}"
-    local match=$(find "$HOME/CursorProjects" -mindepth 2 -maxdepth 2 -type d -name "$name" | head -1)
+    local match=$(find "$HOME/CursorProjects" -mindepth 2 -maxdepth 2 -type d -iname "$name" | head -1)
     if [[ -n "$match" ]]; then
       builtin cd "$match"
     else
@@ -206,7 +213,7 @@ cd() {
 _cd_at() {
   if [[ "${words[CURRENT]}" == @* ]]; then
     local -a repos
-    repos=(${$(find "$HOME/CursorProjects" -mindepth 2 -maxdepth 2 -type d -not -name node_modules -not -name .git 2>/dev/null):t})
+    repos=(${(L)$(find "$HOME/CursorProjects" -mindepth 2 -maxdepth 2 -type d -not -name node_modules -not -name .git 2>/dev/null):t})
     compadd -P "@" -- ${repos}
   else
     _cd "$@"
