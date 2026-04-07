@@ -34,4 +34,7 @@ onoremap j j
 onoremap k k
 onoremap l l
 
-echo "Vim keymaps: Default (HJKL) mode activated"
+" Print message only during interactive keymap switching, not on startup
+if !exists('g:keymap_startup_mode')
+    echo "Vim keymaps: Default (HJKL) mode activated"
+endif

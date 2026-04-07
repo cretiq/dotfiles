@@ -10,10 +10,10 @@ TRIGGER_FILE="$VIM_DIR/keymap_trigger"
 KEYMAPS_DIR="$VIM_DIR/keymaps"
 DEFAULT_KEYMAP="$KEYMAPS_DIR/default.vim"
 CUSTOM_KEYMAP="$KEYMAPS_DIR/custom.vim"
-OBSIDIAN_MANAGER="$HOME/.dotfiles/my_scripts/.script/obsidian-keymap-manager.sh"
-VSCODE_MANAGER="$HOME/.dotfiles/my_scripts/.script/vscode-keymap-manager.sh"
-RANGER_MANAGER="$HOME/.dotfiles/my_scripts/.script/ranger-keymap-manager.sh"
-TREEBOARD_MANAGER="$HOME/.dotfiles/my_scripts/.script/treeboard-keymap-manager.sh"
+VSCODE_MANAGER="$HOME/.dotfiles/my_scripts/.script/vscode-vim-keymap-manager.sh"
+GHOSTTY_MANAGER="$HOME/.dotfiles/my_scripts/.script/ghostty-keymap-manager.sh"
+VIMIUM_MANAGER="$HOME/.dotfiles/my_scripts/.script/vimium-keymap-manager.sh"
+SUPERFILE_MANAGER="$HOME/.dotfiles/my_scripts/.script/superfile-keymap-manager.sh"
 
 # Ensure directories exist
 mkdir -p "$VIM_DIR" "$KEYMAPS_DIR"
@@ -30,10 +30,6 @@ get_current_state() {
 # Function to set state
 set_state() {
     echo "$1" > "$STATE_FILE"
-    # Also write to Windows-accessible path for Treeboard (Tauri runs on Windows)
-    local win_dir="/mnt/c/Users/FilipM/.config/treeboard"
-    mkdir -p "$win_dir" 2>/dev/null
-    echo "$1" > "$win_dir/keymap_state" 2>/dev/null
 }
 
 # Function to trigger hot-reload in all running Vim instances
@@ -58,27 +54,28 @@ trigger_vim_reload() {
         echo "📝 No running Vim instances found. Keymap will apply to new sessions."
     fi
 
-    # Also update Obsidian if available
-    if [[ -x "$OBSIDIAN_MANAGER" ]]; then
-        echo "🔄 Updating Obsidian keybindings..."
-        "$OBSIDIAN_MANAGER" "$state_mode"
-    fi
-
-    # Also update VSCode if available
+    # Also update VSCode/Cursor if available
     if [[ -x "$VSCODE_MANAGER" ]]; then
-        echo "🔄 Updating VSCode keybindings..."
+        echo "🔄 Updating VSCode/Cursor keybindings..."
         "$VSCODE_MANAGER" "$state_mode"
     fi
 
-    # Also update Ranger if available
-    if [[ -x "$RANGER_MANAGER" ]]; then
-        echo "🔄 Updating Ranger keybindings..."
-        "$RANGER_MANAGER" "$state_mode"
+    # Also update Ghostty if available
+    if [[ -x "$GHOSTTY_MANAGER" ]]; then
+        echo "🔄 Updating Ghostty keybindings..."
+        "$GHOSTTY_MANAGER" "$state_mode"
     fi
 
-    # Also update Treeboard if available
-    if [[ -x "$TREEBOARD_MANAGER" ]]; then
-        "$TREEBOARD_MANAGER" "$state_mode"
+    # Also update Vimium if available
+    if [[ -x "$VIMIUM_MANAGER" ]]; then
+        echo "🔄 Updating Vimium keybindings..."
+        "$VIMIUM_MANAGER" "$state_mode"
+    fi
+
+    # Also update Superfile if available
+    if [[ -x "$SUPERFILE_MANAGER" ]]; then
+        echo "🔄 Updating Superfile keybindings..."
+        "$SUPERFILE_MANAGER" "$state_mode"
     fi
 }
 
@@ -95,7 +92,7 @@ toggle_keymap() {
         echo "📍 State saved: custom"
 
         # Show notification
-        osascript -e 'display notification "Custom JKLÖ navigation activated" with title "Vim Keymaps" subtitle "Terminal + VSCode/Cursor"' 2>/dev/null || true
+        osascript -e 'display notification "Custom JKLÖ navigation activated" with title "Vim Keymaps" subtitle "Terminal + VSCode/Cursor + Vimium + Superfile"' 2>/dev/null || true
 
     else
         # Switch to default
@@ -105,7 +102,7 @@ toggle_keymap() {
         echo "📍 State saved: default"
 
         # Show notification
-        osascript -e 'display notification "Default HJKL navigation activated" with title "Vim Keymaps" subtitle "Terminal + VSCode/Cursor"' 2>/dev/null || true
+        osascript -e 'display notification "Default HJKL navigation activated" with title "Vim Keymaps" subtitle "Terminal + VSCode/Cursor + Vimium + Superfile"' 2>/dev/null || true
     fi
 }
 

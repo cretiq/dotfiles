@@ -237,7 +237,7 @@ return {
       })
 
       -- Configure LSP servers (Neovim 0.11+ API)
-      local servers = { "ts_ls", "html", "cssls", "jsonls" }
+      local servers = { "ts_ls", "html", "cssls", "jsonls", "pyright" }
       for _, server in ipairs(servers) do
         vim.lsp.config(server, { capabilities = capabilities })
         vim.lsp.enable(server)
