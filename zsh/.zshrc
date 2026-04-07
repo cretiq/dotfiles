@@ -199,7 +199,7 @@ alias vm="node /Users/filipmellqvist/CursorProjects/consoleapps/version-master/d
 cd() {
   if [[ "$1" == @* ]]; then
     local name="${1#@}"
-    local match=$(find "$HOME/CursorProjects" -mindepth 2 -maxdepth 2 -type d -iname "$name" | head -1)
+    local match=$(find "$HOME/CursorProjects" -mindepth 1 -maxdepth 2 -type d -iname "$name" | head -1)
     if [[ -n "$match" ]]; then
       builtin cd "$match"
     else
@@ -213,7 +213,7 @@ cd() {
 _cd_at() {
   if [[ "${words[CURRENT]}" == @* ]]; then
     local -a repos
-    repos=(${(L)$(find "$HOME/CursorProjects" -mindepth 2 -maxdepth 2 -type d -not -name node_modules -not -name .git 2>/dev/null):t})
+    repos=(${(L)$(find "$HOME/CursorProjects" -mindepth 1 -maxdepth 2 -type d -not -name node_modules -not -name .git 2>/dev/null):t})
     compadd -P "@" -- ${repos}
   else
     _cd "$@"
