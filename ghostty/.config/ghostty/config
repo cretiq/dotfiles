@@ -18,7 +18,7 @@ theme = "dark:Under The Sea,light:Farmhouse Light"
 
 
 # Typography
-font-size = 17
+font-size = 15
 font-family = "JetBrainsMono Nerd Font"
 
 # Glass effect styling
@@ -56,10 +56,6 @@ macos-window-shadow = true
 # macOS window styling (tabs require titlebar)
 macos-titlebar-style = tabs
 macos-non-native-fullscreen = false
-
-# Scarry custom tab bar (ignored by release Ghostty)
-tab-bar-mode = vertical
-tab-bar-width = 440
 
 # Disable window state restoration (prevents ghost windows in debug builds)
 window-save-state = never

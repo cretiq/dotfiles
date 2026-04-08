@@ -4,6 +4,7 @@
 # Known limitation: clamshell mode (lid closed + external) reads as 1 display.
 
 GHOSTTY_CONFIG="$(readlink -f "$HOME/.config/ghostty/config" 2>/dev/null || echo "$HOME/.config/ghostty/config")"
+SCARRY_CONFIG="$(readlink -f "$HOME/.config/scarry/config" 2>/dev/null || echo "$HOME/.config/scarry/config")"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 POLL_INTERVAL=5
 LAST_COUNT=""
@@ -29,12 +30,15 @@ update_font_size() {
     fi
 
     sed -i '' "s/^font-size = .*/font-size = $target_size/" "$GHOSTTY_CONFIG"
+    sed -i '' "s/^font-size = .*/font-size = $target_size/" "$SCARRY_CONFIG"
     pkill -SIGUSR2 ghostty 2>/dev/null
-    osascript -e 'tell application "Ghostty"
-        repeat with t in every terminal
-            perform action "set_font_size:'"$target_size"'" on t
-        end repeat
-    end tell' 2>/dev/null
+    for app in Ghostty Scarry; do
+        osascript -e 'tell application "'"$app"'"
+            repeat with t in every terminal
+                perform action "set_font_size:'"$target_size"'" on t
+            end repeat
+        end tell' 2>/dev/null
+    done
 }
 
 while true; do

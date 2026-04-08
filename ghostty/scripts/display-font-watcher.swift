@@ -3,10 +3,17 @@ import Foundation
 
 let laptopFont = 15
 let externalFont = 17
-let configPath: String = {
-    let path = NSString(string: "~/.config/ghostty/config").expandingTildeInPath
-    return URL(fileURLWithPath: path).resolvingSymlinksInPath().path
-}()
+struct AppConfig {
+    let path: String
+    let app: String
+}
+let configs: [AppConfig] = [
+    ("~/.config/ghostty/config", "Ghostty"),
+    ("~/.config/scarry/config", "Scarry"),
+].map { AppConfig(
+    path: URL(fileURLWithPath: NSString(string: $0.0).expandingTildeInPath).resolvingSymlinksInPath().path,
+    app: $0.1
+) }
 
 var lastExternal: Bool? = nil
 
@@ -39,15 +46,17 @@ func shell(_ command: String) {
 func updateFontSize(_ external: Bool) {
     let size = external ? externalFont : laptopFont
 
-    shell("sed -i '' 's/^font-size = .*/font-size = \(size)/' '\(configPath)'")
+    for cfg in configs {
+        shell("sed -i '' 's/^font-size = .*/font-size = \(size)/' '\(cfg.path)'")
+        shell("""
+            osascript -e 'tell application "\(cfg.app)"
+                repeat with t in every terminal
+                    perform action "set_font_size:\(size)" on t
+                end repeat
+            end tell'
+        """)
+    }
     shell("pkill -SIGUSR2 ghostty")
-    shell("""
-        osascript -e 'tell application "Ghostty"
-            repeat with t in every terminal
-                perform action "set_font_size:\(size)" on t
-            end repeat
-        end tell'
-    """)
 }
 
 func displayCallback(_: CGDirectDisplayID, _: CGDisplayChangeSummaryFlags, _: UnsafeMutableRawPointer?) {
