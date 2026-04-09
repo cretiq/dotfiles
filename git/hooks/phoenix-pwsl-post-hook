@@ -1,7 +1,15 @@
 #!/bin/bash
-# Auto-restore Phoenix WSL overrides after git operations that reset assume-unchanged.
+# Auto-restore Phoenix WSL overrides after git operations.
 # Installed as: post-checkout, post-rewrite, post-merge (via pwsl-install-hooks).
 [[ -f /proc/version ]] && grep -qi microsoft /proc/version 2>/dev/null || exit 0
 [[ -d "server/Phoenix" && -d "client/phoenix-client" ]] || exit 0
+
+# post-checkout fires for each intermediate step during rebase/cherry-pick.
+# Skip it — post-rewrite handles the final restore after rebase completes.
+if [[ "$(basename "$0")" == "post-checkout" ]]; then
+    git_dir="$(git rev-parse --git-dir 2>/dev/null)" || exit 0
+    [[ -d "$git_dir/rebase-merge" || -d "$git_dir/rebase-apply" || -f "$git_dir/CHERRY_PICK_HEAD" ]] && exit 0
+fi
+
 echo "pwsl: restoring WSL overrides..."
 zsh -c 'source ~/.dotfiles/zsh/phoenix-wsl.zsh && pwsl "$PWD" > /dev/null 2>&1'
