@@ -1,36 +1,39 @@
 # Lazygit config
 # Mode: CUSTOM (JKLÖ)
-# Theme: Rosé Pine
+# Theme: Adaptive (works on light and dark backgrounds)
 
 gui:
   theme:
     activeBorderColor:
-      - "#31748f"
+      - "#005f87"
       - bold
     inactiveBorderColor:
-      - "#6e6a86"
+      - default
     searchingActiveBorderColor:
-      - "#ebbcba"
+      - "#af5f00"
       - bold
     optionsTextColor:
-      - "#9ccfd8"
+      - "#005f87"
     selectedLineBgColor:
-      - "#31748f"
+      - reverse
     inactiveViewSelectedLineBgColor:
-      - "#26233a"
-      - bold
+      - reverse
     cherryPickedCommitFgColor:
-      - "#1f1d2e"
+      - "#005f87"
     cherryPickedCommitBgColor:
-      - "#ebbcba"
+      - "#d7d7af"
     markedBaseCommitFgColor:
-      - "#9ccfd8"
+      - "#005f87"
     markedBaseCommitBgColor:
-      - "#f6c177"
+      - "#d7af5f"
     unstagedChangesColor:
-      - "#eb6f92"
+      - "#af0000"
     defaultFgColor:
-      - "#e0def4"
+      - default
+
+os:
+  open: 'xdg-open'
+  editPreset: 'nvim-remote'
 
 keybinding:
   universal:

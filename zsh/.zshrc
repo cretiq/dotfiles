@@ -19,7 +19,6 @@ alias sp="spf -c ~/.spf.toml"
 alias mw="macrowhisper"
 alias vim='nvim'
 alias vim='nvim'
-alias v='nvim'
 alias r='ranger'
 
 alias obs='ranger ~/Documents/Obsidian/RCO'

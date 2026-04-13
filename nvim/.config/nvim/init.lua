@@ -38,6 +38,7 @@ vim.opt.updatetime = 250
 vim.opt.timeoutlen = 300
 vim.opt.splitright = true
 vim.opt.splitbelow = true
+vim.opt.equalalways = false
 vim.opt.mouse = "a"
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
@@ -59,6 +60,32 @@ vim.opt.scrolloff = 8
 vim.opt.cursorline = true
 vim.o.winborder = "rounded"
 
+-- Windows Terminal tab title: 📝 <worktree>
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    local gitdir = vim.fn.system("git rev-parse --git-dir 2>/dev/null"):gsub("%s+$", "")
+    local wt = "nvim"
+    if gitdir:match("/worktrees/") then
+      wt = gitdir:match("/worktrees/(.+)$")
+    elseif gitdir == ".git" or gitdir:match("/.git$") then
+      wt = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+    end
+    io.write(string.format("\027]0;[NVIM] - %s\a", wt))
+  end,
+})
+vim.api.nvim_create_autocmd("VimLeave", {
+  callback = function()
+    io.write("\027]0;\a")
+  end,
+})
+
+-- Open nvim-tree on startup
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    require("nvim-tree.api").tree.open()
+  end,
+})
+
 -- Auto save on focus lost
 vim.api.nvim_create_autocmd({ "FocusLost", "BufLeave" }, {
   pattern = "*",
@@ -68,6 +95,9 @@ vim.api.nvim_create_autocmd({ "FocusLost", "BufLeave" }, {
     end
   end,
 })
+
+-- Clear search highlight
+vim.keymap.set('n', '<C-0>', '<cmd>nohlsearch<cr>', { desc = 'Clear search highlight' })
 
 -- LSP window borders
 vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })

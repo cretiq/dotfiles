@@ -129,6 +129,27 @@ function cc {
   fi
 }
 
+# Launch nvim in a worktree
+# Usage: v (plain nvim) or v @<worktree>[/s|/c] [files...] (cd + nvim)
+function v {
+  if [[ "$1" == @* ]]; then
+    local input="${1#@}"
+    input="${input%/}"
+    local wt_filter="${input%%/*}"
+    local suffix="${input#*/}"
+    [[ "$input" == "$suffix" ]] && suffix=""
+
+    local wt=$(_wt_list | grep -ix "$wt_filter" | head -1)
+    [[ -z "$wt" ]] && wt=$(_wt_list | grep -i "$wt_filter" | head -1)
+    [[ -z "$wt" ]] && { echo "No match: $wt_filter" >&2; return 1; }
+
+    local target=$(_wt_path "$wt" "$suffix")
+    builtin cd "$target" && nvim "${@:2}"
+  else
+    nvim "$@"
+  fi
+}
+
 # Tab completion for c - worktree names or fall through to files
 _c_wt() {
   local cur="${words[CURRENT]}"
@@ -152,6 +173,7 @@ _wt_setup_completion() {
   compdef _cd_wt cd
   compdef _c_wt c
   compdef _c_wt cc
+  compdef _c_wt v
   unfunction _wt_setup_completion
 }
 compdef _wt_setup_completion

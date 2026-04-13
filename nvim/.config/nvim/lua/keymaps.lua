@@ -36,6 +36,12 @@ function M.setup()
     vim.keymap.set({'n', 'v', 'o'}, 'l', 'l', { noremap = true, desc = 'Move right' })
   end
 
+  -- Pane navigation (works in both modes)
+  vim.keymap.set('n', '<C-Left>', '<C-w>h', { noremap = true, desc = 'Pane left' })
+  vim.keymap.set('n', '<C-Right>', '<C-w>l', { noremap = true, desc = 'Pane right' })
+  vim.keymap.set('n', '<C-Up>', '<C-w>k', { noremap = true, desc = 'Pane up' })
+  vim.keymap.set('n', '<C-Down>', '<C-w>j', { noremap = true, desc = 'Pane down' })
+
   -- Page up/down bindings
   vim.keymap.set('n', '<C-k>', '<C-d>', { noremap = true, desc = 'Page down' })
   vim.keymap.set('n', '<C-l>', '<C-u>', { noremap = true, desc = 'Page up' })
