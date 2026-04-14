@@ -82,12 +82,6 @@ vim.api.nvim_create_autocmd("VimLeave", {
   end,
 })
 
--- Open nvim-tree on startup
-vim.api.nvim_create_autocmd("VimEnter", {
-  callback = function()
-    require("nvim-tree.api").tree.open()
-  end,
-})
 
 -- Auto save on focus lost
 vim.api.nvim_create_autocmd({ "FocusLost", "BufLeave" }, {

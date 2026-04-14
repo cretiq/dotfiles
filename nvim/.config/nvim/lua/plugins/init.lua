@@ -9,7 +9,7 @@ return {
 
   -- Light mode colorscheme
   {
-    "EdenEast/nightfox.nvim",
+    "polirritmico/monokai-nightasty.nvim",
     lazy = false,
     priority = 999,
   },
@@ -30,8 +30,8 @@ return {
           vim.api.nvim_set_hl(0, "GitSignsCurrentLineBlame", { fg = "#777777", italic = true })
         end,
         set_light_mode = function()
-          vim.cmd.colorscheme("dayfox")
           vim.o.background = "light"
+          vim.cmd.colorscheme("monokai-nightasty")
           vim.api.nvim_set_hl(0, "GitSignsCurrentLineBlame", { fg = "#888888", italic = true })
         end,
       })
