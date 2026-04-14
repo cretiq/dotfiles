@@ -58,6 +58,9 @@ vim.g.clipboard = {
 vim.opt.clipboard = "unnamedplus"
 vim.opt.scrolloff = 8
 vim.opt.cursorline = true
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.opt.foldlevel = 99
 vim.o.winborder = "rounded"
 
 -- Windows Terminal tab title: 📝 <worktree>
@@ -96,8 +99,9 @@ vim.api.nvim_create_autocmd({ "FocusLost", "BufLeave" }, {
   end,
 })
 
--- Clear search highlight
-vim.keymap.set('n', '<C-0>', '<cmd>nohlsearch<cr>', { desc = 'Clear search highlight' })
+-- Clear search highlight (Escape in normal mode, plus leader+h as backup)
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<cr>', { desc = 'Clear search highlight' })
+vim.keymap.set('n', '<leader>h', '<cmd>nohlsearch<cr>', { desc = 'Clear search highlight' })
 
 -- LSP window borders
 vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
@@ -117,6 +121,9 @@ require("lazy").setup({
   },
   checker = { enabled = true, notify = false },
 })
+
+-- Add treesitter fold queries to rtp (must be after lazy.setup)
+vim.opt.runtimepath:append(vim.fn.stdpath("data") .. "/lazy/nvim-treesitter/runtime")
 
 vim.keymap.set({'n', 'i'}, '<C-A-s>', '<cmd>wq<CR>', { noremap = true, desc = 'Save and quit' })
 

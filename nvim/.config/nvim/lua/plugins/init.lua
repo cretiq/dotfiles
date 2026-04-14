@@ -1,13 +1,10 @@
 return {
   -- Colorscheme (dark)
   {
-    "scottmckendry/cyberdream.nvim",
+    "bluz71/vim-nightfly-colors",
+    name = "nightfly",
     lazy = false,
     priority = 1000,
-    opts = {
-      transparent = true,
-      italic_comments = true,
-    },
   },
 
   -- Light mode colorscheme
@@ -28,7 +25,7 @@ return {
       auto_dark_mode.setup({
         update_interval = 1000,
         set_dark_mode = function()
-          vim.cmd.colorscheme("cyberdream")
+          vim.cmd.colorscheme("nightfly")
           vim.o.background = "dark"
           vim.api.nvim_set_hl(0, "GitSignsCurrentLineBlame", { fg = "#777777", italic = true })
         end,
@@ -52,7 +49,7 @@ return {
       { "<leader>e", "<cmd>NvimTreeFindFileToggle<cr>", desc = "Toggle file explorer" },
     },
     opts = {
-      view = { width = 35, preserve_window_proportions = true },
+      view = { width = 50, preserve_window_proportions = true },
       update_focused_file = { enable = true, update_root = false },
       actions = { open_file = { resize_window = false } },
       renderer = {
@@ -76,7 +73,7 @@ return {
       sections = {
         lualine_a = { "mode" },
         lualine_b = { "branch", "diff", "diagnostics" },
-        lualine_c = { "filename" },
+        lualine_c = { { "filename", path = 1 } },
         lualine_x = { "encoding", "fileformat", "filetype" },
         lualine_y = { "progress" },
         lualine_z = { "location" },
@@ -167,7 +164,7 @@ return {
         "javascript", "typescript", "tsx",
         "html", "css", "json", "jsonc",
         "markdown", "markdown_inline",
-        "bash", "regex",
+        "bash", "regex", "c_sharp",
       },
       highlight = { enable = true },
       indent = { enable = true },
