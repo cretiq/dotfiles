@@ -35,6 +35,9 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 # VS Code (Windows GUI app — needs .exe)
 alias code='code.exe &'
 alias dev='cd ~/Dev/'
+alias kk='~/.dotfiles/windows-keys/interactive-menu-toggle-remaps.sh'
+alias kv='~/.dotfiles/windows-keys/set-all-keymap.sh voyager'
+alias ks='~/.dotfiles/windows-keys/set-all-keymap.sh standard'
 
 # glab wrapper for phoenix worktrees
 # --repo needed because worktree .git pointer files confuse repo detection.
