@@ -393,15 +393,42 @@ return {
         defaults = {
           file_ignore_patterns = { "node_modules", ".git/", "dist/", "build/", ".vite/" },
           path_display = { "truncate" },
-          -- Use vim syntax highlighting instead of broken treesitter previewer (nvim 0.11 compat)
-          file_previewer = previewers.cat.new,
-          grep_previewer = previewers.vimgrep.new,
+          -- Use buffer previewers (termopen vimgrep/cat skip match highlight)
+          file_previewer = previewers.vim_buffer_cat.new,
+          grep_previewer = previewers.vim_buffer_vimgrep.new,
+          layout_strategy = "vertical",
+          layout_config = {
+            vertical = { width = 0.9, height = 0.95, preview_height = 0.6, mirror = true },
+          },
+          preview = {
+            filetype_hook = function(_, _, opts)
+              vim.schedule(function()
+                local ok, line = pcall(require("telescope.actions.state").get_current_line)
+                if not ok or not line or line == "" then return end
+                if not (opts.winid and vim.api.nvim_win_is_valid(opts.winid)) then return end
+                vim.api.nvim_win_call(opts.winid, function()
+                  vim.fn.clearmatches()
+                  local pat = [[\c]] .. vim.fn.escape(line, [[\/.*$^~[]])
+                  vim.fn.matchadd("TelescopePreviewMatch", pat, 10)
+                end)
+              end)
+              return true
+            end,
+          },
         },
         pickers = {
           find_files = { hidden = true },
         },
       })
       telescope.load_extension("fzf")
+
+      -- Respect colorscheme: link to Search/CursorLine (re-apply on colorscheme change)
+      local function apply_tele_hl()
+        vim.api.nvim_set_hl(0, "TelescopePreviewMatch", { link = "Search" })
+        vim.api.nvim_set_hl(0, "TelescopePreviewLine", { link = "CursorLine" })
+      end
+      apply_tele_hl()
+      vim.api.nvim_create_autocmd("ColorScheme", { callback = apply_tele_hl })
     end,
   },
 
