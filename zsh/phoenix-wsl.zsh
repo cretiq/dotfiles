@@ -1,11 +1,17 @@
 # Phoenix WSL Override Manager
-# Ensures per-worktree ports, PFX cert, SQL rewrite, vite proxy are correct for WSL2.
+# Ensures per-worktree ports, PFX cert, connection-string fallback, vite proxy are correct for WSL2.
 #
 # Port scheme (N = trailing digit of worktree dir name, default 1):
 #   Backend (Kestrel):  501N   (via settings.Development.json)
 #   Vite proxy target:  501N   (via BACKEND_PORT in .env → vite.config.ts reads it)
 #   Vite dev server:    517N   (via VITE_PORT in .env → vite.config.ts reads it)
 #   gRPC:               5320   (shared, not per-worktree)
+#
+# Dual-mode scheme detection:
+#   Post-refactor branches (commit 04ab0aad merged) track M5Settings.cs; pwsl patches
+#   it with a TryLoadWslSystems() WSL fallback reading ~/.claude_phoenix/systems.json.
+#   Pre-refactor branches still track ConnectionManager.cs; pwsl patches it with the
+#   legacy .\SQLEXPRESS → localhost,1434 rewrite. Detection is per-worktree.
 #
 # Usage:
 #   pwsl [path]        apply overrides + verify (idempotent, safe to run anytime)
@@ -14,9 +20,8 @@
 #   pwsl-install-hooks [path]  install git hooks for auto-restore after rebase/merge/checkout
 
 readonly _PWSL_OVERRIDES="$HOME/.claude_phoenix/wsl-overrides"
-readonly _PWSL_FILES=(
+readonly _PWSL_COMMON_FILES=(
   "server/Phoenix/settings.Development.json"
-  "server/Phoenix/ConnectionManager.cs"
   "client/phoenix-client/vite.config.ts"
   "client/phoenix-client/playwright.config.ts"
 )
@@ -49,6 +54,23 @@ _pwsl_wt_number() {
   fi
 }
 
+# Detect which connection-string file this worktree uses.
+# Post-refactor (M5Settings.cs tracked) or pre-refactor (ConnectionManager.cs tracked).
+_pwsl_scheme_file() {
+  local root="$1"
+  if git -C "$root" ls-files --error-unmatch server/Phoenix/M5Settings.cs &>/dev/null; then
+    echo "server/Phoenix/M5Settings.cs"
+  else
+    echo "server/Phoenix/ConnectionManager.cs"
+  fi
+}
+
+# Return "new" or "old" scheme label for the given worktree
+_pwsl_scheme() {
+  local sf="$(_pwsl_scheme_file "$1")"
+  [[ "$sf" == *"M5Settings.cs" ]] && echo "new" || echo "old"
+}
+
 # Set or update a key=value in a .env file (creates file if missing)
 _pwsl_set_env() {
   local envfile="$1" key="$2" value="$3"
@@ -64,14 +86,18 @@ _pwsl_set_env() {
 _pwsl_verify() {
   local root="$1"
   local n="$(_pwsl_wt_number "$root")"
+  local scheme="$(_pwsl_scheme "$root")"
   local fails=0
 
   local s="$root/server/Phoenix/settings.Development.json"
   local v="$root/client/phoenix-client/vite.config.ts"
-  local c="$root/server/Phoenix/ConnectionManager.cs"
+  local c="$root/$(_pwsl_scheme_file "$root")"
   local envfile="$root/client/phoenix-client/.env"
 
+  local files=("${_PWSL_COMMON_FILES[@]}" "$(_pwsl_scheme_file "$root")")
+
   echo "  worktree number: $n (backend=501$n, vite=517$n)"
+  echo "  scheme: $scheme ($(basename "$c"))"
   echo ""
 
   # --- Backend port in settings.Development.json ---
@@ -123,12 +149,28 @@ _pwsl_verify() {
     ((fails++))
   fi
 
-  # --- SQL rewrite ---
-  if grep -q 'localhost,1434' "$c" 2>/dev/null; then
-    echo "  OK   SQL rewrite localhost,1434"
+  # --- Scheme-specific marker check ---
+  if [[ "$scheme" == "new" ]]; then
+    if grep -q 'pwsl-wsl-local' "$c" 2>/dev/null; then
+      echo "  OK   M5Settings.cs has WSL fallback"
+    else
+      echo "  FAIL WSL fallback MISSING in M5Settings.cs"
+      ((fails++))
+    fi
+    if [[ -f "$HOME/.claude_phoenix/systems.json" ]]; then
+      echo "  OK   ~/.claude_phoenix/systems.json exists"
+    else
+      echo "  FAIL ~/.claude_phoenix/systems.json MISSING"
+      echo "       fix: create it with {\"Systems\": {\"<name>\": \"<conn-string>\"}, \"GrpcPort\": 5320}"
+      ((fails++))
+    fi
   else
-    echo "  FAIL SQL rewrite MISSING in ConnectionManager.cs"
-    ((fails++))
+    if grep -q 'localhost,1434' "$c" 2>/dev/null; then
+      echo "  OK   ConnectionManager.cs has SQL rewrite (localhost,1434)"
+    else
+      echo "  FAIL SQL rewrite MISSING in ConnectionManager.cs"
+      ((fails++))
+    fi
   fi
 
   # --- PFX cert file ---
@@ -142,7 +184,7 @@ _pwsl_verify() {
 
   # --- assume-unchanged flags ---
   local hidden_ok=true
-  for f in "${_PWSL_FILES[@]}"; do
+  for f in "${files[@]}"; do
     local flag=$(git -C "$root" ls-files -v "$f" 2>/dev/null | cut -c1)
     if [[ "$flag" != "h" ]]; then
       echo "  FAIL assume-unchanged NOT set: $f"
@@ -160,10 +202,14 @@ pwsl() {
   local root
   root="$(_pwsl_find_root "${1:-}")" || { echo "ERROR: not in a Phoenix worktree. Usage: pwsl ~/Dev/phoenix/p3"; return 1; }
   local n="$(_pwsl_wt_number "$root")"
+  local scheme="$(_pwsl_scheme "$root")"
   echo "pwsl: $root"
+  echo "scheme: $scheme"
+
+  local files=("${_PWSL_COMMON_FILES[@]}" "$(_pwsl_scheme_file "$root")")
 
   # Check golden files exist
-  for f in "${_PWSL_FILES[@]}"; do
+  for f in "${files[@]}"; do
     local base="$(basename "$f")"
     if [[ ! -f "$_PWSL_OVERRIDES/$base" ]]; then
       echo "ERROR: golden file missing: $_PWSL_OVERRIDES/$base"
@@ -173,7 +219,7 @@ pwsl() {
   done
 
   # Copy golden files (vite.config.ts reads ports from .env, no patching needed)
-  for f in "${_PWSL_FILES[@]}"; do
+  for f in "${files[@]}"; do
     local base="$(basename "$f")"
     local target="$root/$f"
     local target_dir="$(dirname "$target")"
@@ -194,7 +240,7 @@ pwsl() {
   _pwsl_set_env "$envfile" "BACKEND_PORT" "501${n}"
 
   # Set assume-unchanged
-  for f in "${_PWSL_FILES[@]}"; do
+  for f in "${files[@]}"; do
     git -C "$root" update-index --assume-unchanged "$f" 2>/dev/null
   done
 
@@ -274,8 +320,10 @@ pwsl-save() {
     return 1
   fi
 
+  local files=("${_PWSL_COMMON_FILES[@]}" "$(_pwsl_scheme_file "$root")")
+
   mkdir -p "$_PWSL_OVERRIDES"
-  for f in "${_PWSL_FILES[@]}"; do
+  for f in "${files[@]}"; do
     cp "$root/$f" "$_PWSL_OVERRIDES/$(basename "$f")"
   done
 
