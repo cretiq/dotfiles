@@ -209,7 +209,7 @@ wt() {
 }
 
 alias cco='node ~/Dev/cco-tui/bin/cli.mjs'
-alias tb='cargo run --manifest-path ~/Dev/treeboard-ratatui/Cargo.toml'
+alias tb='cargo run --release --manifest-path ~/Dev/treeboard-ratatui/Cargo.toml'
 alias w='worktree -w'
 alias cdwt='cd ~/.local/src/wt'
 alias cwt='cd ~/.local/src/wt && claude'
