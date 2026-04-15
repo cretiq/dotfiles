@@ -1,38 +1,40 @@
 return {
-  -- Colorscheme (dark)
-  {
-    "bluz71/vim-nightfly-colors",
-    name = "nightfly",
-    lazy = false,
-    priority = 1000,
-  },
-
-  -- Light mode colorscheme
+  -- Colorscheme (dark + light variants)
   {
     "polirritmico/monokai-nightasty.nvim",
     lazy = false,
-    priority = 999,
+    priority = 1000,
+    opts = {
+      dark_style_background = "transparent",
+      light_style_background = "transparent",
+      hl_styles = {
+        floats = "transparent",
+        sidebars = "transparent",
+      },
+    },
   },
 
   -- Auto dark mode
   {
     "f-person/auto-dark-mode.nvim",
     lazy = false,
-    priority = 1001,
+    priority = 900,
     config = function()
       local auto_dark_mode = require("auto-dark-mode")
 
       auto_dark_mode.setup({
         update_interval = 1000,
         set_dark_mode = function()
-          vim.cmd.colorscheme("nightfly")
           vim.o.background = "dark"
+          vim.cmd.colorscheme("monokai-nightasty")
           vim.api.nvim_set_hl(0, "GitSignsCurrentLineBlame", { fg = "#777777", italic = true })
+          vim.api.nvim_set_hl(0, "NvimTreeCursorLine", { bg = "#3e3d32" })
         end,
         set_light_mode = function()
           vim.o.background = "light"
           vim.cmd.colorscheme("monokai-nightasty")
           vim.api.nvim_set_hl(0, "GitSignsCurrentLineBlame", { fg = "#888888", italic = true })
+          vim.api.nvim_set_hl(0, "NvimTreeCursorLine", { bg = "#c4d5e8" })
         end,
       })
 
