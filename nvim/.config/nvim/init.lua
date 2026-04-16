@@ -53,6 +53,10 @@ vim.api.nvim_create_autocmd({ "FocusLost", "BufLeave" }, {
   end,
 })
 
+-- Clear search highlight (Escape in normal mode, plus leader+h as backup)
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<cr>', { desc = 'Clear search highlight' })
+vim.keymap.set('n', '<leader>h', '<cmd>nohlsearch<cr>', { desc = 'Clear search highlight' })
+
 -- LSP window borders
 vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
 vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
@@ -65,7 +69,10 @@ require("lazy").setup({
   spec = {
     { import = "plugins" },
   },
-  install = { colorscheme = { "catppuccin", "habamax" } },
+  install = {
+    missing = true,
+    colorscheme = { "monokai-nightasty", "habamax" }
+  },
   checker = { enabled = true, notify = false },
 })
 

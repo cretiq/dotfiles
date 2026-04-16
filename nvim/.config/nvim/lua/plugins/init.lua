@@ -1,11 +1,44 @@
 return {
-  -- Colorscheme
+  -- Colorscheme (dark + light variants)
   {
-    "mhartington/oceanic-next",
-    priority = 1000,
+    "polirritmico/monokai-nightasty.nvim",
     lazy = false,
+    priority = 1000,
+    opts = {
+      dark_style_background = "transparent",
+      light_style_background = "transparent",
+      hl_styles = {
+        floats = "transparent",
+        sidebars = "transparent",
+      },
+    },
+  },
+
+  -- Auto dark mode
+  {
+    "f-person/auto-dark-mode.nvim",
+    lazy = false,
+    priority = 900,
     config = function()
-      vim.cmd.colorscheme("OceanicNext")
+      local auto_dark_mode = require("auto-dark-mode")
+
+      auto_dark_mode.setup({
+        update_interval = 1000,
+        set_dark_mode = function()
+          vim.o.background = "dark"
+          vim.cmd.colorscheme("monokai-nightasty")
+          vim.api.nvim_set_hl(0, "GitSignsCurrentLineBlame", { fg = "#777777", italic = true })
+          vim.api.nvim_set_hl(0, "NvimTreeCursorLine", { bg = "#3e3d32" })
+        end,
+        set_light_mode = function()
+          vim.o.background = "light"
+          vim.cmd.colorscheme("monokai-nightasty")
+          vim.api.nvim_set_hl(0, "GitSignsCurrentLineBlame", { fg = "#888888", italic = true })
+          vim.api.nvim_set_hl(0, "NvimTreeCursorLine", { bg = "#c4d5e8" })
+        end,
+      })
+
+      auto_dark_mode.init()
     end,
   },
 
@@ -13,11 +46,14 @@ return {
   {
     "nvim-tree/nvim-tree.lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
+    lazy = false,
     keys = {
-      { "<leader>e", "<cmd>NvimTreeToggle<cr>", desc = "Toggle file explorer" },
+      { "<leader>e", "<cmd>NvimTreeFindFileToggle<cr>", desc = "Toggle file explorer" },
     },
     opts = {
-      view = { width = 35 },
+      view = { width = 50, preserve_window_proportions = true },
+      update_focused_file = { enable = true, update_root = false },
+      actions = { open_file = { resize_window = false } },
       renderer = {
         group_empty = true,
         icons = { show = { git = true } },
@@ -52,6 +88,9 @@ return {
     "lewis6991/gitsigns.nvim",
     event = { "BufReadPre", "BufNewFile" },
     opts = {
+      current_line_blame = true,
+      current_line_blame_opts = { delay = 300, virt_text_pos = "eol" },
+      current_line_blame_formatter = " <author>, <author_time:%Y-%m-%d> · <summary>",
       signs = {
         add = { text = "+" },
         change = { text = "~" },
@@ -121,20 +160,26 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
-    event = { "BufReadPost", "BufNewFile" },
-    config = function()
-      local ts = require("nvim-treesitter")
-      ts.setup()
-      pcall(function()
-        ts.install({
-          "lua", "vim", "vimdoc", "query",
-          "javascript", "typescript", "tsx",
-          "html", "css", "json",
-          "markdown", "markdown_inline",
-          "bash", "regex",
-        }, { summary = false })
-      end)
-    end,
+    opts = {
+      ensure_installed = {
+        "lua", "vim", "vimdoc", "query",
+        "javascript", "typescript", "tsx",
+        "html", "css", "json", "jsonc",
+        "markdown", "markdown_inline",
+        "bash", "regex", "c_sharp",
+      },
+      highlight = { enable = true },
+      indent = { enable = true },
+      incremental_selection = {
+        enable = true,
+        keymaps = {
+          init_selection = "<C-space>",
+          node_incremental = "<C-space>",
+          scope_incremental = false,
+          node_decremental = "<bs>",
+        },
+      },
+    },
   },
 
   -- Mason (package manager for LSP servers)
@@ -319,6 +364,71 @@ return {
     keys = {
       { "<leader>?", function() require("which-key").show({ global = false }) end, desc = "Buffer keymaps" },
     },
+  },
+
+  -- Telescope (fuzzy finder)
+  {
+    "nvim-telescope/telescope.nvim",
+    branch = "master",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+    },
+    keys = {
+      { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find files" },
+      { "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "Live grep" },
+      { "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "Buffers" },
+      { "<leader>fs", "<cmd>Telescope lsp_document_symbols<cr>", desc = "Document symbols" },
+      { "<leader>fw", "<cmd>Telescope lsp_workspace_symbols<cr>", desc = "Workspace symbols" },
+      { "<leader>fd", "<cmd>Telescope diagnostics<cr>", desc = "Diagnostics" },
+      { "<leader>fr", "<cmd>Telescope oldfiles<cr>", desc = "Recent files" },
+      { "<leader>/", "<cmd>Telescope current_buffer_fuzzy_find<cr>", desc = "Fuzzy find in buffer" },
+      { "<leader>f.", "<cmd>Telescope resume<cr>", desc = "Resume last search" },
+    },
+    config = function()
+      local previewers = require("telescope.previewers")
+      local telescope = require("telescope")
+      telescope.setup({
+        defaults = {
+          file_ignore_patterns = { "node_modules", ".git/", "dist/", "build/", ".vite/" },
+          path_display = { "truncate" },
+          -- Use buffer previewers (termopen vimgrep/cat skip match highlight)
+          file_previewer = previewers.vim_buffer_cat.new,
+          grep_previewer = previewers.vim_buffer_vimgrep.new,
+          layout_strategy = "vertical",
+          layout_config = {
+            vertical = { width = 0.9, height = 0.95, preview_height = 0.6, mirror = true },
+          },
+          preview = {
+            filetype_hook = function(_, _, opts)
+              vim.schedule(function()
+                local ok, line = pcall(require("telescope.actions.state").get_current_line)
+                if not ok or not line or line == "" then return end
+                if not (opts.winid and vim.api.nvim_win_is_valid(opts.winid)) then return end
+                vim.api.nvim_win_call(opts.winid, function()
+                  vim.fn.clearmatches()
+                  local pat = [[\c]] .. vim.fn.escape(line, [[\/.*$^~[]])
+                  vim.fn.matchadd("TelescopePreviewMatch", pat, 10)
+                end)
+              end)
+              return true
+            end,
+          },
+        },
+        pickers = {
+          find_files = { hidden = true },
+        },
+      })
+      telescope.load_extension("fzf")
+
+      -- Respect colorscheme: link to Search/CursorLine (re-apply on colorscheme change)
+      local function apply_tele_hl()
+        vim.api.nvim_set_hl(0, "TelescopePreviewMatch", { link = "Search" })
+        vim.api.nvim_set_hl(0, "TelescopePreviewLine", { link = "CursorLine" })
+      end
+      apply_tele_hl()
+      vim.api.nvim_create_autocmd("ColorScheme", { callback = apply_tele_hl })
+    end,
   },
 
   -- Icons
