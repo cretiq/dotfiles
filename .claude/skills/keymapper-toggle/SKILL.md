@@ -42,7 +42,7 @@ Two files must change, plus the new toggle script itself:
 
 4. **`set-all-keymap.sh`** — add the toggle to the bulk conditional block.
 
-The `.bat` version still exists but is secondary — update it too if maintaining parity, but the bash menu (`interactive-menu-toggle-remaps.sh`) is the primary entry point from WSL.
+The `.bat` version has been removed. The bash menu (`interactive-menu-toggle-remaps.sh`) is the sole entry point. AHK hotkeys (`^#!+6`, `^#!+9`) launch it via `wt wsl bash`.
 
 ### `--no-reload` flag
 
