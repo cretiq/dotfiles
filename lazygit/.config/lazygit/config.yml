@@ -1,17 +1,17 @@
 # Lazygit config
-# Mode: CUSTOM (JKLÖ)
-# Theme: Adaptive (works on light and dark backgrounds)
+# Keybindings managed by lazygit-keymap-manager.sh
+# Mode: DEFAULT (HJKL)
 
 gui:
+  border: rounded
+  sidePanelWidth: 0.4
   theme:
     activeBorderColor:
-      - "#005f87"
-      - bold
+      - "#5f87af"
     inactiveBorderColor:
-      - default
+      - "#585858"
     searchingActiveBorderColor:
-      - "#af5f00"
-      - bold
+      - "#af875f"
     optionsTextColor:
       - "#005f87"
     selectedLineBgColor:
@@ -37,9 +37,9 @@ os:
 
 keybinding:
   universal:
-    prevItem-alt: l
-    nextItem-alt: k
-    prevBlock-alt: j
-    nextBlock-alt: ö
-    scrollUpMain-alt1: L
-    scrollDownMain-alt1: K
+    prevItem-alt: k
+    nextItem-alt: j
+    prevBlock-alt: h
+    nextBlock-alt: l
+    scrollUpMain-alt1: K
+    scrollDownMain-alt1: J

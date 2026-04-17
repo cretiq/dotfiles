@@ -14,6 +14,11 @@ VSCODE_MANAGER="$HOME/.dotfiles/my_scripts/.script/vscode-vim-keymap-manager.sh"
 GHOSTTY_MANAGER="$HOME/.dotfiles/my_scripts/.script/ghostty-keymap-manager.sh"
 VIMIUM_MANAGER="$HOME/.dotfiles/my_scripts/.script/vimium-keymap-manager.sh"
 SUPERFILE_MANAGER="$HOME/.dotfiles/my_scripts/.script/superfile-keymap-manager.sh"
+LAZYGIT_MANAGER="$HOME/.dotfiles/my_scripts/.script/lazygit-keymap-manager.sh"
+RANGER_MANAGER="$HOME/.dotfiles/my_scripts/.script/ranger-keymap-manager.sh"
+OBSIDIAN_MANAGER="$HOME/.dotfiles/my_scripts/.script/obsidian-keymap-manager.sh"
+RIDER_MANAGER="$HOME/.dotfiles/my_scripts/.script/rider-keymap-manager.sh"
+TREEBOARD_MANAGER="$HOME/.dotfiles/my_scripts/.script/treeboard-keymap-manager.sh"
 
 # Ensure directories exist
 mkdir -p "$VIM_DIR" "$KEYMAPS_DIR"
@@ -76,6 +81,35 @@ trigger_vim_reload() {
     if [[ -x "$SUPERFILE_MANAGER" ]]; then
         echo "🔄 Updating Superfile keybindings..."
         "$SUPERFILE_MANAGER" "$state_mode"
+    fi
+
+    # Also update Lazygit if available
+    if [[ -x "$LAZYGIT_MANAGER" ]]; then
+        echo "🔄 Updating Lazygit keybindings..."
+        "$LAZYGIT_MANAGER" "$state_mode"
+    fi
+
+    # Also update Ranger if available
+    if [[ -x "$RANGER_MANAGER" ]]; then
+        echo "🔄 Updating Ranger keybindings..."
+        "$RANGER_MANAGER" "$state_mode"
+    fi
+
+    # Also update Obsidian if available
+    if [[ -x "$OBSIDIAN_MANAGER" ]]; then
+        echo "🔄 Updating Obsidian keybindings..."
+        "$OBSIDIAN_MANAGER" "$state_mode"
+    fi
+
+    # Also update Rider if available
+    if [[ -x "$RIDER_MANAGER" ]]; then
+        echo "🔄 Updating Rider keybindings..."
+        "$RIDER_MANAGER" "$state_mode"
+    fi
+
+    # Also update Treeboard if available
+    if [[ -x "$TREEBOARD_MANAGER" ]]; then
+        "$TREEBOARD_MANAGER" "$state_mode"
     fi
 }
 
