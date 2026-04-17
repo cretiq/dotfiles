@@ -75,7 +75,7 @@ return {
       sections = {
         lualine_a = { "mode" },
         lualine_b = { "branch", "diff", "diagnostics" },
-        lualine_c = { { "filename", path = 1 } },
+        lualine_c = { { "filename", path = 0 } },
         lualine_x = { "encoding", "fileformat", "filetype" },
         lualine_y = { "progress" },
         lualine_z = { "location" },
@@ -151,6 +151,9 @@ return {
     "kdheepak/lazygit.nvim",
     cmd = { "LazyGit", "LazyGitConfig", "LazyGitCurrentFile", "LazyGitFilter" },
     dependencies = { "nvim-lua/plenary.nvim" },
+    init = function()
+      vim.g.lazygit_floating_window_scaling_factor = 1.0
+    end,
     keys = {
       { "<leader>gg", "<cmd>LazyGit<cr>", desc = "Open Lazygit" },
     },

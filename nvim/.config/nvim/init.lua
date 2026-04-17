@@ -62,6 +62,20 @@ vim.opt.foldmethod = "expr"
 vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 vim.opt.foldlevel = 99
 vim.o.winborder = "rounded"
+vim.o.tabline = "%!v:lua.MyTabline()"
+
+function MyTabline()
+  local s = ""
+  for i = 1, vim.fn.tabpagenr("$") do
+    local winnr = vim.fn.tabpagewinnr(i)
+    local bufnr = vim.fn.tabpagebuflist(i)[winnr]
+    local name = vim.fn.fnamemodify(vim.fn.bufname(bufnr), ":t")
+    if name == "" then name = "[No Name]" end
+    local hl = (i == vim.fn.tabpagenr()) and "%#TabLineSel#" or "%#TabLine#"
+    s = s .. hl .. " %" .. i .. "T" .. name .. " "
+  end
+  return s .. "%#TabLineFill#%T"
+end
 
 -- Windows Terminal tab title: 📝 <worktree>
 vim.api.nvim_create_autocmd("VimEnter", {
