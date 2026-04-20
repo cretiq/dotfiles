@@ -190,8 +190,8 @@ HELP
 alias '?'='_show_help'
 
 # Claude Code aliases
-# c is a function in worktree-nav.zsh: c @phoenix launches claude in worktree (always opus --effort max)
-# cc is a function in worktree-nav.zsh: cc @phoenix launches claude --continue in worktree (always opus --effort max)
+# c is a function in worktree-nav.zsh: c @phoenix launches claude in worktree (always opus --effort xhigh)
+# cc is a function in worktree-nav.zsh: cc @phoenix launches claude --continue in worktree (always opus --effort xhigh)
 alias cr='claude --resume'
 alias ch='claude --model haiku'
 alias cs='claude --model sonnet'
@@ -199,7 +199,7 @@ alias csh='claude --model sonnet --effort high'
 alias csm='claude --model sonnet --effort max'
 alias co='claude --model "opus[1m]"'
 alias coh='claude --model "opus[1m]" --effort high'
-alias com='claude --model "opus[1m]" --effort max'
+alias com='claude --model "opus[1m]" --effort xhigh'
 alias ccc='cd ~/claude-scratch && claude'
 alias ccca='cd ~/claude-scratch && claude --model haiku /analysis:processes'
 alias cccu='cd ~/claude-scratch && claude /usage'
