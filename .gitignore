@@ -8,6 +8,8 @@ CLAUDE.md
 vim/.vim/obsidian-backups/
 vim/.vim/ranger-backups/
 vim/.vim/vscode-backups/
+vim/.vim/lazygit-backups/
+vim/.vim/rider-backups/
 vim/.vim/keymap_state
 .claude/settings.local.json
 .zshrc.local
