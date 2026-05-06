@@ -1,10 +1,23 @@
-fnm env --use-on-cd | Out-String | Invoke-Expression
+﻿# fnm: cached env to avoid ~1.7s subprocess on every shell start
+$fnmCache = Join-Path $env:TEMP 'fnm-env-cache.ps1'
+if (-not (Test-Path $fnmCache) -or ((Get-Item $fnmCache).LastWriteTime -lt (Get-Date).AddHours(-6))) {
+    fnm env --use-on-cd | Out-File -Encoding utf8 $fnmCache
+}
+. $fnmCache
 
 # PowerShell alias for 'l' to run 'ls'
 Set-Alias -Name l -Value Get-ChildItem
 
 # Lazygit alias
 Set-Alias -Name lg -Value lazygit
+
+# Fix laptop brightness (elevates; pass -Install / -Uninstall for wake task)
+function fixbright {
+    $script = "$env:USERPROFILE\Desktop\Keys\fix-brightness.ps1"
+    if (-not (Test-Path $script)) { Write-Error "Not found: $script"; return }
+    $argList = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $script) + $args
+    Start-Process powershell -Verb RunAs -ArgumentList $argList
+}
 
 # Worktree navigation with @ prefix
 $DevRoot = "C:\Dev"
@@ -139,3 +152,14 @@ Set-PSReadLineKeyHandler -Key Enter -ScriptBlock {
 
     [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
 }
+
+
+# Convey: kill and restart tauri dev
+function Restart-Convey {
+    taskkill /F /IM Convey.exe 2>$null
+    taskkill /F /IM node.exe 2>$null
+    Start-Sleep -Milliseconds 500
+    Set-Location C:\Dev\Own\Convey\convey-tauri
+    npx tauri dev
+}
+Set-Alias -Name cv -Value Restart-Convey

@@ -6,6 +6,14 @@ Set-Alias -Name l -Value Get-ChildItem
 # Lazygit alias
 Set-Alias -Name lg -Value lazygit
 
+# Fix laptop brightness (elevates; pass -Install / -Uninstall for wake task)
+function fixbright {
+    $script = "$env:USERPROFILE\Desktop\Keys\fix-brightness.ps1"
+    if (-not (Test-Path $script)) { Write-Error "Not found: $script"; return }
+    $argList = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $script) + $args
+    Start-Process powershell -Verb RunAs -ArgumentList $argList
+}
+
 # Worktree navigation with @ prefix
 $DevRoot = "C:\Dev"
 
