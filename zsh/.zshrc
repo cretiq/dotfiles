@@ -220,3 +220,13 @@ _cd_at() {
   fi
 }
 compdef _cd_at cd
+
+# Drop coding-agent session markers inherited from a session that is already
+# dead. A live CLAUDE_PID means this shell really is inside that agent, so the
+# markers stay; a dead one means they were copied in from a terminal whose
+# agent exited long ago, and a new agent started here would wrongly believe it
+# is a nested child (no transcript, no --resume).
+if [[ -n $CLAUDE_PID ]] && ! kill -0 $CLAUDE_PID 2>/dev/null; then
+  unset CLAUDECODE CLAUDE_CODE_CHILD_SESSION CLAUDE_CODE_SESSION_ID \
+        CLAUDE_CODE_ENTRYPOINT CLAUDE_CODE_EXECPATH CLAUDE_PID CLAUDE_EFFORT AI_AGENT
+fi
