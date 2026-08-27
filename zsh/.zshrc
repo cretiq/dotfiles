@@ -114,6 +114,9 @@ spf() {
 export DOTNET_ROOT="$HOME/.dotnet"
 export PATH="$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools"
 
+# XDG_RUNTIME_DIR for the Claude Code sockets is set in ~/.zshenv so that
+# non-interactive zsh gets it too. It must be set before the fnm eval below.
+
 # fnm (Fast Node Manager)
 export PATH="$HOME/.local/share/fnm:$PATH"
 eval "$(fnm env --use-on-cd --log-level quiet --shell zsh)"
