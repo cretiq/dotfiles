@@ -42,6 +42,7 @@ vim.opt.equalalways = false
 vim.opt.mouse = "a"
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
+vim.opt.wrap = true
 -- WSL clipboard integration via WSLg Wayland (native, no Windows .exe overhead)
 vim.g.clipboard = {
   name = "wl-clipboard",

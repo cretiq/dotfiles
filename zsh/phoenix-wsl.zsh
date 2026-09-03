@@ -253,6 +253,14 @@ pwsl() {
   else
     echo "$rc check(s) FAILED."
   fi
+
+  # Sync personal CC assets (skills, commands, settings.local) into worktree's .claude/
+  # Only if .claude/ is real (or absent) — won't run if it's still a legacy symlink.
+  if [[ -x "$HOME/.claude_phoenix/bin/sync-personal-claude.sh" && ! -L "$root/.claude" ]]; then
+    echo ""
+    "$HOME/.claude_phoenix/bin/sync-personal-claude.sh" --worktree "$root" 2>&1 | tail -3
+  fi
+
   return $rc
 }
 

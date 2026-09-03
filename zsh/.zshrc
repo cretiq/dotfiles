@@ -18,7 +18,6 @@ stty -ixon
 alias sp="spf -c ~/.spf.toml"
 alias mw="macrowhisper"
 alias vim='nvim'
-alias vim='nvim'
 alias r='ranger'
 
 alias obs='ranger ~/Documents/Obsidian/RCO'
@@ -231,3 +230,6 @@ if [ -d "$FNM_PATH" ]; then
   export PATH="$FNM_PATH:$PATH"
   eval "$(fnm env --shell zsh)"
 fi
+
+# Claude Code gateway auth (gitignored secret)
+[ -f ~/.claude/.env.secret ] && source ~/.claude/.env.secret

@@ -56,4 +56,3 @@ command! KeymapCustom source ~/.dotfiles/vim/.vim/keymaps/custom.vim
 command! KeymapToggle call system('~/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh toggle')
 command! KeymapStatus echo 'Current keymap: ' . GetKeymapState()
 command! KeymapReload call CheckAndReloadKeymap()
-set nowrap

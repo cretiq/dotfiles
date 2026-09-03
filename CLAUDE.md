@@ -50,7 +50,7 @@ Config: `windows-keys/` (symlink to `C:\Users\FilipM\Desktop\Keys\`)
 
 - **`hotkeys-and-remaps.ahk`** — App launcher hotkeys (Ctrl+Alt+Shift+Win combinations). Supports left/right modifier distinction via `<^<#<!<+` (left) / `>^>#>!>+` (right) prefixes.
 - **`interactive-menu-toggle-remaps.bat`** — Interactive menu to toggle ESC/CapsLock, Alt+HJKL, per-app HJKL/JKLÖ remaps, and Window Switcher mode (Voyager/Standard).
-- **`restart-window-switcher.ps1`** — Bound to Ctrl+Alt+Shift+Win+W. Kills and restarts the window-switcher process.
+- **`restart-window-switcher.ps1`** — Bound to Ctrl+Alt+Shift+Win+6. Kills and restarts the window-switcher process.
 - **`toggle-scripts/`** — Bash wrappers for ESC, Alt+HJKL, and other toggles.
 - **`status-scripts/`** — Display current remap status.
 

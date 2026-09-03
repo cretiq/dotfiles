@@ -7,10 +7,14 @@ Set-Alias -Name l -Value Get-ChildItem
 Set-Alias -Name lg -Value lazygit
 
 # Fix laptop brightness (elevates; pass -Install / -Uninstall for wake task)
+# Elevated window stays open (-NoExit) so output is visible.
+# Verbose transcript appended to $env:TEMP\fixbright.log on every run.
 function fixbright {
     $script = "$env:USERPROFILE\Desktop\Keys\fix-brightness.ps1"
     if (-not (Test-Path $script)) { Write-Error "Not found: $script"; return }
-    $argList = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $script) + $args
+    $log = Join-Path $env:TEMP 'fixbright.log'
+    Write-Host "Log: $log" -ForegroundColor DarkGray
+    $argList = @('-NoExit', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $script) + $args
     Start-Process powershell -Verb RunAs -ArgumentList $argList
 }
 
