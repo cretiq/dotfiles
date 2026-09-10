@@ -72,15 +72,15 @@ Quick navigation to Phoenix worktrees in `/mnt/c/Dev` (WSL) or `C:\Dev` (Windows
 
 Defined in `zsh/.zshrc` (lines 199-215) and `zsh/worktree-nav.zsh`:
 
-**Functions (Fable 5.1 high by default):**
-- `c` — Launch Claude Code (always `claude-fable-5-1[1m]` `--effort high`)
-- `cc` — `--continue` (always `claude-fable-5-1[1m]` `--effort high`)
+**Functions (Opus 5 xhigh by default):**
+- `c` — Launch Claude Code (always `claude-opus-5[1m]` `--effort xhigh`)
+- `cc` — `--continue` (always `claude-opus-5[1m]` `--effort xhigh`)
 
 **Model shortcuts:**
 - `cr` — `--resume`
-- `ch` — Haiku | `cs` — Sonnet | `co` — Fable 5.1
+- `ch` — Haiku | `cs` — Sonnet | `co` — Opus 5
 - `csh` — Sonnet high | `csm` — Sonnet max
-- `coh` — Fable 5.1 high | `com` — Fable 5.1 xhigh
+- `coh` — Opus 5 high | `com` — Opus 5 xhigh
 
 **Scratch workspace:**
 - `ccc` — cd ~/claude-scratch + launch

@@ -160,9 +160,9 @@ _show_help() {
   cs            sonnet               code     vscode
   csh           sonnet high          mw       macrowhisper
   csm           sonnet max           obs      ranger in Obsidian
-  co            fable 5.1            todo     vim Obsidian TODO
-  coh           fable 5.1 high
-  com           fable 5.1 xhigh
+  co            opus 5               todo     vim Obsidian TODO
+  coh           opus 5 high
+  com           opus 5 xhigh
   ccc           claude-scratch
   ccca          scratch + analyze
   cccu          scratch + usage
@@ -192,16 +192,16 @@ HELP
 alias '?'='_show_help'
 
 # Claude Code aliases
-# c is a function in worktree-nav.zsh: c @phoenix launches claude in worktree (always claude-fable-5-1 --effort high)
-# cc is a function in worktree-nav.zsh: cc @phoenix launches claude --continue in worktree (always claude-fable-5-1 --effort high)
+# c is a function in worktree-nav.zsh: c @phoenix launches claude in worktree (always claude-opus-5 --effort xhigh)
+# cc is a function in worktree-nav.zsh: cc @phoenix launches claude --continue in worktree (always claude-opus-5 --effort xhigh)
 alias cr='claude --resume'
 alias ch='claude --model haiku'
 alias cs='claude --model sonnet'
 alias csh='claude --model sonnet --effort high'
 alias csm='claude --model sonnet --effort max'
-alias co='claude --model "claude-fable-5-1[1m]"'
-alias coh='claude --model "claude-fable-5-1[1m]" --effort high'
-alias com='claude --model "claude-fable-5-1[1m]" --effort xhigh'
+alias co='claude --model "claude-opus-5[1m]"'
+alias coh='claude --model "claude-opus-5[1m]" --effort high'
+alias com='claude --model "claude-opus-5[1m]" --effort xhigh'
 alias ccc='cd ~/claude-scratch && claude'
 alias ccca='cd ~/claude-scratch && claude --model haiku /analysis:processes'
 alias cccu='cd ~/claude-scratch && claude /usage'
