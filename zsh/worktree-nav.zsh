@@ -178,3 +178,14 @@ _wt_setup_completion() {
 }
 compdef _wt_setup_completion
 _wt_setup_completion
+
+# Claude Code refuses to save settings through a symlink, so each worktree keeps
+# a real .claude/settings.local.json and the shared layer loads read-only here.
+function claude {
+  local shared="$HOME/.claude_phoenix/settings.local.json"
+  if [[ "$PWD/" == "$PHOENIX_ROOT"/* && -f "$shared" ]]; then
+    command claude --settings "$shared" "$@"
+  else
+    command claude "$@"
+  fi
+}
