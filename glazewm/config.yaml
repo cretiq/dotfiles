@@ -136,6 +136,7 @@ window_rules:
   - commands: ['set-floating']
     match:
       - window_process: { equals: 'ms-teams' }
+      - window_process: { equals: 'keymapp' }
 
   - commands: ['ignore']
     match:
@@ -163,17 +164,17 @@ window_rules:
         window_class: { not_regex: 'PPTFrameClass' }
 
 binding_modes:
-  # When enabled, the focused window can be resized via arrow keys or HJKL.
+  # When enabled, the focused window can be resized via arrow keys or JKLÖ.
   - name: 'resize'
     keybindings:
       - commands: ['resize --width -2%']
-        bindings: ['h', 'left']
+        bindings: ['j', 'left']
       - commands: ['resize --width +2%']
-        bindings: ['l', 'right']
+        bindings: ['ö', 'right']
       - commands: ['resize --height +2%']
-        bindings: ['k', 'up']
+        bindings: ['l', 'up']
       - commands: ['resize --height -2%']
-        bindings: ['j', 'down']
+        bindings: ['k', 'down']
       # Press enter/escape to return to default keybindings.
       - commands: ['wm-disable-binding-mode --name resize']
         bindings: ['escape', 'enter']
