@@ -1,6 +1,6 @@
 # Keychron Q10 Max cheat sheet
 
-Current keymap: `q10max-v11.json` (import in https://launcher.keychron.com, USB cable).
+Current keymap: `q10max-v13.json` (import in https://launcher.keychron.com, USB cable).
 The original export `Keymap-Q10 Max ISO knob-8-17-26.json` is never overwritten. Older intermediates live in `history/`.
 
 ## Layer keys
@@ -10,9 +10,10 @@ The original export `Keymap-Q10 Max ISO knob-8-17-26.json` is never overwritten.
 | Left space | hold = L1 |
 | Middle key | tap = Space, hold = L2 |
 | Right big key | hold = L3 |
-| M1 | tap = Ghostty show/hide (Hyper+F13) |
+| M1 | sends ⇧⌘ (modifier only) |
+| M2 | tap = Ghostty show/hide (Hyper+F14) |
 | M3 | sends ⌃⇧⌘ (modifier only) |
-| M2, M4, M5, PgUp | no-op, free |
+| M4, M5, PgUp | no-op, free |
 
 All Launcher macros were removed in v7.
 
@@ -25,9 +26,10 @@ Hammerspoon and AeroSpace match modifiers exactly, so each combo is its own name
 | L1 (left space) + key | Meh (⌃⌥⇧) | AeroSpace: focus, workspaces, layout |
 | L2 (middle key) number row, F-row | ⌥⇧⌘ | AeroSpace: send window to workspace |
 | L3 (right big key) + key | Hyper (⌃⌥⇧⌘) | Hammerspoon: app launchers, text |
+| M1 + key | ⇧⌘ | CleanShot: capture shortcuts |
 | M3 + key | ⌃⇧⌘ | AeroSpace: move, join, fullscreen |
 
-Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L3 keeps the media F-row, and digits `1`–`4` keep their Keychron codes.
+Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L3 keeps the media F-row.
 
 ## AeroSpace (`aerospace/.config/aerospace/aerospace.toml`)
 
@@ -52,12 +54,20 @@ Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L
 | Right big key + `Q F A H C Z J E X B S` | Obsidian, Finder, Spotify, Claude, Edge, Bitwarden, ChatGPT, X Pro, Xcode, BetterTouchTool, Simulator |
 | Right big key + `T` | Convey translator (Hyper+T, set in Convey) |
 | Right big key + `N` | Type `/next ` then Enter |
-| M1 | Show/hide Ghostty |
+| M2 | Show/hide Ghostty |
 | F1 | Minimize window |
 | F2 | Mission Control |
 | F7 / F8 / F9 / F10 | Previous / play-pause / next / mute |
 | F11 / F12 | Volume down / up |
 | Scroll down over a Dock icon | Minimize that app's windows |
+
+## CleanShot (hold M1)
+
+| Press | Action |
+|---|---|
+| M1 + `2` / `3` / `4` / `5` | Capture window / OCR / area / all-in-one |
+| M1 + `E` | Pin last screenshot |
+| M1 + `1` / `6` | Close / restore overlays |
 
 ## L2 (hold middle key)
 
@@ -78,7 +88,7 @@ Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L
 
 ## Notes
 
-- v5 and later overwrite Keychron's L1 RGB, Bluetooth and battery keys. v4 still has them.
+- v5 and later overwrite Keychron's L1 RGB, Bluetooth and battery keys, and v13 does the same to the L3 digits `1`–`4` (Bluetooth / 2.4G switching, `0x7e0b`–`0x7e0e`, which I never verified). v4 still has them.
 - ⌃⇧⌘ + `3` / `4` is macOS's screenshot-to-clipboard shortcut, so M3 + `3` / `4` takes a screenshot.
 - Keyboard firmware V1.1.0 is available but not applied.
 - Receiver (Keychron Link Type A, V0.3.1) shows only as "Bootloader device" after a failed flash. Contact Keychron support before re-flashing.
