@@ -142,4 +142,10 @@ for _, d in ipairs(hs.usb.attachedDevices()) do
   if d.vendorID == 0x3434 and d.productID == 0x08A1 then hs.timer.doAfter(3, applyQ10) end
 end
 
+-- Over the 2.4 GHz dongle macOS numbers the key above Tab as 50 instead of 10, and Convey listens for 10.
+hs.hotkey.bind({"cmd", "shift"}, 50, function()
+  hs.eventtap.event.newKeyEvent({"cmd", "shift"}, 10, true):post()
+  hs.eventtap.event.newKeyEvent({"cmd", "shift"}, 10, false):post()
+end)
+
 hs.alert.show("Hammerspoon config loaded")
