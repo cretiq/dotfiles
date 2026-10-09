@@ -1,12 +1,7 @@
 require("hs.ipc")
 
--- Q10 modifier combos: L3 hyper, L1 meh, L2 alt+shift+cmd, pgup ctrl+alt+cmd, m3 ctrl+shift+cmd; hyper+t is convey
+-- Q10 modifier combos: L3 hyper, L1 meh, L2 alt+shift+cmd; meh and m3 combos are bound in aerospace
 local hyper = {"cmd", "alt", "ctrl", "shift"}
-local meh = {"ctrl", "shift", "alt"}
-hs.hotkey.bind(meh, "j", function() hs.window.focusedWindow():focusWindowWest(nil, true, true) end)
-hs.hotkey.bind(meh, "k", function() hs.window.focusedWindow():focusWindowSouth(nil, true, true) end)
-hs.hotkey.bind(meh, "l", function() hs.window.focusedWindow():focusWindowNorth(nil, true, true) end)
-hs.hotkey.bind(meh, ";", function() hs.window.focusedWindow():focusWindowEast(nil, true, true) end)
 
 local apps = {
   q = "Obsidian",
@@ -21,16 +16,14 @@ local apps = {
   b = "BetterTouchTool",
   s = "Simulator",
 }
-local pgup = {"ctrl", "alt", "cmd"}
-local m3 = {"ctrl", "shift", "cmd"}
 for key, app in pairs(apps) do
-  local launch = function() hs.application.launchOrFocus(app) end
-  hs.hotkey.bind(pgup, key, launch)
-  hs.hotkey.bind(m3, key, launch)
+  hs.hotkey.bind(hyper, key, function() hs.application.launchOrFocus(app) end)
 end
-for _, mods in ipairs({pgup, m3}) do
-  hs.hotkey.bind(mods, "t", function() hs.eventtap.keyStroke(hyper, "t") end)
-end
+
+hs.hotkey.bind(hyper, "f13", function()
+  local ghostty = hs.application.get("Ghostty")
+  if ghostty and ghostty:isFrontmost() then ghostty:hide() else hs.application.launchOrFocus("Ghostty") end
+end)
 
 hs.hotkey.bind({}, "f1", function()
   local win = hs.window.focusedWindow()
