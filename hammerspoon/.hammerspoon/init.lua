@@ -81,4 +81,44 @@ hs.hotkey.bind(hyper, "n", function()
   end)
 end)
 
+-- Keychron Q10 Max: the cable (PID 0x08A1) gets the newest Mac layout on connect. The 2.4 GHz receiver is never written.
+-- Pause: create ~/.local/share/q10/auto-off. The q10 binary is built from keyboard/q10max/q10.swift.
+local q10Bin = os.getenv("HOME") .. "/.local/share/q10"
+local q10Layouts = os.getenv("HOME") .. "/.dotfiles/keyboard/q10max"
+local q10Tries = 0
+
+local function newestMacLayout()
+  local best, bestN = nil, -1
+  for f in hs.fs.dir(q10Layouts) do
+    local n = tonumber(f:match("^q10max%-v(%d+)%.json$"))
+    if n and n > bestN then best, bestN = f, n end
+  end
+  return best and (q10Layouts .. "/" .. best)
+end
+
+local function applyQ10()
+  if hs.fs.attributes(q10Bin .. "/auto-off") then return end
+  local layout = newestMacLayout()
+  if not layout then return end
+  hs.task.new(q10Bin .. "/q10", function(_, out)
+    if out:find("Verified") then
+      hs.alert.show("Q10: Mac layout applied")
+    elseif not out:find("already matches") then
+      q10Tries = q10Tries + 1
+      if q10Tries < 3 then hs.timer.doAfter(3, applyQ10) else hs.alert.show("Q10: could not apply Mac layout") end
+    end
+  end, {"apply", "-f", layout, "--yes"}):start()
+end
+
+q10Watcher = hs.usb.watcher.new(function(e)
+  if e.eventType == "added" and e.vendorID == 0x3434 and e.productID == 0x08A1 then
+    q10Tries = 0
+    hs.timer.doAfter(3, applyQ10)
+  end
+end):start()
+
+for _, d in ipairs(hs.usb.attachedDevices()) do
+  if d.vendorID == 0x3434 and d.productID == 0x08A1 then hs.timer.doAfter(3, applyQ10) end
+end
+
 hs.alert.show("Hammerspoon config loaded")
