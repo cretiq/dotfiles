@@ -1,6 +1,6 @@
 # Lazygit config
 # Keybindings managed by lazygit-keymap-manager.sh
-# Mode: CUSTOM (JKLÖ)
+# Mode: DEFAULT (HJKL)
 
 gui:
   border: rounded
@@ -37,9 +37,9 @@ os:
 
 keybinding:
   universal:
-    prevItem-alt: l
-    nextItem-alt: k
-    prevBlock-alt: j
-    nextBlock-alt: ö
-    scrollUpMain-alt1: L
-    scrollDownMain-alt1: K
+    prevItem-alt: k
+    nextItem-alt: j
+    prevBlock-alt: h
+    nextBlock-alt: l
+    scrollUpMain-alt1: K
+    scrollDownMain-alt1: J

@@ -181,9 +181,11 @@ _wt_setup_completion
 
 # Claude Code refuses to save settings through a symlink, so each worktree keeps
 # a real .claude/settings.local.json and the shared layer loads read-only here.
+# The sync runs first so links, memory and permission rules are current when the session starts.
 function claude {
   local shared="$HOME/.claude_phoenix/settings.local.json"
   if [[ "$PWD/" == "$PHOENIX_ROOT"/* && -f "$shared" ]]; then
+    "$HOME/.claude_phoenix/bin/phoenix-claude-sync" --quiet 2>/dev/null
     command claude --settings "$shared" "$@"
   else
     command claude "$@"
