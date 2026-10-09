@@ -49,6 +49,8 @@ Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L
 | Left space + `-` and `=` | Shrink and grow window |
 | Left space + right big key | Spotlight (Cmd+Space) |
 
+New windows go into the layout you are looking at. Messages and Calendar open floating instead (`on-window-detected` rules in `aerospace.toml`), so they do not reshuffle it. System Settings, Bitwarden and Convey float too.
+
 ## Window border (JankyBorders)
 
 AeroSpace has no border of its own. JankyBorders draws it. AeroSpace starts it (`after-startup-command` in `aerospace.toml`), and it reads its settings from `borders/.config/borders/bordersrc`, stowed to `~/.config/borders` (`stow borders`).
@@ -118,6 +120,15 @@ The Mac layout is the master: the newest `q10max-vN.json`. Plugging the Q10 in b
 | Pause | Create `~/.local/share/q10/auto-off` |
 
 Close the Keychron Launcher tab before using `q10`: with the Launcher open the keyboard answers both programs and reads become unreliable.
+
+## Dongle (2.4 GHz) quirks on the Mac
+
+macOS keeps its own settings per keyboard connection, and the dongle (Keychron Link) is a different keyboard from the cable.
+
+- **Modifier keys:** the dongle had Control and Command swapped and Caps Lock turned into Escape, left over from an earlier setup. That turned Ctrl+Tab into Cmd+Tab and broke the Meh and ⇧⌘ chords. Fix: System Settings, Keyboard, Keyboard Shortcuts, Modifier Keys, pick Keychron Link, Restore Defaults.
+- **Key above Tab (`§`):** over the dongle macOS reports keycode 50 instead of 10, so `§` and `<` come out swapped when typing. Changing the keyboard type in System Settings and a `hidutil` swap for the dongle both had no effect. Hammerspoon forwards ⇧⌘ + keycode 50 as ⇧⌘ + keycode 10, so M5 and M1 + `§` open Convey's keyboard cheat sheet on both connections. Side effect: on the cable ⇧⌘ + `<>` opens it too.
+- Typing `§` and `<` over the dongle stays swapped. Not fixed.
+- The keymap cannot be written over the dongle, only over the cable.
 
 ## Notes
 
