@@ -83,12 +83,12 @@ _wt_least_recent() {
 #        c jira <key>      — analyze Jira ticket in least recently used worktree
 function c {
   if [[ "$1" == "mr" && -n "$2" ]]; then
-    builtin cd "$PHOENIX_ROOT/p1" && claude --model "claude-opus-5[1m]" --effort xhigh "/mr:review $2"
+    builtin cd "$PHOENIX_ROOT/p1" && claude --model claude-sonnet-5-5 --effort high "/mr:review $2"
     return
   fi
   if [[ "$1" == "jira" && -n "$2" ]]; then
     local target=$(_wt_least_recent)
-    builtin cd "$target" && claude --model "claude-opus-5[1m]" --effort xhigh "/analyze-jira $2"
+    builtin cd "$target" && claude --model claude-sonnet-5-5 --effort high "/analyze-jira $2"
     return
   fi
   if [[ "$1" == @* ]]; then
@@ -103,9 +103,9 @@ function c {
     [[ -z "$wt" ]] && { echo "No match: $wt_filter" >&2; return 1; }
 
     local target=$(_wt_path "$wt" "$suffix")
-    builtin cd "$target" && claude --model "claude-opus-5[1m]" --effort xhigh "${@:2}"
+    builtin cd "$target" && claude --model claude-sonnet-5-5 --effort high "${@:2}"
   else
-    claude --model "claude-opus-5[1m]" --effort xhigh "$@"
+    claude --model claude-sonnet-5-5 --effort high "$@"
   fi
 }
 
@@ -123,9 +123,9 @@ function cc {
     [[ -z "$wt" ]] && { echo "No match: $wt_filter" >&2; return 1; }
 
     local target=$(_wt_path "$wt" "$suffix")
-    builtin cd "$target" && claude --continue --model "claude-opus-5[1m]" --effort xhigh "${@:2}"
+    builtin cd "$target" && claude --continue --model claude-sonnet-5-5 --effort high "${@:2}"
   else
-    claude --continue --model "claude-opus-5[1m]" --effort xhigh "$@"
+    claude --continue --model claude-sonnet-5-5 --effort high "$@"
   fi
 }
 

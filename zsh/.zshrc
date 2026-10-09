@@ -156,21 +156,15 @@ _show_help() {
   c             launch claude        r        ranger
   cc            --continue           sp       superfile
   cr            --resume             lg       lazygit
-  ch            haiku model          vim      nvim
-  cs            sonnet               code     vscode
-  csh           sonnet high          mw       macrowhisper
-  csm           sonnet max           obs      ranger in Obsidian
-  co            opus 5               todo     vim Obsidian TODO
-  coh           opus 5 high
-  com           opus 5 xhigh
-  ccc           claude-scratch
-  ccca          scratch + analyze
-  cccu          scratch + usage
-  SHELL                              WORKTREE DASHBOARD
+  cs            sonnet 5.5 high      vim      nvim
+  co            opus 5.5             code     vscode
+  ccc           claude-scratch       mw       macrowhisper
+  cdot          dotfiles + claude    obs      ranger in Obsidian
+                                     todo     vim Obsidian TODO
+  SHELL                             WORKTREE DASHBOARD
   ─────────────────────────────      ─────────────────────────────
   sz            source ~/.zshrc      w        worktree -w (live dashboard)
   ?             this help            cdwt     cd into wt repo
-                                     cwt      wt repo + claude
 
   PHOENIX WSL
   ─────────────────────────────
@@ -192,19 +186,28 @@ HELP
 alias '?'='_show_help'
 
 # Claude Code aliases
-# c is a function in worktree-nav.zsh: c @phoenix launches claude in worktree (always claude-opus-5 --effort xhigh)
-# cc is a function in worktree-nav.zsh: cc @phoenix launches claude --continue in worktree (always claude-opus-5 --effort xhigh)
-alias cr='claude --resume'
-alias ch='claude --model haiku'
-alias cs='claude --model sonnet'
-alias csh='claude --model sonnet --effort high'
-alias csm='claude --model sonnet --effort max'
-alias co='claude --model "claude-opus-5[1m]"'
-alias coh='claude --model "claude-opus-5[1m]" --effort high'
-alias com='claude --model "claude-opus-5[1m]" --effort xhigh'
-alias ccc='cd ~/claude-scratch && claude'
-alias ccca='cd ~/claude-scratch && claude --model haiku /analysis:processes'
-alias cccu='cd ~/claude-scratch && claude /usage'
+# c is a function in worktree-nav.zsh: c @phoenix launches claude in worktree (always claude-sonnet-5-5 --effort high)
+# cc is a function in worktree-nav.zsh: cc @phoenix launches claude --continue in worktree (always claude-sonnet-5-5 --effort high)
+alias cr='claude --model claude-sonnet-5-5 --effort high --resume'
+alias cs='claude --model claude-sonnet-5-5 --effort high'
+alias co='claude --model "claude-opus-5-5[1m]"'
+alias ccc='cd ~/claude-scratch && claude --model claude-sonnet-5-5 --effort high'
+alias cdot='cd ~/.dotfiles && claude --model claude-sonnet-5-5 --effort high'
+
+# Needs the keyboard on a USB cable: the 2.4 GHz receiver cannot write the keymap.
+function q10 {
+  local dir="$HOME/.dotfiles/keyboard/q10max"
+  local ps=/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe
+  local script="$(wslpath -w "$dir/q10.ps1")"
+  local sub="${1:-win}"; shift 2>/dev/null
+  case "$sub" in
+    win)     "$ps" -NoProfile -ExecutionPolicy Bypass -File "$script" apply -File "$(wslpath -w "$dir/q10max-win-v1.json")" -Yes "$@" ;;
+    restore) "$ps" -NoProfile -ExecutionPolicy Bypass -File "$script" apply -File "$(wslpath -w "$dir/q10max-mac-restore.json")" -Yes "$@" ;;
+    status)  "$ps" -NoProfile -ExecutionPolicy Bypass -File "$script" dump -File "$(wslpath -w "$dir/q10max-win-v1.json")" "$@" ;;
+    probe|install) "$ps" -NoProfile -ExecutionPolicy Bypass -File "$script" "$sub" "$@" ;;
+    *)       echo "usage: q10 [win|restore|status|probe|install]" >&2; return 1 ;;
+  esac
+}
 # Windows Terminal CLI wrapper (wt.exe is a UWP alias, invoke via PowerShell)
 wt() {
   powershell.exe -NoProfile -Command "wt.exe $args"
@@ -214,7 +217,6 @@ alias cco='node ~/Dev/cco-tui/bin/cli.mjs'
 alias tb='cargo run --release --manifest-path ~/Dev/treeboard-ratatui/Cargo.toml'
 alias w='worktree -w'
 alias cdwt='cd ~/.local/src/wt'
-alias cwt='cd ~/.local/src/wt && claude'
 
 # System utilities
 disable-alt-shift() {
