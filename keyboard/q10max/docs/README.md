@@ -1,17 +1,17 @@
 # Keychron Q10 Max cheat sheet
 
-Current keymap: `q10max-v13.json` (import in https://launcher.keychron.com, USB cable).
+Current keymap: `q10max-v14.json` (import in https://launcher.keychron.com, USB cable).
 The original export `Keymap-Q10 Max ISO knob-8-17-26.json` is never overwritten. Older intermediates live in `history/`.
 
 ## Layer keys
 
 | Key | Does |
 |---|---|
-| Left space | hold = L1 |
+| Left space | tap = Space, hold = L1 |
 | Middle key | tap = Space, hold = L2 |
 | Right big key | hold = L3 |
 | M1 | sends ⇧⌘ (modifier only) |
-| M2 | tap = Ghostty show/hide (Hyper+F14) |
+| M2 | sends Hyper+F14, nothing bound |
 | M3 | sends ⌃⇧⌘ (modifier only) |
 | M4, M5, PgUp | no-op, free |
 
@@ -54,7 +54,6 @@ Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L
 | Right big key + `Q F A H C Z J E X B S` | Obsidian, Finder, Spotify, Claude, Edge, Bitwarden, ChatGPT, X Pro, Xcode, BetterTouchTool, Simulator |
 | Right big key + `T` | Convey translator (Hyper+T, set in Convey) |
 | Right big key + `N` | Type `/next ` then Enter |
-| M2 | Show/hide Ghostty |
 | F1 | Minimize window |
 | F2 | Mission Control |
 | F7 / F8 / F9 / F10 | Previous / play-pause / next / mute |
@@ -86,9 +85,43 @@ Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L
 - Esc and Caps are swapped. F1–F12 are plain F-keys.
 - Knob: volume on L0 and L2, backlight on L1, brightness on L3.
 
+## Mac automation
+
+The Mac layout is the master: the newest `q10max-vN.json`. Plugging the Q10 in by cable applies it, and the Windows layout is derived from it.
+
+| Piece | Does |
+|---|---|
+| `q10.swift` | Mac tool, same safety rules as `q10.ps1`. Build: `swiftc -O -swift-version 5 q10.swift -o ~/.local/share/q10/q10`. Commands: `probe`, `selftest`, `dump -f x.json`, `apply -f x.json [--yes]` |
+| Hammerspoon (`init.lua`) | On cable connect (PID `0x08A1`) runs `apply` with the newest Mac layout, retries 3 times. The 2.4 GHz receiver is never written |
+| `make-win.py` | Writes `q10max-win-v2.json` from the newest Mac layout. `--check` reports drift |
+| Pause | Create `~/.local/share/q10/auto-off` |
+
+Close the Keychron Launcher tab before using `q10`: with the Launcher open the keyboard answers both programs and reads become unreliable.
+
 ## Notes
 
 - v5 and later overwrite Keychron's L1 RGB, Bluetooth and battery keys, and v13 does the same to the L3 digits `1`–`4` (Bluetooth / 2.4G switching, `0x7e0b`–`0x7e0e`, which I never verified). v4 still has them.
 - ⌃⇧⌘ + `3` / `4` is macOS's screenshot-to-clipboard shortcut, so M3 + `3` / `4` takes a screenshot.
 - Keyboard firmware V1.1.0 is available but not applied.
 - Receiver (Keychron Link Type A, V0.3.1) shows only as "Bootloader device" after a failed flash. Contact Keychron support before re-flashing.
+
+## On Windows
+
+The switch stays on Mac. The Windows layout (`q10max-win-v2.json`) is the Mac layout with these changes, so GlazeWM gets the same gestures AeroSpace has on the Mac. GlazeWM and other keyboards (Voyager) are untouched: the Q10 sends the plain Alt chords GlazeWM already uses.
+
+| Key | Mac | Windows |
+|---|---|---|
+| Bottom-left three keys | Cmd, Ctrl, Opt | Ctrl, Win, Alt |
+| Left space + `J` / `K` / `L` / `Ö` | Meh + key (AeroSpace focus) | Alt + key (GlazeWM focus) |
+| Left space + `1`–`9` | Meh + digit (go to workspace) | Alt + digit (go to workspace) |
+| M3 (hold) | ⌃⇧⌘ | Alt+Shift: M3 + `J` / `K` / `L` / `Ö` moves the window |
+| Middle key + `1`–`9` | ⌥⇧⌘ + digit (send window) | Alt+Shift + digit (send window) |
+
+| Command (WSL zsh) | Does |
+|---|---|
+| `q10` / `q10 win` | Write the Windows layout (USB cable) |
+| `q10 restore` | Write the Mac layout back (`q10max-mac-restore.json`) |
+| `q10 status` | Compare the keyboard with the Windows file |
+| `q10 install` | Copy the tool for `watchers.ahk`, which applies the Windows layout whenever the keyboard is plugged in by cable |
+
+The Mac side applies its own layout automatically, see "Mac automation" above.
