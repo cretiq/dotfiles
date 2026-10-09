@@ -1,0 +1,69 @@
+start-at-login = true
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'auto'
+accordion-padding = 30
+automatically-unhide-macos-hidden-apps = true
+
+[gaps]
+inner.horizontal = 40
+inner.vertical = 40
+outer.left = 40
+outer.right = 40
+outer.top = 40
+outer.bottom = 40
+
+[[on-window-detected]]
+if.app-id = 'com.apple.systempreferences'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.bitwarden.desktop'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.example.Convey'
+run = 'layout floating'
+
+# Modifiers match the Q10 layers: meh (ctrl-shift-alt) = L1, ctrl-shift-cmd = M3, alt-shift-cmd = L2 number row
+[mode.main.binding]
+ctrl-shift-alt-j = 'focus left'
+ctrl-shift-alt-k = 'focus down'
+ctrl-shift-alt-l = 'focus up'
+ctrl-shift-alt-semicolon = 'focus right'
+
+ctrl-shift-cmd-j = 'move left'
+ctrl-shift-cmd-k = 'move down'
+ctrl-shift-cmd-l = 'move up'
+ctrl-shift-cmd-semicolon = 'move right'
+ctrl-shift-cmd-f = 'fullscreen'
+ctrl-shift-cmd-u = 'join-with left'
+ctrl-shift-cmd-i = 'join-with down'
+ctrl-shift-cmd-o = 'join-with up'
+ctrl-shift-cmd-p = 'join-with right'
+
+ctrl-shift-alt-1 = 'workspace 1'
+ctrl-shift-alt-2 = 'workspace 2'
+ctrl-shift-alt-3 = 'workspace 3'
+ctrl-shift-alt-4 = 'workspace 4'
+ctrl-shift-alt-5 = 'workspace 5'
+ctrl-shift-alt-6 = 'workspace 6'
+ctrl-shift-alt-7 = 'workspace 7'
+ctrl-shift-alt-8 = 'workspace 8'
+ctrl-shift-alt-9 = 'workspace 9'
+
+alt-shift-cmd-1 = 'move-node-to-workspace 1'
+alt-shift-cmd-2 = 'move-node-to-workspace 2'
+alt-shift-cmd-3 = 'move-node-to-workspace 3'
+alt-shift-cmd-4 = 'move-node-to-workspace 4'
+alt-shift-cmd-5 = 'move-node-to-workspace 5'
+alt-shift-cmd-6 = 'move-node-to-workspace 6'
+alt-shift-cmd-7 = 'move-node-to-workspace 7'
+alt-shift-cmd-8 = 'move-node-to-workspace 8'
+alt-shift-cmd-9 = 'move-node-to-workspace 9'
+
+ctrl-shift-alt-slash = 'layout tiles horizontal vertical'
+ctrl-shift-alt-comma = 'layout accordion horizontal vertical'
+ctrl-shift-alt-f = 'layout floating tiling'
+ctrl-shift-alt-t = ['flatten-workspace-tree', 'layout tiles horizontal', 'balance-sizes']
+ctrl-shift-alt-minus = 'resize smart -50'
+ctrl-shift-alt-equal = 'resize smart +50'
