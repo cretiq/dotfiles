@@ -20,7 +20,7 @@ for key, app in pairs(apps) do
   hs.hotkey.bind(hyper, key, function() hs.application.launchOrFocus(app) end)
 end
 
-hs.hotkey.bind(hyper, "f13", function()
+hs.hotkey.bind(hyper, "f14", function()
   local ghostty = hs.application.get("Ghostty")
   if ghostty and ghostty:isFrontmost() then ghostty:hide() else hs.application.launchOrFocus("Ghostty") end
 end)
