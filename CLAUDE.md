@@ -49,7 +49,10 @@ Config: `/mnt/c/Users/FilipM/AppData/Local/Packages/Microsoft.WindowsTerminal_8w
 Config: `windows-keys/` (symlink to `C:\Users\FilipM\Desktop\Keys\`)
 
 - **`hotkeys-and-remaps.ahk`** — App launcher hotkeys (Ctrl+Alt+Shift+Win combinations) and `LCtrl+LAlt+1–6` (`<^<!`, left keys only: AltGr = Ctrl+Alt would swallow `@ £ $ €` on the Swedish layout) → Edge `https://localhost:5171–5176`. Supports left/right modifier distinction via `<^<#<!<+` (left) / `>^>#>!>+` (right) prefixes.
-- **`watchers.ahk`** — Background watchers, Startup shortcut `watchers.lnk`, versioned copy `ahk/watchers.ahk`: starts/stops GlazeWM by dock, blocks Win+arrows while it runs, forwards Win+Space, applies the Q10 Max Windows keymap on cable connect. Kept out of `hotkeys-and-remaps.ahk` because toggle scripts edit and reload that file.
+- **`watchers.ahk`** — Background watchers, Startup shortcut `watchers.lnk`, versioned copy `ahk/watchers.ahk`, log `%LOCALAPPDATA%\watchers.log`. Kept out of `hotkeys-and-remaps.ahk` because toggle scripts edit and reload that file.
+  - **Desk mode** (laptop panel not on the desktop, i.e. lid closed on the dock — Voyager at the office, Q10 at home): GlazeWM on + `set-all-keymap.sh voyager`. **Laptop screen on** (laptop alone, or laptop keyboard at a desk): GlazeWM off + `set-all-keymap.sh standard`. GlazeWM never runs with the laptop screen on, so the Standard Alt+HJKL arrows never clash with it. The preset runs only when the mode changes; `kk`/`kv`/`ks` overrides hold until the next change.
+  - Blocks Win+arrows while GlazeWM runs, forwards Win+Space, applies the Q10 Max Windows keymap on cable connect.
+  - Reacts to WM_DISPLAYCHANGE / WM_DEVICECHANGE, re-checks every 30 s.
 - **`interactive-menu-toggle-remaps.bat`** — Interactive menu to toggle ESC/CapsLock, Alt+HJKL, per-app HJKL/JKLÖ remaps, and Window Switcher mode (Voyager/Standard).
 - **`restart-window-switcher.ps1`** — Bound to Ctrl+Alt+Shift+Win+6. Kills and restarts the window-switcher process.
 - **`toggle-scripts/`** — Bash wrappers for ESC, Alt+HJKL, and other toggles.

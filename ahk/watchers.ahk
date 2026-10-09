@@ -1,30 +1,71 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
+Persistent
 
 ; Background watchers, started at logon (Startup\watchers.lnk). Live copy: C:\Users\FilipM\Desktop\Keys\watchers.ahk.
 ; Keys and remaps live in hotkeys-and-remaps.ahk, which toggle scripts edit and reload; these must not restart with it.
+; Display and device changes arrive as window messages; the 30 s re-check covers any that are missed.
+logFile := EnvGet("LOCALAPPDATA") "\watchers.log"
+Log(msg) => FileAppend(FormatTime(, "yyyy-MM-dd HH:mm:ss") "  " msg "`n", logFile)
 
-; GlazeWM only runs while a wide external display (docked) is connected.
-; Laptop panel alone is < 2500 px wide even before DPI scaling is undone.
+; Desk mode = the laptop panel is not on the desktop (lid closed, external screen only): GlazeWM on and the
+; Voyager preset, whose remaps are off so Alt+HJKL reaches GlazeWM. Laptop panel on: GlazeWM off, Standard preset.
+; The preset is applied only when the mode changes, so kk/kv/ks overrides last until the next change.
+; WMI keeps reporting a closed lid's panel as active, so the panel is looked up among the desktop monitors.
 glazewmDir := "C:\Program Files\glzr.io\GlazeWM"
-dockedMinWidth := 2500
+setAllKeymap := "/home/filip/.dotfiles/windows-keys/set-all-keymap.sh"
+internalPanels := Map()
+appliedMode := ""
 
-IsDocked() {
+InternalPanelIds() {
+    ids := Map()
+    for m in ComObjGet("winmgmts:root\wmi").ExecQuery("SELECT InstanceName, VideoOutputTechnology FROM WmiMonitorConnectionParams") {
+        tech := m.VideoOutputTechnology & 0xFFFFFFFF
+        ; D3DKMDT_VOT_INTERNAL, DISPLAYPORT_EMBEDDED, UDI_EMBEDDED
+        if (tech = 0x80000000 || tech = 11 || tech = 13)
+            ids[StrUpper(RegExReplace(m.InstanceName, "i)^DISPLAY\\|_\d+$"))] := true
+    }
+    return ids
+}
+
+PanelOnDesktop() {
+    dd := Buffer(840)  ; DISPLAY_DEVICEW: StateFlags at 324, DeviceID at 328
     Loop MonitorGetCount() {
-        MonitorGet(A_Index, &left, , &right)
-        if (right - left >= dockedMinWidth)
-            return true
+        adapter := MonitorGetName(A_Index)
+        i := 0
+        Loop {
+            NumPut("UInt", 840, dd)
+            if !DllCall("EnumDisplayDevicesW", "Str", adapter, "UInt", i++, "Ptr", dd, "UInt", 1)
+                break
+            if (NumGet(dd, 324, "UInt") & 1)
+                && RegExMatch(StrGet(dd.Ptr + 328, 128, "UTF-16"), "i)DISPLAY#([^#]+#[^#]+)#", &m)
+                && internalPanels.Has(StrUpper(StrReplace(m[1], "#", "\")))
+                return true
+        }
     }
     return false
 }
 
-SyncGlazewm() {
+SyncMode() {
+    global internalPanels, appliedMode
+    if !internalPanels.Count
+        internalPanels := InternalPanelIds()
+    if (!internalPanels.Count || !MonitorGetCount())
+        return
+    desk := !PanelOnDesktop()
     running := ProcessExist("glazewm.exe")
-    docked := IsDocked()
-    if (docked && !running)
+    if (desk && !running)
         Run '"' glazewmDir '\glazewm.exe"'
-    else if (!docked && running)
+    else if (!desk && running)
         Run '"' glazewmDir '\cli\glazewm.exe" command wm-exit', , "Hide"
+    mode := desk ? "desk" : "laptop"
+    if (mode = appliedMode)
+        return
+    appliedMode := mode
+    preset := desk ? "voyager" : "standard"
+    Log(mode " mode: GlazeWM " (desk ? "on" : "off") ", " preset " preset")
+    Run A_ComSpec ' /c wsl.exe bash ' setAllKeymap ' ' preset ' >> "' logFile '" 2>&1', , "Hide"
+    TrayTip desk ? "GlazeWM on, Voyager preset." : "GlazeWM off, Standard preset.", desk ? "Desk mode" : "Laptop screen"
 }
 
 ; Block Windows snap shortcuts while GlazeWM is tiling.
@@ -74,7 +115,22 @@ SyncQ10() {
         TrayTip "Could not apply the Windows layout. See " log, "Q10 Max", 3
 }
 
-SyncGlazewm()
-SetTimer SyncGlazewm, 5000
-SyncQ10()
-SetTimer SyncQ10, 5000
+; Monitor setups and USB devices settle over a few seconds; each new message restarts the delay.
+OnDisplayChange(*) {
+    SetTimer(SyncMode, -3000)
+}
+
+OnDeviceChange(wParam, *) {
+    if (wParam = 0x0007)  ; DBT_DEVNODES_CHANGED
+        SetTimer(SyncQ10, -2000)
+}
+
+SyncAll() {
+    SyncMode()
+    SyncQ10()
+}
+
+OnMessage(0x007E, OnDisplayChange)  ; WM_DISPLAYCHANGE
+OnMessage(0x0219, OnDeviceChange)   ; WM_DEVICECHANGE
+SyncAll()
+SetTimer(SyncAll, 30000)
