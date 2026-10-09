@@ -1,6 +1,6 @@
 # Keychron Q10 Max cheat sheet
 
-Current keymap: `q10max-v6.json` (import in https://launcher.keychron.com, USB cable).
+Current keymap: `q10max-v11.json` (import in https://launcher.keychron.com, USB cable).
 The original export `Keymap-Q10 Max ISO knob-8-17-26.json` is never overwritten. Older intermediates live in `history/`.
 
 ## Layer keys
@@ -9,33 +9,50 @@ The original export `Keymap-Q10 Max ISO knob-8-17-26.json` is never overwritten.
 |---|---|
 | Left space | hold = L1 |
 | Middle key | tap = Space, hold = L2 |
-| Right big key, M1 | hold = L3 |
-| PgUp | sends ⌃⌥⌘ (modifier only) |
+| Right big key | hold = L3 |
+| M1 | tap = Ghostty show/hide (Hyper+F13) |
 | M3 | sends ⌃⇧⌘ (modifier only) |
+| M2, M4, M5, PgUp | no-op, free |
+
+All Launcher macros were removed in v7.
 
 ## Modifier namespace per layer
 
-Hammerspoon matches modifiers exactly, so each combo is its own namespace.
+Hammerspoon and AeroSpace match modifiers exactly, so each combo is its own namespace.
 
 | Source | Sends | Used for |
 |---|---|---|
-| L1 (left space) + key | Meh (⌃⌥⇧) | Windows |
-| L2 (middle key) number row, F-row | ⌥⇧⌘ | Free slots |
-| L3 (right big key) + key | Hyper (⌃⌥⇧⌘) | Scripts and text |
-| PgUp + key | ⌃⌥⌘ | App launchers |
-| M3 + key | ⌃⇧⌘ | App launchers (same as PgUp) |
+| L1 (left space) + key | Meh (⌃⌥⇧) | AeroSpace: focus, workspaces, layout |
+| L2 (middle key) number row, F-row | ⌥⇧⌘ | AeroSpace: send window to workspace |
+| L3 (right big key) + key | Hyper (⌃⌥⇧⌘) | Hammerspoon: app launchers, text |
+| M3 + key | ⌃⇧⌘ | AeroSpace: move, join, fullscreen |
 
 Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L3 keeps the media F-row, and digits `1`–`4` keep their Keychron codes.
 
-## Hammerspoon bindings (`hammerspoon/.hammerspoon/init.lua`)
+## AeroSpace (`aerospace/.config/aerospace/aerospace.toml`)
 
 | Press | Action |
 |---|---|
-| Left space + `J` / `K` / `L` / `Ö` | Focus window left / down / up / right |
-| Right big key + `N` | Type `/next ` then Enter |
+| Left space + `J` / `K` / `L` / `Ö` | Focus left / down / up / right |
+| Left space + `1`–`9` | Go to workspace |
+| Left space + `T` | Tidy: reset layout, balance sizes |
+| Left space + `/` and `,` | Tiles layout, accordion layout |
+| Left space + `F` | Toggle floating |
+| Left space + `-` and `=` | Shrink and grow window |
+| M3 + `J` / `K` / `L` / `Ö` | Move window left / down / up / right |
+| M3 + `U` / `I` / `O` / `P` | Join with left / down / up / right neighbor (stack over/under) |
+| M3 + `F` | Fullscreen |
+| Middle key + `1`–`9` | Send window to workspace |
+| Left space + right big key | Spotlight (Cmd+Space) |
+
+## Hammerspoon (`hammerspoon/.hammerspoon/init.lua`)
+
+| Press | Action |
+|---|---|
+| Right big key + `Q F A H C Z J E X B S` | Obsidian, Finder, Spotify, Claude, Edge, Bitwarden, ChatGPT, X Pro, Xcode, BetterTouchTool, Simulator |
 | Right big key + `T` | Convey translator (Hyper+T, set in Convey) |
-| PgUp or M3 + `Q F A H C Z J E X B S` | Obsidian, Finder, Spotify, Claude, Edge, Bitwarden, ChatGPT, X Pro, Xcode, BetterTouchTool, Simulator |
-| PgUp or M3 + `T` | Forwards Hyper+T to Convey |
+| Right big key + `N` | Type `/next ` then Enter |
+| M1 | Show/hide Ghostty |
 | F1 | Minimize window |
 | F2 | Mission Control |
 | F7 / F8 / F9 / F10 | Previous / play-pause / next / mute |
@@ -51,8 +68,8 @@ Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L
 - `I` / `O`: Opt+Left / Opt+Right (word jump)
 - `H` / `'`: Cmd+Left / Cmd+Right (line start / end)
 - `J` / `K` / `L` / `Ö`: Left / Down / Up / Right
+- Enter: Cmd+Enter. Backspace: Cmd+Backspace.
 - Right big key: Cmd+Space. Middle key: back to L0.
-- `Y`, Backspace, M-keys run Launcher macros (not in the export).
 
 ## L0 and knob
 
