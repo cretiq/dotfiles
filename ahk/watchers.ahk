@@ -64,8 +64,22 @@ SyncMode() {
     appliedMode := mode
     preset := desk ? "voyager" : "standard"
     Log(mode " mode: GlazeWM " (desk ? "on" : "off") ", " preset " preset")
-    Run A_ComSpec ' /c wsl.exe bash ' setAllKeymap ' ' preset ' >> "' logFile '" 2>&1', , "Hide"
+    hotkeysFile := A_ScriptDir "\hotkeys-and-remaps.ahk"
+    before := FileGetTime(hotkeysFile)
+    RunWait A_ComSpec ' /c wsl.exe bash ' setAllKeymap ' ' preset ' --no-reload >> "' logFile '" 2>&1', , "Hide"
+    if (FileGetTime(hotkeysFile) != before)
+        RestartHotkeys(hotkeysFile)
     TrayTip desk ? "GlazeWM on, Voyager preset." : "GlazeWM off, Standard preset.", desk ? "Desk mode" : "Laptop screen"
+}
+
+; Restarted from here rather than from the hidden WSL session: a copy launched there did not replace the
+; running one (two copies ran, the old remap state won).
+RestartHotkeys(path) {
+    for p in ComObjGet("winmgmts:").ExecQuery("SELECT ProcessId, CommandLine FROM Win32_Process WHERE Name LIKE 'AutoHotkey%'")
+        if InStr(p.CommandLine, "hotkeys-and-remaps.ahk")
+            ProcessClose(p.ProcessId)
+    Run '"' A_AhkPath '" "' path '"'
+    Log("restarted hotkeys-and-remaps.ahk")
 }
 
 ; Block Windows snap shortcuts while GlazeWM is tiling.
