@@ -1,7 +1,7 @@
 require("hs.ipc")
 
--- Q10 modifier combos: L3 hyper, L1 meh, L2 alt+shift+cmd; meh and m3 combos are bound in aerospace
-local hyper = {"cmd", "alt", "ctrl", "shift"}
+-- Q10 right space (L3) sends meh (ctrl+shift+alt); left space belongs to aerospace
+local meh = {"ctrl", "shift", "alt"}
 
 local apps = {
   q = "Obsidian",
@@ -17,7 +17,7 @@ local apps = {
   s = "Simulator",
 }
 for key, app in pairs(apps) do
-  hs.hotkey.bind(hyper, key, function() hs.application.launchOrFocus(app) end)
+  hs.hotkey.bind(meh, key, function() hs.application.launchOrFocus(app) end)
 end
 
 hs.hotkey.bind({}, "f1", function()
@@ -75,7 +75,7 @@ local function typeSlowly(text, delay, done)
   end)
 end
 
-hs.hotkey.bind(hyper, "n", function()
+hs.hotkey.bind(meh, "n", function()
   typeSlowly("/next ", 0.003, function()
     hs.timer.doAfter(0.03, function() hs.eventtap.keyStroke({}, "return", 10000) end)
   end)
@@ -128,7 +128,7 @@ local function applyQ10()
         hs.alert.show("Q10: could not apply the Mac layout. Is the Keychron Launcher tab open?", 8)
       end
     end
-  end, {"apply", "-f", layout, "--yes"}):start()
+  end, {"apply", "-f", layout, "--yes", "--max-cells", "150"}):start()
 end
 
 q10Watcher = hs.usb.watcher.new(function(e)
