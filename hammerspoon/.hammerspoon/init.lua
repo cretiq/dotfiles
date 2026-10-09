@@ -96,16 +96,35 @@ local function newestMacLayout()
   return best and (q10Layouts .. "/" .. best)
 end
 
+local function launcherOpen()
+  for _, w in ipairs(hs.window.allWindows()) do
+    if (w:title() or ""):find("Keychron Launcher", 1, true) then return true end
+  end
+  return false
+end
+
+local q10Waits = 0
 local function applyQ10()
   if hs.fs.attributes(q10Bin .. "/auto-off") then return end
   local layout = newestMacLayout()
   if not layout then return end
+  if launcherOpen() and q10Waits < 12 then
+    if q10Waits == 0 then hs.alert.show("Q10: close the Keychron Launcher tab to apply the Mac layout", 8) end
+    q10Waits = q10Waits + 1
+    hs.timer.doAfter(5, applyQ10)
+    return
+  end
+  q10Waits = 0
   hs.task.new(q10Bin .. "/q10", function(_, out)
     if out:find("Verified") then
       hs.alert.show("Q10: Mac layout applied")
     elseif not out:find("already matches") then
       q10Tries = q10Tries + 1
-      if q10Tries < 3 then hs.timer.doAfter(3, applyQ10) else hs.alert.show("Q10: could not apply Mac layout") end
+      if q10Tries < 3 then
+        hs.timer.doAfter(3, applyQ10)
+      else
+        hs.alert.show("Q10: could not apply the Mac layout. Is the Keychron Launcher tab open?", 8)
+      end
     end
   end, {"apply", "-f", layout, "--yes"}):start()
 end
