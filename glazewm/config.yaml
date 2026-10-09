@@ -133,7 +133,9 @@ workspaces:
 
 window_rules:
   # Managed but floating by default, so focus cycling can reach it.
-  - commands: ['set-floating']
+  # set-tiling first: a window that starts maximized has previous state fullscreen,
+  # and toggle-floating would send it back there instead of to tiling.
+  - commands: ['set-tiling', 'set-floating']
     match:
       - window_process: { equals: 'ms-teams' }
       - window_process: { equals: 'keymapp' }
@@ -268,15 +270,12 @@ keybindings:
   - commands: ['shell-exec cmd']
     bindings: ['alt+enter']
 
-  # Focus the next/previous active workspace defined in `workspaces` config.
-  - commands: ['focus --next-active-workspace']
-    bindings: ['alt+s']
   - commands: ['focus --prev-active-workspace']
     bindings: ['alt+a']
 
-  # Focus the workspace that last had focus.
-  - commands: ['focus --recent-workspace']
-    bindings: ['alt+d']
+  # From any workspace other than 1 this goes to 1, not to the next one.
+  - commands: ['shell-exec --hide-window powershell -NoProfile -File C:\Users\FilipM\.glzr\glazewm\cycle-workspace.ps1']
+    bindings: ['alt+h']
 
   # Change focus to a workspace defined in `workspaces` config.
   - commands: ['focus --workspace 1']
