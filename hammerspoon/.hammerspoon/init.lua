@@ -118,7 +118,9 @@ local function applyQ10()
   hs.task.new(q10Bin .. "/q10", function(_, out)
     if out:find("Verified") then
       hs.alert.show("Q10: Mac layout applied")
-    elseif not out:find("already matches") then
+    elseif out:find("already matches") then
+      hs.alert.show("Q10: Mac layout already set")
+    else
       q10Tries = q10Tries + 1
       if q10Tries < 3 then
         hs.timer.doAfter(3, applyQ10)
