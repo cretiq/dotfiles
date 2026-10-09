@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# The Mac layout is the master. Windows swaps the AeroSpace modifier chords for the Alt chords GlazeWM expects.
+# The Mac layout is the master. Windows keeps L1 Meh and L3 Hyper, and gives GlazeWM its Alt chords.
 import hashlib
 import json
 import re
@@ -30,8 +30,11 @@ def convert(d):
                 k["val"] = 0x600
     for rc, k in pos[1].items():
         code = base[rc]
-        if (code in DIGITS or code in JKLO) and k["val"] == 0x700 | code:
-            k["val"] = 0x400 | code
+        if k["val"] == 0xD00 | code and code:
+            k["val"] = (0x400 if code in DIGITS or code in JKLO else 0x700) | code
+    for k in km[3]:
+        if k["val"] & 0xFF and (k["val"] & 0xFF00) == 0x700:
+            k["val"] = 0xF00 | (k["val"] & 0xFF)
     for rc, k in pos[2].items():
         code = base[rc]
         if code in DIGITS and k["val"] == 0xE00 | code:
