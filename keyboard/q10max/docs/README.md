@@ -1,6 +1,6 @@
 # Keychron Q10 Max cheat sheet
 
-Current keymap: `q10max-v16.json` (import in https://launcher.keychron.com, USB cable).
+Current keymap: `q10max-v17.json` (import in https://launcher.keychron.com, USB cable).
 The original export `Keymap-Q10 Max ISO knob-8-17-26.json` is never overwritten. Older intermediates live in `history/`.
 
 ## Layer keys
@@ -13,7 +13,8 @@ The original export `Keymap-Q10 Max ISO knob-8-17-26.json` is never overwritten.
 | M1 | sends ⇧⌘ (modifier only) |
 | M2 | sends Hyper+F14, nothing bound |
 | M3 | sends ⌃⇧⌘ (modifier only), nothing bound |
-| M4, M5, PgUp | no-op, free |
+| M4, PgUp | no-op, free |
+| M5 | sends ⇧⌘ + the key above Tab, opens the Convey keyboard cheat sheet |
 
 All Launcher macros were removed in v7.
 
@@ -48,6 +49,16 @@ Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L
 | Left space + `-` and `=` | Shrink and grow window |
 | Left space + right big key | Spotlight (Cmd+Space) |
 
+## Window border (JankyBorders)
+
+AeroSpace has no border of its own. JankyBorders draws it. AeroSpace starts it (`after-startup-command` in `aerospace.toml`), and it reads its settings from `borders/.config/borders/bordersrc`, stowed to `~/.config/borders` (`stow borders`).
+
+- Install: `brew install FelixKratz/formulae/borders` (the plain name `borders` is not in Homebrew core).
+- Current look: sunset gradient (orange to pink) on the focused window, dim grey on the others, 3 px, rounded, `hidpi=on`, `order=above`.
+- `order=above` draws the border over the window, which looked right. It is missing from the v1.9.0 man page, so it was found by trying it.
+- Try a value live with `borders width=5.0`, then put it in `bordersrc` so it survives a restart. Quote gradients, the shell reads the parentheses.
+- Apply `bordersrc` after editing: `pkill -x borders; borders &`.
+
 ## Hammerspoon (`hammerspoon/.hammerspoon/init.lua`)
 
 | Press | Action |
@@ -60,6 +71,15 @@ Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L
 | F7 / F8 / F9 / F10 | Previous / play-pause / next / mute |
 | F11 / F12 | Volume down / up |
 | Scroll down over a Dock icon | Minimize that app's windows |
+
+## Convey (hold M1)
+
+| Press | Action |
+|---|---|
+| M1 + `J` | Cheat sheet (searchable) |
+| M1 + the key above Tab, or M5 | Cheat sheet in keyboard view, with the Q10 drawn |
+| Right space + `T` | Translator (Meh+`T`) |
+| Left space + Shift + `M` | Free mode (Hyper+`M`) |
 
 ## CleanShot (hold M1)
 
