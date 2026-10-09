@@ -30,6 +30,14 @@ run = 'layout tiling'
 if.app-id = 'com.example.Convey'
 run = 'layout floating'
 
+[[on-window-detected]]
+if.app-id = 'com.apple.MobileSMS'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.iCal'
+run = 'layout floating'
+
 # Q10 left space (L1) sends ctrl-alt-cmd; holding Shift as well makes it hyper
 [mode.main.binding]
 ctrl-alt-cmd-j = 'focus left'
