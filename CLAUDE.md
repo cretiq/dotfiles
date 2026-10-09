@@ -67,7 +67,7 @@ Windows app. Registers its own global hotkeys (`hotkeys.rs`; a key already taken
 ## Keyboard: Keychron Q10 Max
 
 Files in `keyboard/q10max/`; details in the `keychron-q10-max` skill. The keyboard holds one keymap and its Mac/Win switch stays on **Mac** on both machines. Mac behaviour must never change.
-- `q10max-mac-restore.json` = Mac layout, `q10max-win-v1.json` = same with Windows bottom row (Ctrl | Win | Alt).
+- `q10max-mac-restore.json` = Mac layout. `q10max-win-v2.json` = same with Windows bottom row (Ctrl | Win | Alt) and GlazeWM gestures: left space + J/K/L/Ö or 1–9 sends Alt + key, M3 holds Alt+Shift, middle key + 1–9 sends Alt+Shift + digit. GlazeWM keeps only its Alt chords, so other keyboards (Voyager) are unaffected.
 - WSL: `q10` (zsh function in `zsh/.zshrc`) swaps the layout over USB via `q10.ps1`; `q10 install` copies the tool to `%LOCALAPPDATA%\q10`, where `watchers.ahk` uses it to apply the Windows layout when the keyboard is plugged in by cable.
 
 ## Worktree Navigation (@prefix)

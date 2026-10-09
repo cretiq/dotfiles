@@ -95,7 +95,15 @@ Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L
 
 ## On Windows
 
-The switch stays on Mac. The Windows layout (`q10max-win-v1.json`) only changes the three bottom-left keys to Ctrl | Win | Alt; everything else is the Mac layout.
+The switch stays on Mac. The Windows layout (`q10max-win-v2.json`) is the Mac layout with these changes, so GlazeWM gets the same gestures AeroSpace has on the Mac. GlazeWM and other keyboards (Voyager) are untouched: the Q10 sends the plain Alt chords GlazeWM already uses.
+
+| Key | Mac | Windows |
+|---|---|---|
+| Bottom-left three keys | Cmd, Ctrl, Opt | Ctrl, Win, Alt |
+| Left space + `J` / `K` / `L` / `Ö` | Meh + key (AeroSpace focus) | Alt + key (GlazeWM focus) |
+| Left space + `1`–`9` | Meh + digit (go to workspace) | Alt + digit (go to workspace) |
+| M3 (hold) | ⌃⇧⌘ | Alt+Shift: M3 + `J` / `K` / `L` / `Ö` moves the window |
+| Middle key + `1`–`9` | ⌥⇧⌘ + digit (send window) | Alt+Shift + digit (send window) |
 
 | Command (WSL zsh) | Does |
 |---|---|

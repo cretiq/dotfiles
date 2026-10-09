@@ -62,7 +62,7 @@ SyncQ10() {
     ; The raw-HID interface enumerates a moment after the keyboard itself.
     Sleep 3000
     log := q10Dir "\auto.log"
-    RunWait A_ComSpec ' /c powershell -NoProfile -ExecutionPolicy Bypass -File "' q10Dir '\q10.ps1" apply -File "' q10Dir '\q10max-win-v1.json" -Yes > "' log '" 2>&1', , "Hide"
+    RunWait A_ComSpec ' /c powershell -NoProfile -ExecutionPolicy Bypass -File "' q10Dir '\q10.ps1" apply -File "' q10Dir '\q10max-win-v2.json" -Yes > "' log '" 2>&1', , "Hide"
     out := FileRead(log)
     if InStr(out, "Verified")
         TrayTip "Windows layout applied.", "Q10 Max"

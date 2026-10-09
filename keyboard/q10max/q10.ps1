@@ -13,7 +13,7 @@ param(
     [switch]$Yes,
     [switch]$AnyPid,
     [string]$RawOut,
-    [int]$MaxCells = 8
+    [int]$MaxCells = 32
 )
 $ErrorActionPreference = 'Stop'
 
@@ -175,8 +175,8 @@ switch ($Mode) {
     'install' {
         $dst = Join-Path $env:LOCALAPPDATA 'q10'
         New-Item -ItemType Directory -Force $dst | Out-Null
-        foreach ($f in 'q10.ps1', 'q10max-win-v1.json') { Copy-Item -Force (Join-Path $PSScriptRoot $f) $dst }
-        "Copied q10.ps1 and q10max-win-v1.json to $dst (used by watchers.ahk on cable connect)."
+        foreach ($f in 'q10.ps1', 'q10max-win-v2.json') { Copy-Item -Force (Join-Path $PSScriptRoot $f) $dst }
+        "Copied q10.ps1 and q10max-win-v2.json to $dst (used by watchers.ahk on cable connect)."
     }
     'probe' {
         Get-Interfaces | Format-Table Id, Ok, @{n = 'PID'; e = { '0x{0:X4}' -f $_.Pid } }, @{n = 'Page'; e = { '0x{0:X4}' -f $_.Page } }, @{n = 'Usage'; e = { '0x{0:X2}' -f $_.Usage } }, InLen, OutLen, Err -AutoSize | Out-String -Width 250
