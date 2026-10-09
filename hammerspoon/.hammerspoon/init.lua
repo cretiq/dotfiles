@@ -20,11 +20,6 @@ for key, app in pairs(apps) do
   hs.hotkey.bind(hyper, key, function() hs.application.launchOrFocus(app) end)
 end
 
-hs.hotkey.bind(hyper, "f14", function()
-  local ghostty = hs.application.get("Ghostty")
-  if ghostty and ghostty:isFrontmost() then ghostty:hide() else hs.application.launchOrFocus("Ghostty") end
-end)
-
 hs.hotkey.bind({}, "f1", function()
   local win = hs.window.focusedWindow()
   if win then win:minimize() end
@@ -81,7 +76,9 @@ local function typeSlowly(text, delay, done)
 end
 
 hs.hotkey.bind(hyper, "n", function()
-  typeSlowly("/next ", 0.01, function() hs.eventtap.keyStroke({}, "return") end)
+  typeSlowly("/next ", 0.003, function()
+    hs.timer.doAfter(0.03, function() hs.eventtap.keyStroke({}, "return", 10000) end)
+  end)
 end)
 
 hs.alert.show("Hammerspoon config loaded")
