@@ -46,7 +46,20 @@ PanelOnDesktop() {
     return false
 }
 
+; Timers interrupt each other mid-check: two overlapping checks both saw GlazeWM stopped and both started it
+; ("Another instance of the application is already running"). One check at a time; a blocked one retries.
 SyncMode() {
+    static busy := false
+    if busy {
+        SetTimer(SyncMode, -2000)
+        return
+    }
+    busy := true
+    try ApplyMode()
+    finally busy := false
+}
+
+ApplyMode() {
     global internalPanels, appliedMode
     if !internalPanels.Count
         internalPanels := InternalPanelIds()
