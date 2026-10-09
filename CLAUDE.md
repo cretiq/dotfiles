@@ -48,11 +48,27 @@ Config: `/mnt/c/Users/FilipM/AppData/Local/Packages/Microsoft.WindowsTerminal_8w
 
 Config: `windows-keys/` (symlink to `C:\Users\FilipM\Desktop\Keys\`)
 
-- **`hotkeys-and-remaps.ahk`** — App launcher hotkeys (Ctrl+Alt+Shift+Win combinations). Supports left/right modifier distinction via `<^<#<!<+` (left) / `>^>#>!>+` (right) prefixes.
+- **`hotkeys-and-remaps.ahk`** — App launcher hotkeys (Ctrl+Alt+Shift+Win combinations) and `LCtrl+LAlt+1–6` (`<^<!`, left keys only: AltGr = Ctrl+Alt would swallow `@ £ $ €` on the Swedish layout) → Edge `https://localhost:5171–5176`. Supports left/right modifier distinction via `<^<#<!<+` (left) / `>^>#>!>+` (right) prefixes.
+- **`watchers.ahk`** — Background watchers, Startup shortcut `watchers.lnk`, versioned copy `ahk/watchers.ahk`: starts/stops GlazeWM by dock, blocks Win+arrows while it runs, forwards Win+Space, applies the Q10 Max Windows keymap on cable connect. Kept out of `hotkeys-and-remaps.ahk` because toggle scripts edit and reload that file.
 - **`interactive-menu-toggle-remaps.bat`** — Interactive menu to toggle ESC/CapsLock, Alt+HJKL, per-app HJKL/JKLÖ remaps, and Window Switcher mode (Voyager/Standard).
 - **`restart-window-switcher.ps1`** — Bound to Ctrl+Alt+Shift+Win+6. Kills and restarts the window-switcher process.
 - **`toggle-scripts/`** — Bash wrappers for ESC, Alt+HJKL, and other toggles.
 - **`status-scripts/`** — Display current remap status.
+
+## Convey (hotkey app + cheat sheets)
+
+Windows app. Registers its own global hotkeys (`hotkeys.rs`; a key already taken is rejected, message names the owner) and shows per-app shortcut cheat sheets. Settings: `%LOCALAPPDATA%\Convey\settings.json` (`/mnt/c/Users/FilipM/AppData/Local/Convey/`).
+
+- **Global hotkeys in use:** `Ctrl+Alt+Shift+M` capture memory, `Ctrl+Alt+Shift+J` cheat sheet, `Ctrl+Alt+Shift+Win+I` Translate, `Ctrl+Alt+Shift+Win+W` What word?, macros `Ctrl+Alt+Shift+Z` (Rename) / `Ctrl+Alt+Shift+A` (Next). Main toggle, command bar, Free mode unset. Check this list before binding any new `Ctrl+Alt+Shift(+Win)` combo in AHK, GlazeWM or Terminal.
+- **Cheat sheets:** one `.md` per app in `…/Convey/cheatsheets/` (43 apps; entries are `` - `keys` — description ``). Re-read each time the window opens. Only verified shortcuts go in.
+- **Keep in sync:** after changing aliases, keymaps or hotkeys here (zsh, GlazeWM, AHK, Terminal, nvim…), run `/cheatsheet --changed --light` (`~/.claude/commands/cheatsheet.md`). It finds the sheets by their `source:` line and patches only the changed entries; `--changed` alone re-verifies those sheets in full. Do not hand-edit around it. A config no sheet lists (e.g. `hotkeys-and-remaps.ahk`) is reported as `unowned`; create its sheet with `/cheatsheet <app>`.
+- **Currently stale:** `zsh.md` and `claude-code.md` still list removed aliases (`ch`, `csh`, `csm`, `coh`, `com`, `ccca`, `cccu`, `cwt`) and lack `cdot`; `glazewm.md` lacks `alt+h`. The AHK Edge keys (`LCtrl+LAlt+1–6`, `Ctrl+Alt+Shift+Win+C`) live in `edge.md`; the other AHK launchers are in no sheet.
+
+## Keyboard: Keychron Q10 Max
+
+Files in `keyboard/q10max/`; details in the `keychron-q10-max` skill. The keyboard holds one keymap and its Mac/Win switch stays on **Mac** on both machines. Mac behaviour must never change.
+- `q10max-mac-restore.json` = Mac layout, `q10max-win-v1.json` = same with Windows bottom row (Ctrl | Win | Alt).
+- WSL: `q10` (zsh function in `zsh/.zshrc`) swaps the layout over USB via `q10.ps1`; `q10 install` copies the tool to `%LOCALAPPDATA%\q10`, where `watchers.ahk` uses it to apply the Windows layout when the keyboard is plugged in by cable.
 
 ## Worktree Navigation (@prefix)
 
@@ -70,22 +86,20 @@ Quick navigation to Phoenix worktrees in `/mnt/c/Dev` (WSL) or `C:\Dev` (Windows
 
 ## Claude Code Aliases
 
-Defined in `zsh/.zshrc` (lines 199-215) and `zsh/worktree-nav.zsh`:
+Defined in `zsh/.zshrc` (lines 194-217) and `zsh/worktree-nav.zsh`. Default for everything: `claude-sonnet-5-5`, `--effort high`.
 
-**Functions (Opus 5 xhigh by default):**
-- `c` — Launch Claude Code (always `claude-opus-5[1m]` `--effort xhigh`)
-- `cc` — `--continue` (always `claude-opus-5[1m]` `--effort xhigh`)
+**Functions:**
+- `c` — Launch Claude Code (`--model claude-sonnet-5-5 --effort high`)
+- `cc` — `--continue` (`--model claude-sonnet-5-5 --effort high`)
 
 **Model shortcuts:**
 - `cr` — `--resume`
-- `ch` — Haiku | `cs` — Sonnet | `co` — Opus 5
-- `csh` — Sonnet high | `csm` — Sonnet max
-- `coh` — Opus 5 high | `com` — Opus 5 xhigh
+- `cs` — Sonnet high
+- `co` — Opus 5.5 `[1m]`
 
 **Scratch workspace:**
 - `ccc` — cd ~/claude-scratch + launch
-- `ccca` — scratch + /analysis:analyze-processes
-- `cccu` — scratch + /usage
+- `cdot` — cd ~/.dotfiles + launch
 
 ## File Structure
 
