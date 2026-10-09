@@ -1,6 +1,6 @@
 # Keychron Q10 Max cheat sheet
 
-Current keymap: `q10max-v14.json` (import in https://launcher.keychron.com, USB cable).
+Current keymap: `q10max-v16.json` (import in https://launcher.keychron.com, USB cable).
 The original export `Keymap-Q10 Max ISO knob-8-17-26.json` is never overwritten. Older intermediates live in `history/`.
 
 ## Layer keys
@@ -8,26 +8,27 @@ The original export `Keymap-Q10 Max ISO knob-8-17-26.json` is never overwritten.
 | Key | Does |
 |---|---|
 | Left space | tap = Space, hold = L1 |
-| Middle key | tap = Space, hold = L2 |
+| Middle key | hold = L2 (no tap) |
 | Right big key | hold = L3 |
 | M1 | sends ⇧⌘ (modifier only) |
 | M2 | sends Hyper+F14, nothing bound |
-| M3 | sends ⌃⇧⌘ (modifier only) |
+| M3 | sends ⌃⇧⌘ (modifier only), nothing bound |
 | M4, M5, PgUp | no-op, free |
 
 All Launcher macros were removed in v7.
 
 ## Modifier namespace per layer
 
-Hammerspoon and AeroSpace match modifiers exactly, so each combo is its own namespace.
+Hammerspoon and AeroSpace match modifiers exactly, so each combo is its own namespace. Only chords with 3 or 4 modifiers are used, which apps almost never claim. Left space + Shift is a different chord from left space alone, because the layer base has no Shift.
 
 | Source | Sends | Used for |
 |---|---|---|
-| L1 (left space) + key | Meh (⌃⌥⇧) | AeroSpace: focus, workspaces, layout |
-| L2 (middle key) number row, F-row | ⌥⇧⌘ | AeroSpace: send window to workspace |
-| L3 (right big key) + key | Hyper (⌃⌥⇧⌘) | Hammerspoon: app launchers, text |
+| Left space (L1) + key | ⌃⌥⌘ | AeroSpace: focus, workspaces, layout |
+| Left space + physical Shift + key | Hyper (⌃⌥⇧⌘) | AeroSpace: move, send to workspace, join, fullscreen |
+| Right big key (L3) + key | Meh (⌃⌥⇧) | Hammerspoon: app launchers, text. Convey: Meh+`T` |
+| Middle key (L2) number row, F-row | ⌥⇧⌘ | Free slots |
 | M1 + key | ⇧⌘ | CleanShot: capture shortcuts |
-| M3 + key | ⌃⇧⌘ | AeroSpace: move, join, fullscreen |
+| M3 + key | ⌃⇧⌘ | Free (avoid `3` / `4`, macOS screenshot) |
 
 Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L3 keeps the media F-row.
 
@@ -36,15 +37,15 @@ Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L
 | Press | Action |
 |---|---|
 | Left space + `J` / `K` / `L` / `Ö` | Focus left / down / up / right |
+| Left space + Shift + `J` / `K` / `L` / `Ö` | Move window left / down / up / right |
 | Left space + `1`–`9` | Go to workspace |
+| Left space + Shift + `1`–`9` | Send window to workspace |
+| Left space + Shift + `U` / `I` / `O` / `P` | Join with left / down / up / right neighbor (stack over/under) |
 | Left space + `T` | Tidy: reset layout, balance sizes |
 | Left space + `/` and `,` | Tiles layout, accordion layout |
 | Left space + `F` | Toggle floating |
+| Left space + Shift + `F` | Fullscreen |
 | Left space + `-` and `=` | Shrink and grow window |
-| M3 + `J` / `K` / `L` / `Ö` | Move window left / down / up / right |
-| M3 + `U` / `I` / `O` / `P` | Join with left / down / up / right neighbor (stack over/under) |
-| M3 + `F` | Fullscreen |
-| Middle key + `1`–`9` | Send window to workspace |
 | Left space + right big key | Spotlight (Cmd+Space) |
 
 ## Hammerspoon (`hammerspoon/.hammerspoon/init.lua`)
@@ -52,7 +53,7 @@ Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L
 | Press | Action |
 |---|---|
 | Right big key + `Q F A H C Z J E X B S` | Obsidian, Finder, Spotify, Claude, Edge, Bitwarden, ChatGPT, X Pro, Xcode, BetterTouchTool, Simulator |
-| Right big key + `T` | Convey translator (Hyper+T, set in Convey) |
+| Right big key + `T` | Convey translator (Meh+`T`, set in Convey's settings) |
 | Right big key + `N` | Type `/next ` then Enter |
 | F1 | Minimize window |
 | F2 | Mission Control |
@@ -92,7 +93,7 @@ The Mac layout is the master: the newest `q10max-vN.json`. Plugging the Q10 in b
 | Piece | Does |
 |---|---|
 | `q10.swift` | Mac tool, same safety rules as `q10.ps1`. Build: `swiftc -O -swift-version 5 q10.swift -o ~/.local/share/q10/q10`. Commands: `probe`, `selftest`, `dump -f x.json`, `apply -f x.json [--yes]` |
-| Hammerspoon (`init.lua`) | On cable connect (PID `0x08A1`) runs `apply` with the newest Mac layout, retries 3 times. The 2.4 GHz receiver is never written |
+| Hammerspoon (`init.lua`) | On cable connect (PID `0x08A1`) runs `apply` with the newest Mac layout, retries 3 times, up to 150 changed keys per apply. The 2.4 GHz receiver is never written |
 | `make-win.py` | Writes `q10max-win-v2.json` from the newest Mac layout. `--check` reports drift |
 | Pause | Create `~/.local/share/q10/auto-off` |
 
@@ -112,10 +113,14 @@ The switch stays on Mac. The Windows layout (`q10max-win-v2.json`) is the Mac la
 | Key | Mac | Windows |
 |---|---|---|
 | Bottom-left three keys | Cmd, Ctrl, Opt | Ctrl, Win, Alt |
-| Left space + `J` / `K` / `L` / `Ö` | Meh + key (AeroSpace focus) | Alt + key (GlazeWM focus) |
-| Left space + `1`–`9` | Meh + digit (go to workspace) | Alt + digit (go to workspace) |
-| M3 (hold) | ⌃⇧⌘ | Alt+Shift: M3 + `J` / `K` / `L` / `Ö` moves the window |
-| Middle key + `1`–`9` | ⌥⇧⌘ + digit (send window) | Alt+Shift + digit (send window) |
+| Left space + `J` / `K` / `L` / `Ö` | ⌃⌥⌘ + key (AeroSpace focus) | Alt + key (GlazeWM focus) |
+| Left space + `1`–`9` | ⌃⌥⌘ + digit (go to workspace) | Alt + digit (go to workspace) |
+| Left space + Shift + `J` / `K` / `L` / `Ö` | Hyper + key (AeroSpace move) | Alt+Shift + key (GlazeWM move) |
+| Left space + Shift + `1`–`9` | Hyper + digit (send window) | Alt+Shift + digit (send window) |
+| Left space, other keys | ⌃⌥⌘ + key | Meh (⌃⌥⇧) + key, as before |
+| Right big key + key | Meh + key | Hyper + key, as before |
+| M3 (hold) | ⌃⇧⌘, nothing bound | Alt+Shift: M3 + `J` / `K` / `L` / `Ö` moves the window |
+| Middle key + `1`–`9` | ⌥⇧⌘ + digit, nothing bound | Alt+Shift + digit (send window) |
 
 | Command (WSL zsh) | Does |
 |---|---|
