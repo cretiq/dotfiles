@@ -5,7 +5,6 @@
 A unified keymap toggle system that switches between **HJKL** (default) and **JKLÖ** (custom) navigation across multiple applications:
 
 - **Terminal Vim**: Hot-reload with real-time switching
-- **VSCode/Cursor**: Automatic settings.json updates
 - **Ghostty Terminal**: Pane navigation keybinding updates
 - **System-wide access**: FastScripts keyboard shortcuts, terminal commands
 
@@ -20,7 +19,6 @@ State File (keymap_state: "default" or "custom")
     ↓
 Application Adapters
     ├─ Terminal Vim (file-based hot-reload)
-    ├─ VSCode/Cursor (JSON settings update)
     └─ Ghostty Terminal (config file update)
 ```
 
@@ -37,13 +35,10 @@ Application Adapters
 │       │   ├── custom.vim              # JKLÖ mappings
 │       │   ├── auto-load.vim           # State-aware loading
 │       │   └── hotreload.vim           # Real-time detection
-│       ├── vscode-backups/             # VSCode config backups
 │       └── ghostty-backups/            # Ghostty config backups
 ├── my_scripts/.script/
 │   ├── vim-keymap-toggle.sh            # Main controller
-│   ├── vscode-vim-keymap-manager.sh    # VSCode adapter
-│   ├── ghostty-keymap-manager.sh       # Ghostty adapter
-│   └── update-vscode-keybindings.py    # JSON processor
+│   └── ghostty-keymap-manager.sh       # Ghostty adapter
 ├── ghostty/.config/ghostty/config      # Ghostty terminal config
 ├── zsh/.zshrc                          # Terminal aliases
 └── ~/Library/Scripts/
@@ -74,7 +69,7 @@ vimkeys custom     # JKLÖ mode
 
 ## Key Mappings
 
-### Vim & VSCode/Cursor
+### Vim
 | Mode | j | k | l | ö |
 |------|---|---|---|---|
 | **Default** | down | up | right | *unused* |
@@ -165,7 +160,7 @@ vimtoggle  # Should now include your app
 
 ## Configuration Examples
 
-### JSON-based Apps (like VSCode)
+### JSON-based Apps
 ```json
 {
     "vim.normalModeKeyBindings": [
@@ -207,12 +202,6 @@ cat ~/.dotfiles/vim/.vim/keymap_state
 
 # Test in Vim
 :KeymapReload
-```
-
-**VSCode not updating:**
-```bash
-# Test VSCode manager directly
-~/.dotfiles/my_scripts/.script/vscode-vim-keymap-manager.sh status
 ```
 
 **Ghostty not updating:**

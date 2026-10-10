@@ -60,7 +60,7 @@ config push
 ## Development Aliases and Scripts
 
 ### Vim Keymap Management
-Dynamic keymap switching system supporting both terminal Vim and VSCode/Cursor:
+Dynamic keymap switching system for terminal Vim and its adapters (Ghostty, Vimium, Superfile):
 - `vimtoggle`: Toggle between default (HJKL) and custom (JKLÖ) keymaps
 - `vimkeys status`: Show current keymap status
 - `vimkeys default`: Force default HJKL mode
@@ -68,17 +68,14 @@ Dynamic keymap switching system supporting both terminal Vim and VSCode/Cursor:
 
 **Integration Features:**
 - **Real-time hot-reload**: All running Vim instances switch automatically
-- **VSCode/Cursor support**: Dynamically updates VSCodeVim extension settings
 - **State persistence**: Remembers keymap choice across sessions
 - **FastScripts integration**: System-wide keyboard shortcut access
 - **Visual feedback**: Status line indicators and macOS notifications
 
 **Key Files:**
 - Main script: `my_scripts/.script/vim-keymap-toggle.sh`
-- VSCode manager: `my_scripts/.script/vscode-vim-keymap-manager.sh`
 - State file: `vim/.vim/keymap_state`
 - FastScripts: `~/Library/Scripts/Toggle Vim Keymaps.sh`
-- Backups: `vim/.vim/vscode-backups/`
 
 ### Port Management
 The zsh configuration includes comprehensive port management aliases:
