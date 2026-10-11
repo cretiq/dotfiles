@@ -66,15 +66,16 @@ source $ZSH/oh-my-zsh.sh
 alias config='/usr/bin/git --git-dir=/Users/filipmellqvist/.dotfiles/ --work-tree=/Users/filipmellqvist'
 
 # Claude Code aliases
-alias c='claude --effort max'
-alias cc='claude --continue --effort max'
-alias cr='claude --resume --effort max'
-alias ch='claude --model haiku --effort max'
-alias cs='claude --model sonnet --effort max'
-alias co='claude --model opus --effort max'
-alias ccc='cd ~/claude-scratch && claude --effort max'
-alias ccca='cd ~/claude-scratch && claude --model haiku --effort max /analysis:analyze-processes'
-alias cccu='cd ~/claude-scratch && claude --effort max /usage'
+alias c='claude --model claude-sonnet-5-5 --effort high'
+alias cc='claude --continue --model claude-sonnet-5-5 --effort high'
+alias cr='claude --resume --model claude-sonnet-5-5 --effort high'
+alias ch='claude --model haiku --effort xhigh'
+alias cs='claude --model sonnet --effort xhigh'
+alias co='claude --model opus --effort xhigh'
+alias ccc='cd ~/claude-scratch && claude --model claude-sonnet-5-5 --effort high'
+alias csc='cd ~/CursorProjects/scarry && c'
+alias ccca='cd ~/claude-scratch && claude --model haiku --effort xhigh /analysis:analyze-processes'
+alias cccu='cd ~/claude-scratch && claude --model claude-sonnet-5-5 --effort high /usage'
 
 bindkey '^[[1;5D' backward-word     # Ctrl+Left
 bindkey '^[[1;5C' forward-word      # Ctrl+Right
