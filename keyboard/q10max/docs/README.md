@@ -1,6 +1,6 @@
 # Keychron Q10 Max cheat sheet
 
-Current keymap: `q10max-v17.json` (import in https://launcher.keychron.com, USB cable).
+Current keymap: `q10max-v24.json` (import in https://launcher.keychron.com, USB cable).
 The original export `Keymap-Q10 Max ISO knob-8-17-26.json` is never overwritten. Older intermediates live in `history/`.
 
 ## Layer keys
@@ -9,10 +9,10 @@ The original export `Keymap-Q10 Max ISO knob-8-17-26.json` is never overwritten.
 |---|---|
 | Left space | tap = Space, hold = L1 |
 | Middle key | hold = L2 (no tap) |
-| Right big key | hold = L3 |
+| Right big key | tap = Enter, hold = L3 |
 | M1 | sends ⇧⌘ (modifier only) |
 | M2 | sends Hyper+F14, nothing bound |
-| M3 | sends ⌃⇧⌘ (modifier only), nothing bound |
+| M3 | sends ⌃⇧⌘ (modifier only), hold + key launches apps |
 | M4, PgUp | no-op, free |
 | M5 | sends ⇧⌘ + the key above Tab, opens the Convey keyboard cheat sheet |
 
@@ -26,10 +26,12 @@ Hammerspoon and AeroSpace match modifiers exactly, so each combo is its own name
 |---|---|---|
 | Left space (L1) + key | ⌃⌥⌘ | AeroSpace: focus, workspaces, layout |
 | Left space + physical Shift + key | Hyper (⌃⌥⇧⌘) | AeroSpace: move, send to workspace, join, fullscreen |
-| Right big key (L3) + key | Meh (⌃⌥⇧) | Hammerspoon: app launchers, text. Convey: Meh+`T` |
-| Middle key (L2) number row, F-row | ⌥⇧⌘ | Free slots |
-| M1 + key | ⇧⌘ | CleanShot: capture shortcuts |
-| M3 + key | ⌃⇧⌘ | Free (avoid `3` / `4`, macOS screenshot) |
+| Right big key (L3) + key | Meh (⌃⌥⇧) | Hammerspoon: `/next`, `/cut`, `/compact`, `/copy`, `/rebuild`, title-and-rename text. Convey: Meh+`T` |
+| Middle key (L2) `1`–`6` | ⌥⇧⌘ | CleanShot: capture shortcuts |
+| Middle key (L2) `7` | ⌥⇧⌘ | Hammerspoon: screenshot the focused window |
+| Middle key (L2) other number row, F-row | ⌥⇧⌘ | Free slots |
+| M1 + key | ⇧⌘ | CleanShot: pin last screenshot (`E`) |
+| M3 + key | ⌃⇧⌘ | Hammerspoon: app launchers (avoid `3` / `4`, macOS screenshot) |
 
 Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L3 keeps the media F-row.
 
@@ -49,6 +51,8 @@ Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L
 | Left space + `-` and `=` | Shrink and grow window |
 | Left space + right big key | Spotlight (Cmd+Space) |
 
+New windows go into the layout you are looking at. Messages, Calendar and Mail open floating instead (`on-window-detected` rules in `aerospace.toml`), so they do not reshuffle it. System Settings, Bitwarden and Convey float too.
+
 ## Window border (JankyBorders)
 
 AeroSpace has no border of its own. JankyBorders draws it. AeroSpace starts it (`after-startup-command` in `aerospace.toml`), and it reads its settings from `borders/.config/borders/bordersrc`, stowed to `~/.config/borders` (`stow borders`).
@@ -63,10 +67,12 @@ AeroSpace has no border of its own. JankyBorders draws it. AeroSpace starts it (
 
 | Press | Action |
 |---|---|
-| Right big key + `Q F A H C Z J E X B S` | Obsidian, Finder, Spotify, Claude, Edge, Bitwarden, ChatGPT, X Pro, Xcode, BetterTouchTool, Simulator |
+| M3 + `Q F A H Z J E X B S` | Obsidian, Finder, Spotify, Claude, Bitwarden, ChatGPT, X Pro, Xcode, BetterTouchTool, Simulator |
 | Right big key + `T` | Convey translator (Meh+`T`, set in Convey's settings) |
-| Right big key + `N` | Type `/next ` then Enter |
-| F1 | Minimize window |
+| Right big key + `N` / `C` / `O` / `X` / `R` | Type `/next ` / `/cut ` / `/compact ` / `/copy ` / `/rebuild ` then Enter |
+| Right big key + `D` | Type `done` then Enter |
+| Right big key + `Z` | Type `/generate:short-title ` + Enter, `/copy ` + Enter, then `/rename ` and stop |
+| F1, or left space + `M` | Minimize window |
 | F2 | Mission Control |
 | F7 / F8 / F9 / F10 | Previous / play-pause / next / mute |
 | F11 / F12 | Volume down / up |
@@ -81,30 +87,31 @@ AeroSpace has no border of its own. JankyBorders draws it. AeroSpace starts it (
 | Right space + `T` | Translator (Meh+`T`) |
 | Left space + Shift + `M` | Free mode (Hyper+`M`) |
 
-## CleanShot (hold M1)
+## CleanShot (hold middle key)
 
 | Press | Action |
 |---|---|
-| M1 + `2` / `3` / `4` / `5` | Capture window / OCR / area / all-in-one |
+| Middle key + `2` / `3` / `4` / `5` | Capture window / OCR / area / all-in-one |
 | M1 + `E` | Pin last screenshot |
-| M1 + `1` / `6` | Close / restore overlays |
+| Middle key + `1` / `6` | Close all screenshot popups / reopen the one you just closed |
+| Middle key + `7` | Screenshot the focused window at once (Hammerspoon calls `cleanshot://capture-area` with the window's rectangle, so anything overlapping it is included) |
 
 ## L2 (hold middle key)
 
 - Left hand: Cmd+letter. Exceptions below.
-- `T` Cmd+Shift+T, `F` Cmd+T, `G` and `W` Cmd+W, `Q` Cmd+Q (quits the app)
+- `A` Cmd+R, `B` Shift+Cmd+V (opens Paste, the clipboard history; both B keys), `X` Cmd+Shift+Z (redo), `T` Cmd+Shift+T, `F` Cmd+T, `G` and `W` Cmd+W, `Q` Cmd+Q (quits the app)
 - `S` / `D`: previous / next tab (Ctrl+Shift+Tab / Ctrl+Tab)
 - `U` / `P`: Cmd+Up / Cmd+Down
 - `I` / `O`: Opt+Left / Opt+Right (word jump)
 - `H` / `'`: Cmd+Left / Cmd+Right (line start / end)
 - `J` / `K` / `L` / `Ö`: Left / Down / Up / Right
-- Enter: Cmd+Enter. Backspace: Cmd+Backspace.
+- Enter: Cmd+Enter. Backspace: right Opt+Backspace (delete word). Right Option worked where left Option only deleted one letter.
 - Right big key: Cmd+Space. Middle key: back to L0.
 
 ## L0 and knob
 
 - Esc and Caps are swapped. F1–F12 are plain F-keys.
-- Knob: volume on L0 and L2, backlight on L1, brightness on L3.
+- Knob: volume on L0 and L2, backlight on L1, brightness on L3. Holding Shift makes volume and brightness (knob and F-row media keys) change in small steps: Hammerspoon turns Shift+key into Shift+Option+key. The knob is only written by the Launcher import, not by `q10`.
 
 ## Mac automation
 
@@ -118,6 +125,15 @@ The Mac layout is the master: the newest `q10max-vN.json`. Plugging the Q10 in b
 | Pause | Create `~/.local/share/q10/auto-off` |
 
 Close the Keychron Launcher tab before using `q10`: with the Launcher open the keyboard answers both programs and reads become unreliable.
+
+## Dongle (2.4 GHz) quirks on the Mac
+
+macOS keeps its own settings per keyboard connection, and the dongle (Keychron Link) is a different keyboard from the cable.
+
+- **Modifier keys:** the dongle had Control and Command swapped and Caps Lock turned into Escape, left over from an earlier setup. That turned Ctrl+Tab into Cmd+Tab and broke the Meh and ⇧⌘ chords. Fix: System Settings, Keyboard, Keyboard Shortcuts, Modifier Keys, pick Keychron Link, Restore Defaults.
+- **Key above Tab (`§`):** over the dongle macOS reports keycode 50 instead of 10, so `§` and `<` come out swapped when typing. Changing the keyboard type in System Settings and a `hidutil` swap for the dongle both had no effect. Hammerspoon forwards ⇧⌘ + keycode 50 as ⇧⌘ + keycode 10, so M5 and M1 + `§` open Convey's keyboard cheat sheet on both connections. It does the same for Meh + 50, so the VolumeGuard listening-mode cycle (Right big key + `§`) works on both. Side effect: on the cable ⇧⌘ + `<>` opens it too.
+- Typing `§` and `<` over the dongle stays swapped. Not fixed.
+- The keymap cannot be written over the dongle, only over the cable.
 
 ## Notes
 
