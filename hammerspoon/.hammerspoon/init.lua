@@ -31,7 +31,9 @@ hs.hotkey.bind({"ctrl", "alt", "cmd"}, "m", minimizeFocused)
 hs.hotkey.bind({}, "f2", hs.spaces.toggleMissionControl)
 
 -- CleanShot has no "capture the focused window" command, so capture its rectangle. Its origin is the display's lower left corner.
-local function captureFocusedWindow()
+-- Claude Code takes a pasted image on ctrl+v, not cmd+v.
+local lundBundle = "app.supabit.supacode.debug"
+local function captureFocusedWindowToLund()
   local win = hs.window.focusedWindow()
   if not win then return end
   local f, screen = win:frame(), win:screen()
@@ -41,11 +43,26 @@ local function captureFocusedWindow()
     if s ~= hs.screen.primaryScreen() then other = other + 1 end
     if s == screen then display = (s == hs.screen.primaryScreen()) and 1 or other end
   end
-  hs.urlevent.openURL(string.format("cleanshot://capture-area?x=%d&y=%d&width=%d&height=%d&display=%d",
+  local before = hs.pasteboard.changeCount()
+  hs.urlevent.openURL(string.format("cleanshot://capture-area?x=%d&y=%d&width=%d&height=%d&display=%d&action=copy",
     f.x - sf.x, sf.h - (f.y - sf.y) - f.h, f.w, f.h, display))
+  local deadline = hs.timer.secondsSinceEpoch() + 5
+  local timer
+  timer = hs.timer.doEvery(0.1, function()
+    if hs.pasteboard.changeCount() ~= before and hs.fnutils.contains(hs.pasteboard.contentTypes(), "public.png") then
+      timer:stop()
+      hs.application.launchOrFocusByBundleID(lundBundle)
+      hs.timer.doAfter(0.3, function()
+        hs.eventtap.keyStroke({"ctrl"}, "v", 0)
+        hs.timer.doAfter(0.3, function() hs.eventtap.keyStrokes(" ") end)
+      end)
+    elseif hs.timer.secondsSinceEpoch() > deadline then
+      timer:stop()
+    end
+  end)
 end
--- Q10 middle key (L2) + 7 sends alt+shift+cmd+7
-hs.hotkey.bind({"alt", "shift", "cmd"}, "7", captureFocusedWindow)
+-- Q10 middle key (L2) + 6 sends alt+shift+cmd+7: 6 and 7 are swapped on L2, so CleanShot's own alt+shift+cmd+6 sits on 7
+hs.hotkey.bind({"alt", "shift", "cmd"}, "7", captureFocusedWindowToLund)
 
 local function mediaKey(name)
   return function()
