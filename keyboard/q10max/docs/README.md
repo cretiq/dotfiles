@@ -1,6 +1,6 @@
 # Keychron Q10 Max cheat sheet
 
-Current keymap: `q10max-v25.json` (import in https://launcher.keychron.com, USB cable).
+Current keymap: `q10max-v26.json` (import in https://launcher.keychron.com, USB cable).
 The original export `Keymap-Q10 Max ISO knob-8-17-26.json` is never overwritten. Older intermediates live in `history/`.
 
 ## Layer keys
@@ -27,8 +27,9 @@ Hammerspoon and AeroSpace match modifiers exactly, so each combo is its own name
 | Left space (L1) + key | ⌃⌥⌘ | AeroSpace: focus, workspaces, layout |
 | Left space + physical Shift + key | Hyper (⌃⌥⇧⌘) | AeroSpace: move, send to workspace, join, fullscreen |
 | Right big key (L3) + key | Meh (⌃⌥⇧) | Hammerspoon: `/next`, `/cut`, `/compact`, `/copy`, `/rebuild`, title-and-rename text. Convey: Meh+`T` |
-| Middle key (L2) `1`–`5` and `7` | ⌥⇧⌘ | CleanShot: capture shortcuts. `7` sends ⌥⇧⌘+6 (reopen closed popup) |
-| Middle key (L2) `6` | ⌥⇧⌘ | Hammerspoon: screenshot the focused window, paste it into Lund. Sends ⌥⇧⌘+7 |
+| Middle key (L2) `1` `2` `4` `5` | ⌥⇧⌘ | CleanShot: capture shortcuts |
+| Middle key (L2) `6` and `7` | ⌥⇧⌘ | CleanShot: `6` sends ⌥⇧⌘+3 (OCR), `7` sends ⌥⇧⌘+6 (reopen closed popup) |
+| Middle key (L2) `3` | ⌥⇧⌘ | Hammerspoon: screenshot the focused window, paste it into Lund. Sends ⌥⇧⌘+7 |
 | Middle key (L2) other number row, F-row | ⌥⇧⌘ | Free slots |
 | M1 + key | ⇧⌘ | CleanShot: pin last screenshot (`E`) |
 | M3 + key | ⌃⇧⌘ | Hammerspoon: app launchers (avoid `3` / `4`, macOS screenshot) |
@@ -91,10 +92,10 @@ AeroSpace has no border of its own. JankyBorders draws it. AeroSpace starts it (
 
 | Press | Action |
 |---|---|
-| Middle key + `2` / `3` / `4` / `5` | Capture window / OCR / area / all-in-one |
+| Middle key + `2` / `6` / `4` / `5` | Capture window / OCR / area / all-in-one |
 | M1 + `E` | Pin last screenshot |
 | Middle key + `1` / `7` | Close all screenshot popups / reopen the one you just closed |
-| Middle key + `6` | Screenshot the focused window at once, copy it, focus Lund, press Ctrl+V and type a space. Hammerspoon calls `cleanshot://capture-area` with the window's rectangle, so anything overlapping it is included |
+| Middle key + `3` | Screenshot the focused window at once, copy it, focus Lund, press Ctrl+V and type a space. Hammerspoon calls `cleanshot://capture-area` with the window's rectangle, so anything overlapping it is included. CleanShot's screenshot background preset is swapped to "Dev Item small corners" (a copy of "Dev Item" with a 0.03 corner radius instead of 0.067) for this capture only and restored afterwards |
 
 ## L2 (hold middle key)
 

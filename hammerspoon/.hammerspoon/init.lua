@@ -33,6 +33,13 @@ hs.hotkey.bind({}, "f2", hs.spaces.toggleMissionControl)
 -- CleanShot has no "capture the focused window" command, so capture its rectangle. Its origin is the display's lower left corner.
 -- Claude Code takes a pasted image on ctrl+v, not cmd+v.
 local lundBundle = "app.supabit.supacode.debug"
+-- CleanShot rounds every screenshot with its screenshot background preset and the URL scheme cannot pick a preset, so this capture swaps in
+-- a copy of "Dev Item" with smaller corners ("Dev Item small corners" in CleanShot) and puts the old preset back afterwards.
+local csDomain = "com.getcleanshot.app-setapp"
+local lundShotPreset = "5BEE1433-83EB-4939-9914-385AB3501F57"
+local function setScreenshotPreset(id)
+  hs.execute(string.format("/usr/bin/defaults write %s screenshotBackgroundPresetID -string %s", csDomain, id))
+end
 local function captureFocusedWindowToLund()
   local win = hs.window.focusedWindow()
   if not win then return end
@@ -43,25 +50,29 @@ local function captureFocusedWindowToLund()
     if s ~= hs.screen.primaryScreen() then other = other + 1 end
     if s == screen then display = (s == hs.screen.primaryScreen()) and 1 or other end
   end
+  local usualPreset = hs.execute(string.format("/usr/bin/defaults read %s screenshotBackgroundPresetID", csDomain)):gsub("%s+", "")
+  setScreenshotPreset(lundShotPreset)
   local before = hs.pasteboard.changeCount()
-  hs.urlevent.openURL(string.format("cleanshot://capture-area?x=%d&y=%d&width=%d&height=%d&display=%d&action=copy",
-    f.x - sf.x, sf.h - (f.y - sf.y) - f.h, f.w, f.h, display))
+  hs.timer.doAfter(0.2, function()
+    hs.urlevent.openURL(string.format("cleanshot://capture-area?x=%d&y=%d&width=%d&height=%d&display=%d&action=copy",
+      f.x - sf.x, sf.h - (f.y - sf.y) - f.h, f.w, f.h, display))
+  end)
   local deadline = hs.timer.secondsSinceEpoch() + 5
   local timer
   timer = hs.timer.doEvery(0.1, function()
-    if hs.pasteboard.changeCount() ~= before and hs.fnutils.contains(hs.pasteboard.contentTypes(), "public.png") then
-      timer:stop()
-      hs.application.launchOrFocusByBundleID(lundBundle)
-      hs.timer.doAfter(0.3, function()
-        hs.eventtap.keyStroke({"ctrl"}, "v", 0)
-        hs.timer.doAfter(0.3, function() hs.eventtap.keyStrokes(" ") end)
-      end)
-    elseif hs.timer.secondsSinceEpoch() > deadline then
-      timer:stop()
-    end
+    local captured = hs.pasteboard.changeCount() ~= before and hs.fnutils.contains(hs.pasteboard.contentTypes(), "public.png")
+    if not captured and hs.timer.secondsSinceEpoch() <= deadline then return end
+    timer:stop()
+    setScreenshotPreset(usualPreset)
+    if not captured then return end
+    hs.application.launchOrFocusByBundleID(lundBundle)
+    hs.timer.doAfter(0.3, function()
+      hs.eventtap.keyStroke({"ctrl"}, "v", 0)
+      hs.timer.doAfter(0.3, function() hs.eventtap.keyStrokes(" ") end)
+    end)
   end)
 end
--- Q10 middle key (L2) + 6 sends alt+shift+cmd+7: 6 and 7 are swapped on L2, so CleanShot's own alt+shift+cmd+6 sits on 7
+-- Q10 middle key (L2) + 3 sends alt+shift+cmd+7: L2 3, 6 and 7 are shuffled so CleanShot's own alt+shift+cmd+3 and +6 sit on 6 and 7
 hs.hotkey.bind({"alt", "shift", "cmd"}, "7", captureFocusedWindowToLund)
 
 local function mediaKey(name)
