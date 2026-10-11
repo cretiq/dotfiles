@@ -2,13 +2,14 @@ require("hs.ipc")
 
 -- Q10 right space (L3) sends meh (ctrl+shift+alt); left space belongs to aerospace
 local meh = {"ctrl", "shift", "alt"}
+-- Q10 M3 sends ctrl+shift+cmd
+local m3 = {"ctrl", "shift", "cmd"}
 
 local apps = {
   q = "Obsidian",
   f = "Finder",
   a = "Spotify",
   h = "Claude",
-  c = "Microsoft Edge",
   z = "Bitwarden",
   j = "ChatGPT",
   e = "X Pro",
@@ -17,15 +18,34 @@ local apps = {
   s = "Simulator",
 }
 for key, app in pairs(apps) do
-  hs.hotkey.bind(meh, key, function() hs.application.launchOrFocus(app) end)
+  hs.hotkey.bind(m3, key, function() hs.application.launchOrFocus(app) end)
 end
 
-hs.hotkey.bind({}, "f1", function()
+local function minimizeFocused()
   local win = hs.window.focusedWindow()
   if win then win:minimize() end
-end)
+end
+hs.hotkey.bind({}, "f1", minimizeFocused)
+hs.hotkey.bind({"ctrl", "alt", "cmd"}, "m", minimizeFocused)
 
 hs.hotkey.bind({}, "f2", hs.spaces.toggleMissionControl)
+
+-- CleanShot has no "capture the focused window" command, so capture its rectangle. Its origin is the display's lower left corner.
+local function captureFocusedWindow()
+  local win = hs.window.focusedWindow()
+  if not win then return end
+  local f, screen = win:frame(), win:screen()
+  local sf = screen:fullFrame()
+  local display, other = 1, 1
+  for _, s in ipairs(hs.screen.allScreens()) do
+    if s ~= hs.screen.primaryScreen() then other = other + 1 end
+    if s == screen then display = (s == hs.screen.primaryScreen()) and 1 or other end
+  end
+  hs.urlevent.openURL(string.format("cleanshot://capture-area?x=%d&y=%d&width=%d&height=%d&display=%d",
+    f.x - sf.x, sf.h - (f.y - sf.y) - f.h, f.w, f.h, display))
+end
+-- Q10 middle key (L2) + 7 sends alt+shift+cmd+7
+hs.hotkey.bind({"alt", "shift", "cmd"}, "7", captureFocusedWindow)
 
 local function mediaKey(name)
   return function()
@@ -75,9 +95,33 @@ local function typeSlowly(text, delay, done)
   end)
 end
 
-hs.hotkey.bind(meh, "n", function()
-  typeSlowly("/next ", 0.003, function()
-    hs.timer.doAfter(0.03, function() hs.eventtap.keyStroke({}, "return", 10000) end)
+local function typeCommand(text, submit, done)
+  typeSlowly(text, 0.003, function()
+    hs.timer.doAfter(0.03, function()
+      if submit then hs.eventtap.keyStroke({}, "return", 10000) end
+      if done then hs.timer.doAfter(0.3, done) end
+    end)
+  end)
+end
+
+local commands = {
+  n = "/next ",
+  c = "/cut ",
+  o = "/compact ",
+  x = "/copy ",
+  r = "/rebuild ",
+  d = "done",
+}
+for key, text in pairs(commands) do
+  hs.hotkey.bind(meh, key, function() typeCommand(text, true) end)
+end
+
+-- Claude Code queues a command sent mid-turn and runs it after the turn, so /copy picks up the generated title.
+hs.hotkey.bind(meh, "z", function()
+  typeCommand("/generate:short-title ", true, function()
+    typeCommand("/copy ", true, function()
+      typeCommand("/rename ", false)
+    end)
   end)
 end)
 
@@ -142,10 +186,49 @@ for _, d in ipairs(hs.usb.attachedDevices()) do
   if d.vendorID == 0x3434 and d.productID == 0x08A1 then hs.timer.doAfter(3, applyQ10) end
 end
 
--- Over the 2.4 GHz dongle macOS numbers the key above Tab as 50 instead of 10, and Convey listens for 10.
-hs.hotkey.bind({"cmd", "shift"}, 50, function()
-  hs.eventtap.event.newKeyEvent({"cmd", "shift"}, 10, true):post()
-  hs.eventtap.event.newKeyEvent({"cmd", "shift"}, 10, false):post()
-end)
+-- Q10 attached (cable or 2.4 GHz receiver) = desk: JKLÖ. Otherwise laptop keyboard: HJKL.
+local keymapScript = os.getenv("HOME") .. "/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh"
+local keymapStateFile = os.getenv("HOME") .. "/.dotfiles/vim/.vim/keymap_state"
+
+local function q10Attached()
+  for _, d in ipairs(hs.usb.attachedDevices()) do
+    if d.vendorID == 0x3434 and (d.productID == 0x08A1 or d.productID == 0xD030) then return true end
+  end
+  return false
+end
+
+local function syncVimKeymap()
+  local want = q10Attached() and "custom" or "default"
+  local f = io.open(keymapStateFile)
+  local have = f and f:read("*l")
+  if f then f:close() end
+  if have ~= want then hs.task.new(keymapScript, nil, {want}):start() end
+end
+
+keymapWatcher = hs.usb.watcher.new(function(e)
+  if e.vendorID == 0x3434 then hs.timer.doAfter(1, syncVimKeymap) end
+end):start()
+syncVimKeymap()
+
+-- macOS steps volume and brightness in quarters when Option is held with Shift; the knob cannot send that conditionally.
+local fineKeys = {SOUND_UP = true, SOUND_DOWN = true, BRIGHTNESS_UP = true, BRIGHTNESS_DOWN = true}
+fineStepTap = hs.eventtap.new({hs.eventtap.event.types.systemDefined}, function(e)
+  local k = e:systemKey()
+  local f = e:getFlags()
+  if k and fineKeys[k.key] and f.shift and not f.alt then
+    local ev = hs.eventtap.event.newSystemKeyEvent(k.key, k.down)
+    ev:setFlags({shift = true, alt = true})
+    ev:post()
+    return true
+  end
+end):start()
+
+-- Over the 2.4 GHz dongle macOS numbers the key above Tab as 50 instead of 10, and Convey and VolumeGuard listen for 10.
+for _, mods in ipairs({{"cmd", "shift"}, meh}) do
+  hs.hotkey.bind(mods, 50, function()
+    hs.eventtap.event.newKeyEvent(mods, 10, true):post()
+    hs.eventtap.event.newKeyEvent(mods, 10, false):post()
+  end)
+end
 
 hs.alert.show("Hammerspoon config loaded")
