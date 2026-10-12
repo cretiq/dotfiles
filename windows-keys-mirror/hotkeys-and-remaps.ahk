@@ -189,6 +189,35 @@ Loop 6
 }
 
 
+; Meh chords from the Q10's left space layer. The keys are held when the hotkey fires, so wait for release before typing.
+SlashCommand(name, submit := true)
+{
+    KeyWait "Ctrl"
+    KeyWait "Alt"
+    KeyWait "Shift"
+    SendText name
+    Sleep 20
+    Send "{Space}"
+    if submit
+    {
+        Sleep 100
+        Send "{Enter}"
+    }
+}
+
+^!+a::SlashCommand "/next"
+
+^!+r::SlashCommand "/rebuild"
+
+^!+z::
+{
+    SlashCommand "/generate:long-title"
+    Sleep 300
+    SlashCommand "/copy"
+    Sleep 300
+    SlashCommand "/rename", false
+}
+
 ;---REMAP ESC---
 ;Esc::CapsLock
 ;CapsLock::Esc
