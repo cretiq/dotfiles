@@ -1,0 +1,15 @@
+#!/bin/sh
+# windows-keys links into C:\Users\FilipM\Desktop\Keys; git cannot follow a symlink, so only a copy can be tracked.
+cd "$(git rev-parse --show-toplevel)" || exit 0
+src=windows-keys
+dst=windows-keys-mirror
+[ -d "$src" ] || exit 0
+
+mkdir -p "$dst"
+tar -C "$src" --exclude=./.claude -cf - . | tar -C "$dst" -xf -
+(cd "$dst" && find . -type f) | while read -r f; do
+    [ -e "$src/$f" ] || rm -- "$dst/$f"
+done
+
+git add -- "$dst"
+git add -u -- "$dst"

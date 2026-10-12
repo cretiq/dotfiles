@@ -1,0 +1,204 @@
+#SingleInstance Force
+
+; Install keyboard hook to prevent modifier keys from getting stuck
+InstallKeybdHook()
+
+; Reset CapsLock to off on startup/reload
+SetCapsLockState "Off"
+
+OpenLocalhost(port, *) => Run('msedge.exe "https://localhost:' port '"')
+; Left-only: AltGr is seen as Ctrl+Alt, so plain ^! would swallow @ £ $ € (AltGr+2..5) on the Swedish layout.
+Loop 6
+    Hotkey "<^<!" A_Index, OpenLocalhost.Bind(5170 + A_Index)
+
+^#!+v::
+{
+    if WinExist("ahk_exe Spotify.exe")
+        WinActivate
+    else
+        Run "spotify:"
+}
+
+^#!+r::
+{
+    if WinExist("ahk_exe devenv.exe")
+        WinActivate
+    else
+    {
+        vsPath := "C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\IDE\devenv.exe"
+
+        if FileExist(vsPath)
+            Run vsPath
+    }
+}
+
+^#!+d::
+{
+    if WinExist("ahk_exe WindowsTerminal.exe")
+        WinActivate
+    else
+        Run "wt"
+}
+
+^#!+c::
+{
+    if WinExist("ahk_exe msedge.exe")
+        WinActivate
+    else
+    {
+        msEdgePath := "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+
+        if FileExist(msEdgePath)
+            Run '"' msEdgePath '" --profile-directory="Profile 1"'
+    }
+}
+
+^#!+e::
+{
+    if WinExist("ahk_exe Obsidian.exe")
+        WinActivate
+    else
+    {
+        obsidianPath := "C:\Users\" A_UserName "\AppData\Local\Programs\Obsidian\Obsidian.exe"
+
+        if FileExist(obsidianPath)
+            Run obsidianPath ' --disable-smooth-scrolling'
+    }
+}
+
+^#!+f::
+{
+    if WinExist("ahk_class CabinetWClass")
+        WinActivate
+    else
+        Run A_MyDocuments
+}
+
+^#!+s::
+{
+    beekeeperPath := "C:\Users\" A_UserName "\AppData\Local\Programs\Beekeeper Studio\Beekeeper Studio.exe"
+
+    if WinExist("ahk_exe Beekeeper Studio.exe")
+        WinActivate
+    else if FileExist(beekeeperPath)
+        Run beekeeperPath
+}
+
+^#!+h::
+{
+    if WinExist("ahk_exe claude.exe")
+        WinActivate
+    else
+        Run "explorer.exe shell:AppsFolder\Claude_pzs8sxrjxfjjc!Claude"
+}
+
+^#!+j::
+{
+    if WinExist("ahk_exe ChatGPT.exe")
+        WinActivate
+    else
+        Run "explorer.exe shell:AppsFolder\OpenAI.Codex_2p2nqsd0c76g0!App"
+}
+
+^#!+b::
+{
+    if WinExist("ahk_exe rider64.exe")
+        WinActivate
+    else
+    {
+        gkPath := "C:\Users\FilipM\AppData\Local\Programs\Rider\bin\rider64.exe"
+
+        if FileExist(gkPath)
+            Run gkPath
+    }
+}
+
+^#!+t::
+{
+    if WinExist("ahk_exe ms-teams.exe")
+        WinActivate
+    else
+        Run "ms-teams:"
+}
+
+^#!+k::
+{
+    if WinExist("ahk_exe keymapp.exe")
+        WinActivate
+    else
+    {
+        keymappPath := "C:\Program Files (x86)\Keymapp\keymapp.exe"
+
+        if FileExist(keymappPath)
+            Run keymappPath
+    }
+}
+
+^#!+y::
+{
+    if WinExist("Administrator: ahk_exe powershell.exe")
+        WinActivate
+    else
+        Run '*RunAs powershell.exe', "C:\"
+}
+
+^!+y::
+{
+    if WinExist("Administrator: ahk_exe powershell.exe")
+    {
+        FileAppend "", EnvGet("USERPROFILE") "\.m5kick-trigger"
+        WinActivate
+    }
+    else
+        Run '*RunAs powershell.exe -NoExit -Command m5kick', "C:\"
+}
+
++#!^0::Reload
+
+^#!+9::
+{
+    Run "wt wsl bash /home/filip/.dotfiles/windows-keys/interactive-menu-toggle-remaps.sh"
+}
+
+^#!+6::
+{
+    Run 'powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Users\' A_UserName '\Desktop\Keys\restart-window-switcher.ps1"', , "Hide"
+}
+
+^#!+p::
+{
+    A_Clipboard := ""
+    Run '"' EnvGet("LOCALAPPDATA") '\Programs\ShareX\ShareX.exe" -workflow ActiveWindowPlain'
+    if !ClipWait(5, 1)
+        return
+
+    ; wsl-screenshot-cli swaps a WSL file path into the clipboard after the bitmap lands; Windows Terminal pastes text only.
+    Loop 20
+    {
+        if A_Clipboard != ""
+            break
+        Sleep 100
+    }
+
+    if WinExist("ahk_exe WindowsTerminal.exe")
+    {
+        WinActivate
+        if WinWaitActive(, , 2)
+            Send "^v"
+    }
+}
+
+
+;---REMAP ESC---
+;Esc::CapsLock
+;CapsLock::Esc
+;---------------
+
+;---REMAP ALT+HJKL---
+;!h::Left
+;!j::Down
+;!k::Up
+;!l::Right
+;!u::^Left
+;!i::^Right
+;---------------------
