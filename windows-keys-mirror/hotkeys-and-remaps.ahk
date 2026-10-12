@@ -165,11 +165,13 @@ Loop 6
     Run 'powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Users\' A_UserName '\Desktop\Keys\restart-window-switcher.ps1"', , "Hide"
 }
 
-^#!+p::
+CaptureToTerminal(workflow, timeout)
 {
+    KeyWait "Ctrl"
+    KeyWait "Shift"
     A_Clipboard := ""
-    Run '"' EnvGet("LOCALAPPDATA") '\Programs\ShareX\ShareX.exe" -workflow ActiveWindowPlain'
-    if !ClipWait(5, 1)
+    Run '"' EnvGet("LOCALAPPDATA") '\Programs\ShareX\ShareX.exe" -workflow ' workflow
+    if !ClipWait(timeout, 1)
         return
 
     if WinExist("ahk_exe WindowsTerminal.exe")
@@ -180,13 +182,19 @@ Loop 6
     }
 }
 
+^+e::CaptureToTerminal "ActiveWindowPlain", 5
 
-; Meh chords from the Q10's left space layer. The keys are held when the hotkey fires, so wait for release before typing.
+^+g::CaptureToTerminal "RegionPlain", 30
+
+
+; Chords from the Q10's left space layer and the Voyager's layer 7. The keys are held when the hotkey fires, so wait for release before typing.
 SlashCommand(name, submit := true)
 {
     KeyWait "Ctrl"
     KeyWait "Alt"
     KeyWait "Shift"
+    KeyWait "LWin"
+    KeyWait "RWin"
     SendText name
     Sleep 20
     Send "{Space}"
@@ -197,7 +205,15 @@ SlashCommand(name, submit := true)
     }
 }
 
-^!+a::SlashCommand "/next"
+^!#r::SlashCommand "/mr:deep-review", false
+
+^!#t::SlashCommand "/generate:long-title"
+
+^!#d::SlashCommand "/dev:restart"
+
+^!#n::SlashCommand "/next"
+
+^!#c::SlashCommand "/cut"
 
 ^!+r::SlashCommand "/rebuild"
 
