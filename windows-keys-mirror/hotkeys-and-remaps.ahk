@@ -172,14 +172,6 @@ Loop 6
     if !ClipWait(5, 1)
         return
 
-    ; wsl-screenshot-cli swaps a WSL file path into the clipboard after the bitmap lands; Windows Terminal pastes text only.
-    Loop 20
-    {
-        if A_Clipboard != ""
-            break
-        Sleep 100
-    }
-
     if WinExist("ahk_exe WindowsTerminal.exe")
     {
         WinActivate
