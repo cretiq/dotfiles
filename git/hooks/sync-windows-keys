@@ -13,3 +13,12 @@ done
 
 git add -- "$dst"
 git add -u -- "$dst"
+
+fw=keyboard/voyager/firmware
+if [ -f "$fw/scripts/bindings.py" ] && [ -f "$src/hotkeys-and-remaps.ahk" ]; then
+    python3 "$fw/scripts/bindings.py" "$fw/keymap/keymap.c" --config "$fw/keymap/config.h" \
+        --titles /mnt/c/Users/FilipM/AppData/Local/voyager/oryx-layout.json \
+        --ahk "$src/hotkeys-and-remaps.ahk" > keyboard/voyager/BINDINGS.md.tmp \
+        && mv keyboard/voyager/BINDINGS.md.tmp keyboard/voyager/BINDINGS.md \
+        && git add -- keyboard/voyager/BINDINGS.md
+fi

@@ -22,6 +22,12 @@ alias config='/usr/bin/git --git-dir=/home/filip/.dotfiles/ --work-tree=/home/fi
 - **Ranger**: File manager with HJKL/JKLÖ keymap integration — `ranger/`
 - **SPF (Superfile)**: File manager — `spf/.spf.toml`
 
+## Voyager Keyboard
+
+The ZSA Voyager ("V") layout and its chords, generated at every commit. See the `voyager` skill for how to change, build and flash it.
+
+@keyboard/voyager/BINDINGS.md
+
 ## Zsh Configuration
 
 Local secrets and machine-specific settings go in `~/.zshrc.local` (git-ignored):
