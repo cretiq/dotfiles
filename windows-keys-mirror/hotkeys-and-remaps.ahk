@@ -168,7 +168,7 @@ Loop 6
 CaptureToTerminal(workflow, timeout)
 {
     KeyWait "Ctrl"
-    KeyWait "Shift"
+    KeyWait "Alt"
     A_Clipboard := ""
     Run '"' EnvGet("LOCALAPPDATA") '\Programs\ShareX\ShareX.exe" -workflow ' workflow
     if !ClipWait(timeout, 1)
@@ -182,9 +182,9 @@ CaptureToTerminal(workflow, timeout)
     }
 }
 
-^+e::CaptureToTerminal "ActiveWindowPlain", 5
+<^<!q::CaptureToTerminal "ActiveWindowPlain", 5
 
-^+g::CaptureToTerminal "RegionPlain", 30
+<^<!w::CaptureToTerminal "RegionPlain", 30
 
 
 ; Chords from the Q10's left space layer and the Voyager's layer 7. The keys are held when the hotkey fires, so wait for release before typing.
