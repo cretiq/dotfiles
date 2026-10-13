@@ -109,6 +109,7 @@ keybind = cmd+opt+left=new_split:left
 keybind = cmd+opt+up=new_split:up
 keybind = shift+opt+minus=new_split:right
 keybind = shift+opt+slash=new_split:down
+keybind = cmd+n=new_split:right
 
 # Split Resize
 keybind = shift+opt+left=resize_split:left,20
