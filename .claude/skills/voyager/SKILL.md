@@ -17,7 +17,7 @@ The current bindings are in `keyboard/voyager/BINDINGS.md` (generated at every c
 `patch_layout.py` rewrites, at build time: layer 7 (every letter and digit is `Ctrl+Alt+Win` + the Main key), the Nav top-left key (`QK_BOOT`), Nav W (`Ctrl+G`) and the top-right key (`Ctrl+Alt+Shift+K`, opens Convey's cheat sheet). Convey's `lib/voyager/patches.ts` must mirror every such rule, or the cheat sheet shows the wrong keys. Oryx and Keymapp still show the unpatched layout.
 
 ## Change, build, flash
-1. Edit `scripts/patch_layout.py` (or ask for an Oryx edit and refresh). Test it on a copy of `keymap.c` first.
+1. Edit `scripts/patch_layout.py` (or ask for an Oryx edit and refresh). Test it on a copy of `keymap.c` first. Raise `PATCH_VERSION` there and in Convey's `lib/voyager/patches.ts` with every rule change, and mirror the rule in `patches.ts`: Convey warns when the repo's number is higher than its own.
 2. Commit and push the firmware repo, `gh workflow run build.yml`, wait about two minutes, `gh run download <id> -n voyager-firmware -D <folder>`.
 3. Flash with `zapp` (`zapp.exe flash <bin>`, from https://github.com/zsa/zapp/releases). The keyboard enters flash mode with Nav + top-left key, or the reset button.
 4. Keep `oryx-original-5L3pB.bin` as the way back. Never run `zapp update`: it would flash Oryx's unpatched build.
