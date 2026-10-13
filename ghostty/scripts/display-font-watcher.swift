@@ -8,7 +8,7 @@ struct AppConfig {
     let app: String
 }
 let configs: [AppConfig] = [
-    ("~/.config/ghostty/config", "Ghostty"),
+    ("~/.config/lund/config", "Ghostty"),
     ("~/.config/scarry/config", "Scarry"),
 ].map { AppConfig(
     path: URL(fileURLWithPath: NSString(string: $0.0).expandingTildeInPath).resolvingSymlinksInPath().path,

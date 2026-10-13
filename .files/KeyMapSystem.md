@@ -39,7 +39,7 @@ Application Adapters
 ├── my_scripts/.script/
 │   ├── vim-keymap-toggle.sh            # Main controller
 │   └── ghostty-keymap-manager.sh       # Ghostty adapter
-├── ghostty/.config/ghostty/config      # Ghostty terminal config
+├── lund/.config/lund/config            # Lund terminal config (Ghostty syntax)
 ├── zsh/.zshrc                          # Terminal aliases
 └── ~/Library/Scripts/
     └── Toggle Vim Keymaps.sh           # FastScripts integration

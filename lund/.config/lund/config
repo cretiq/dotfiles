@@ -1,8 +1,8 @@
 # ===============================================
-# GHOSTTY CONFIGURATION
+# LUND TERMINAL CONFIGURATION (Ghostty syntax)
 # ===============================================
 # A beautiful, minimal terminal setup
-# Location: ~/.config/ghostty/config
+# Location: ~/.config/lund/config (read by Lund)
 
 # ===============================================
 # APPEARANCE & THEME

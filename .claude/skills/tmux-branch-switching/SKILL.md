@@ -57,7 +57,7 @@ After checkout:
 
 ## What changes between branches
 
-### Ghostty config (`ghostty/.config/ghostty/config`)
+### Lund terminal config (`lund/.config/lund/config`)
 - **mac**: Ghostty-native splits, `goto_split` keybinds, `new_split` keybinds, Apple System Colors theme
 - **mac-tmux**: Splits/nav/resize keybinds send escape sequences to tmux, Catppuccin Mocha/Latte theme
 

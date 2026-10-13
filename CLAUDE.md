@@ -10,7 +10,7 @@ This is a personal dotfiles repository for macOS containing configuration files 
 
 ### Terminal and Shell
 - **Ghostty**: Modern terminal emulator with glass effects and theme support
-  - Config: `ghostty/.config/ghostty/config`
+  - Config: `lund/.config/lund/config` (read by Lund, Ghostty syntax)
   - Theme: dark:Under The Sea, light:Farmhouse Light
   - Font: JetBrains Mono, size 15
 - **Zsh**: Shell with Oh My Zsh framework

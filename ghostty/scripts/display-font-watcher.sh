@@ -3,7 +3,7 @@
 # Larger font when external monitor connected, laptop font when solo.
 # Known limitation: clamshell mode (lid closed + external) reads as 1 display.
 
-GHOSTTY_CONFIG="$(readlink -f "$HOME/.config/ghostty/config" 2>/dev/null || echo "$HOME/.config/ghostty/config")"
+GHOSTTY_CONFIG="$(readlink -f "$HOME/.config/lund/config" 2>/dev/null || echo "$HOME/.config/lund/config")"
 SCARRY_CONFIG="$(readlink -f "$HOME/.config/scarry/config" 2>/dev/null || echo "$HOME/.config/scarry/config")"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 POLL_INTERVAL=5

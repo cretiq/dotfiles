@@ -10,7 +10,7 @@
 
 APP_NAME="ghostty"
 APP_DISPLAY_NAME="Ghostty"
-CONFIG_FILE="$HOME/.dotfiles/ghostty/.config/ghostty/config"
+CONFIG_FILE="$HOME/.dotfiles/lund/.config/lund/config"
 BACKUP_DIR="$HOME/.dotfiles/vim/.vim/ghostty-backups"
 
 # Ensure backup directory exists
