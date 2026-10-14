@@ -311,6 +311,9 @@ local fnActions = {
   [27] = {"resize smart -50"},
   [24] = {"resize smart +50"},
 }
+for i = 1, 9 do
+  fnActions[hs.keycodes.map[tostring(i)]] = {"workspace " .. i, "move-node-to-workspace " .. i}
+end
 fnTap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(e)
   local f = e:getFlags()
   if not f.fn or f.cmd or f.alt or f.ctrl then return false end
