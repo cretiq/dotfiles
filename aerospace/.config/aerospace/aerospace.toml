@@ -6,12 +6,12 @@ automatically-unhide-macos-hidden-apps = true
 after-startup-command = ['exec-and-forget borders']
 
 [gaps]
-inner.horizontal = 40
-inner.vertical = 40
-outer.left = 40
-outer.right = 40
-outer.top = 40
-outer.bottom = 40
+inner.horizontal = [{ monitor."built-in" = 10 }, 40]
+inner.vertical = [{ monitor."built-in" = 10 }, 40]
+outer.left = [{ monitor."built-in" = 10 }, 40]
+outer.right = [{ monitor."built-in" = 10 }, 40]
+outer.top = [{ monitor."built-in" = 10 }, 40]
+outer.bottom = [{ monitor."built-in" = 10 }, 40]
 
 [[on-window-detected]]
 if.app-id = 'com.apple.systempreferences'

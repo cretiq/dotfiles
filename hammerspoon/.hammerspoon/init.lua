@@ -233,10 +233,28 @@ local function syncVimKeymap()
   if have ~= want then hs.task.new(keymapScript, nil, {want}):start() end
 end
 
+-- Laptop only: with the Q10 attached, L2 S/D already cycle tabs.
+local tabCycleKeys = {
+  hs.hotkey.new({"alt"}, "s", function() hs.eventtap.keyStroke({"ctrl", "shift"}, "tab", 0) end),
+  hs.hotkey.new({"alt"}, "d", function() hs.eventtap.keyStroke({"ctrl"}, "tab", 0) end),
+}
+
+local function syncTabCycle()
+  for _, k in ipairs(tabCycleKeys) do
+    if q10Attached() then k:disable() else k:enable() end
+  end
+end
+
 keymapWatcher = hs.usb.watcher.new(function(e)
-  if e.vendorID == 0x3434 then hs.timer.doAfter(1, syncVimKeymap) end
+  if e.vendorID == 0x3434 then
+    hs.timer.doAfter(1, function()
+      syncVimKeymap()
+      syncTabCycle()
+    end)
+  end
 end):start()
 syncVimKeymap()
+syncTabCycle()
 
 -- macOS steps volume and brightness in quarters when Option is held with Shift; the knob cannot send that conditionally.
 local fineKeys = {SOUND_UP = true, SOUND_DOWN = true, BRIGHTNESS_UP = true, BRIGHTNESS_DOWN = true}
