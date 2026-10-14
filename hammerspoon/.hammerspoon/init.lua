@@ -40,30 +40,22 @@ local lundShotPreset = "5BEE1433-83EB-4939-9914-385AB3501F57"
 local function setScreenshotPreset(id)
   hs.execute(string.format("/usr/bin/defaults write %s screenshotBackgroundPresetID -string %s", csDomain, id))
 end
-local function captureFocusedWindowToLund()
-  local win = hs.window.focusedWindow()
-  if not win then return end
-  local f, screen = win:frame(), win:screen()
-  local sf = screen:fullFrame()
-  local display, other = 1, 1
-  for _, s in ipairs(hs.screen.allScreens()) do
-    if s ~= hs.screen.primaryScreen() then other = other + 1 end
-    if s == screen then display = (s == hs.screen.primaryScreen()) and 1 or other end
+-- preset: CleanShot screenshot preset to use for this capture only. waitSeconds: how long to wait for the image, longer when you pick the area yourself.
+local function captureToLund(url, preset, waitSeconds)
+  local usualPreset
+  if preset then
+    usualPreset = hs.execute(string.format("/usr/bin/defaults read %s screenshotBackgroundPresetID", csDomain)):gsub("%s+", "")
+    setScreenshotPreset(preset)
   end
-  local usualPreset = hs.execute(string.format("/usr/bin/defaults read %s screenshotBackgroundPresetID", csDomain)):gsub("%s+", "")
-  setScreenshotPreset(lundShotPreset)
   local before = hs.pasteboard.changeCount()
-  hs.timer.doAfter(0.2, function()
-    hs.urlevent.openURL(string.format("cleanshot://capture-area?x=%d&y=%d&width=%d&height=%d&display=%d&action=copy",
-      f.x - sf.x, sf.h - (f.y - sf.y) - f.h, f.w, f.h, display))
-  end)
-  local deadline = hs.timer.secondsSinceEpoch() + 5
+  hs.timer.doAfter(0.2, function() hs.urlevent.openURL(url) end)
+  local deadline = hs.timer.secondsSinceEpoch() + waitSeconds
   local timer
   timer = hs.timer.doEvery(0.1, function()
     local captured = hs.pasteboard.changeCount() ~= before and hs.fnutils.contains(hs.pasteboard.contentTypes(), "public.png")
     if not captured and hs.timer.secondsSinceEpoch() <= deadline then return end
     timer:stop()
-    setScreenshotPreset(usualPreset)
+    if preset then setScreenshotPreset(usualPreset) end
     if not captured then return end
     hs.application.launchOrFocusByBundleID(lundBundle)
     hs.timer.doAfter(0.3, function()
@@ -72,8 +64,35 @@ local function captureFocusedWindowToLund()
     end)
   end)
 end
--- Q10 middle key (L2) + 3 sends alt+shift+cmd+7: L2 3, 6 and 7 are shuffled so CleanShot's own alt+shift+cmd+3 and +6 sit on 6 and 7
-hs.hotkey.bind({"alt", "shift", "cmd"}, "7", captureFocusedWindowToLund)
+
+local function focusedWindowCaptureURL(extra)
+  local win = hs.window.focusedWindow()
+  if not win then return nil end
+  local f, screen = win:frame(), win:screen()
+  local sf = screen:fullFrame()
+  local display, other = 1, 1
+  for _, s in ipairs(hs.screen.allScreens()) do
+    if s ~= hs.screen.primaryScreen() then other = other + 1 end
+    if s == screen then display = (s == hs.screen.primaryScreen()) and 1 or other end
+  end
+  return string.format("cleanshot://capture-area?x=%d&y=%d&width=%d&height=%d&display=%d%s",
+    f.x - sf.x, sf.h - (f.y - sf.y) - f.h, f.w, f.h, display, extra)
+end
+
+-- Q10 middle key (L2) number row, all alt+shift+cmd+: 1 sends 7 (focused window), 2 sends 9 (picked window), 3 sends 8 (area), each pasted into Lund.
+-- 4 sends 0 (focused window, no paste), 7 sends minus (history). 5, 6, 8, 9 and 0 send CleanShot's own 2, 4, 3, 5 and 1.
+local csMods = {"alt", "shift", "cmd"}
+hs.hotkey.bind(csMods, "7", function()
+  local url = focusedWindowCaptureURL("&action=copy")
+  if url then captureToLund(url, lundShotPreset, 5) end
+end)
+hs.hotkey.bind(csMods, "8", function() captureToLund("cleanshot://capture-area?action=copy", nil, 60) end)
+hs.hotkey.bind(csMods, "9", function() captureToLund("cleanshot://capture-window?action=copy", nil, 60) end)
+hs.hotkey.bind(csMods, "0", function()
+  local url = focusedWindowCaptureURL("")
+  if url then hs.urlevent.openURL(url) end
+end)
+hs.hotkey.bind(csMods, "-", function() hs.urlevent.openURL("cleanshot://open-history") end)
 
 local function mediaKey(name)
   return function()
@@ -233,28 +252,104 @@ local function syncVimKeymap()
   if have ~= want then hs.task.new(keymapScript, nil, {want}):start() end
 end
 
--- Laptop only: with the Q10 attached, L2 S/D already cycle tabs.
-local tabCycleKeys = {
+-- Laptop only: with the Q10 attached, L2 already has S/D as tab cycle, arrows, word jump and the CleanShot number row.
+local laptopKeys = {
   hs.hotkey.new({"alt"}, "s", function() hs.eventtap.keyStroke({"ctrl", "shift"}, "tab", 0) end),
   hs.hotkey.new({"alt"}, "d", function() hs.eventtap.keyStroke({"ctrl"}, "tab", 0) end),
 }
 
-local function syncTabCycle()
-  for _, k in ipairs(tabCycleKeys) do
+local arrowKeys = {
+  h = {"left"}, j = {"down"}, k = {"up"}, l = {"right"},
+  u = {"left", {alt = true}}, i = {"right", {alt = true}},
+  y = {"left", {cmd = true}}, o = {"right", {cmd = true}},
+}
+for key, spec in pairs(arrowKeys) do
+  local press = function()
+    for _, down in ipairs({true, false}) do
+      hs.eventtap.event.newKeyEvent(spec[1], down):setFlags(spec[2] or {}):post()
+    end
+  end
+  table.insert(laptopKeys, hs.hotkey.new({"alt"}, key, press, nil, press))
+end
+
+local cleanShotKeys = {
+  function()
+    local url = focusedWindowCaptureURL("&action=copy")
+    if url then captureToLund(url, lundShotPreset, 5) end
+  end,
+  function() captureToLund("cleanshot://capture-window?action=copy", nil, 60) end,
+  function() captureToLund("cleanshot://capture-area?action=copy", nil, 60) end,
+  function()
+    local url = focusedWindowCaptureURL("")
+    if url then hs.urlevent.openURL(url) end
+  end,
+  function() hs.urlevent.openURL("cleanshot://capture-window") end,
+  function() hs.urlevent.openURL("cleanshot://capture-area") end,
+  function() hs.urlevent.openURL("cleanshot://open-history") end,
+}
+for i, capture in ipairs(cleanShotKeys) do
+  table.insert(laptopKeys, hs.hotkey.new({"cmd", "shift"}, tostring(i), capture))
+end
+
+local aerospaceBin = "/opt/homebrew/bin/aerospace"
+
+-- Fn + key runs an AeroSpace command, Fn + Shift + key the second one. Keycodes 43, 44, 27 and 24 are the keys
+-- AeroSpace calls comma, slash, minus and equal: , - + ´ on the Swedish layout.
+local fnActions = {
+  [hs.keycodes.map.h] = {"focus left", "move left"},
+  [hs.keycodes.map.j] = {"focus down", "move down"},
+  [hs.keycodes.map.k] = {"focus up", "move up"},
+  [hs.keycodes.map.l] = {"focus right", "move right"},
+  [hs.keycodes.map.u] = {"join-with left"},
+  [hs.keycodes.map.i] = {"join-with down"},
+  [hs.keycodes.map.o] = {"join-with up"},
+  [hs.keycodes.map.p] = {"join-with right"},
+  [hs.keycodes.map.f] = {"layout floating tiling", "fullscreen"},
+  [hs.keycodes.map.t] = {"flatten-workspace-tree && aerospace layout tiles horizontal && aerospace balance-sizes"},
+  [44] = {"layout tiles horizontal vertical"},
+  [43] = {"layout accordion horizontal vertical"},
+  [27] = {"resize smart -50"},
+  [24] = {"resize smart +50"},
+}
+fnTap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(e)
+  local f = e:getFlags()
+  if not f.fn or f.cmd or f.alt or f.ctrl then return false end
+  local code = e:getKeyCode()
+  local command = fnActions[code] and fnActions[code][f.shift and 2 or 1]
+  if code == hs.keycodes.map.m and not f.shift then
+    if e:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat) == 0 then minimizeFocused() end
+    return true
+  end
+  if not command then return false end
+  if e:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat) == 0 then
+    hs.task.new("/bin/sh", nil, {"-c", "export PATH=/opt/homebrew/bin:$PATH; aerospace " .. command}):start()
+  end
+  return true
+end)
+
+local function syncLaptop()
+  hs.task.new(aerospaceBin, nil, {"mode", q10Attached() and "main" or "laptop"}):start()
+  for _, k in ipairs(laptopKeys) do
     if q10Attached() then k:disable() else k:enable() end
   end
+  if q10Attached() then fnTap:stop() else fnTap:start() end
 end
 
 keymapWatcher = hs.usb.watcher.new(function(e)
   if e.vendorID == 0x3434 then
     hs.timer.doAfter(1, function()
       syncVimKeymap()
-      syncTabCycle()
+      syncLaptop()
     end)
   end
 end):start()
 syncVimKeymap()
-syncTabCycle()
+syncLaptop()
+
+-- AeroSpace starts in main mode, so set the mode again when it launches.
+aerospaceWatcher = hs.application.watcher.new(function(name, event)
+  if name == "AeroSpace" and event == hs.application.watcher.launched then hs.timer.doAfter(1, syncLaptop) end
+end):start()
 
 -- macOS steps volume and brightness in quarters when Option is held with Shift; the knob cannot send that conditionally.
 local fineKeys = {SOUND_UP = true, SOUND_DOWN = true, BRIGHTNESS_UP = true, BRIGHTNESS_DOWN = true}
