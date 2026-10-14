@@ -106,8 +106,9 @@ keybind = f4=ignore
 # Ghostty's own macOS defaults for splitting
 keybind = cmd+d=unbind
 keybind = cmd+shift+d=unbind
-keybind = shift+opt+plus=new_split:right
-keybind = shift+opt+minus=new_split:down
+# Named by physical key: Swedish + is Ghostty's `minus`, Swedish - is `slash`
+keybind = shift+opt+minus=new_split:right
+keybind = shift+opt+slash=new_split:down
 keybind = cmd+n=new_split:right
 
 # Split Resize
