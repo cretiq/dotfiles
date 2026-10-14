@@ -103,12 +103,11 @@ keybind = f4=ignore
 
 
 # Split Creation
-keybind = cmd+opt+right=new_split:right
-keybind = cmd+opt+down=new_split:down
-keybind = cmd+opt+left=new_split:left
-keybind = cmd+opt+up=new_split:up
-keybind = shift+opt+minus=new_split:right
-keybind = shift+opt+slash=new_split:down
+# Ghostty's own macOS defaults for splitting
+keybind = cmd+d=unbind
+keybind = cmd+shift+d=unbind
+keybind = shift+opt+plus=new_split:right
+keybind = shift+opt+minus=new_split:down
 keybind = cmd+n=new_split:right
 
 # Split Resize
@@ -141,10 +140,14 @@ keybind = cmd+z=text:\x1f
 keybind = cmd+s=text:\x1b:w\x0d
 keybind = cmd+shift+s=text:\x1b:wq\x0d
 
-# Split Navigation (vim-style)
+# Split Navigation: Q10 L3 sends ctrl+opt+shift (Meh), so L3 + J/K/L/Ö moves between splits
+keybind = ctrl+alt+shift+j=goto_split:left
+keybind = ctrl+alt+shift+k=goto_split:down
+keybind = ctrl+alt+shift+l=goto_split:up
+keybind = ctrl+alt+shift+ö=goto_split:right
 keybind = cmd+h=goto_split:left
-keybind = cmd+l=goto_split:right
 keybind = cmd+j=goto_split:down
 keybind = cmd+k=goto_split:up
+keybind = cmd+l=goto_split:right
 keybind = ctrl+shift+minus=unbind
 
