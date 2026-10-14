@@ -30,69 +30,52 @@ hs.hotkey.bind({"ctrl", "alt", "cmd"}, "m", minimizeFocused)
 
 hs.hotkey.bind({}, "f2", hs.spaces.toggleMissionControl)
 
--- CleanShot has no "capture the focused window" command, so capture its rectangle. Its origin is the display's lower left corner.
 -- Claude Code takes a pasted image on ctrl+v, not cmd+v.
 local lundBundle = "app.supabit.supacode.debug"
--- CleanShot rounds every screenshot with its screenshot background preset and the URL scheme cannot pick a preset, so this capture swaps in
--- a copy of "Dev Item" with smaller corners ("Dev Item small corners" in CleanShot) and puts the old preset back afterwards.
-local csDomain = "com.getcleanshot.app-setapp"
-local lundShotPreset = "5BEE1433-83EB-4939-9914-385AB3501F57"
-local function setScreenshotPreset(id)
-  hs.execute(string.format("/usr/bin/defaults write %s screenshotBackgroundPresetID -string %s", csDomain, id))
-end
--- preset: CleanShot screenshot preset to use for this capture only. waitSeconds: how long to wait for the image, longer when you pick the area yourself.
-local function captureToLund(url, preset, waitSeconds)
-  local usualPreset
-  if preset then
-    usualPreset = hs.execute(string.format("/usr/bin/defaults read %s screenshotBackgroundPresetID", csDomain)):gsub("%s+", "")
-    setScreenshotPreset(preset)
-  end
-  local before = hs.pasteboard.changeCount()
-  hs.timer.doAfter(0.2, function() hs.urlevent.openURL(url) end)
-  local deadline = hs.timer.secondsSinceEpoch() + waitSeconds
-  local timer
-  timer = hs.timer.doEvery(0.1, function()
-    local captured = hs.pasteboard.changeCount() ~= before and hs.fnutils.contains(hs.pasteboard.contentTypes(), "public.png")
-    if not captured and hs.timer.secondsSinceEpoch() <= deadline then return end
-    timer:stop()
-    if preset then setScreenshotPreset(usualPreset) end
-    if not captured then return end
-    hs.application.launchOrFocusByBundleID(lundBundle)
-    hs.timer.doAfter(0.3, function()
-      hs.eventtap.keyStroke({"ctrl"}, "v", 0)
-      hs.timer.doAfter(0.3, function() hs.eventtap.keyStrokes(" ") end)
-    end)
+local screencapture = "/usr/sbin/screencapture"
+
+local function pasteToLund()
+  hs.application.launchOrFocusByBundleID(lundBundle)
+  hs.timer.doAfter(0.3, function()
+    hs.eventtap.keyStroke({"ctrl"}, "v", 0)
+    hs.timer.doAfter(0.3, function() hs.eventtap.keyStrokes(" ") end)
   end)
 end
 
-local function focusedWindowCaptureURL(extra)
-  local win = hs.window.focusedWindow()
-  if not win then return nil end
-  local f, screen = win:frame(), win:screen()
-  local sf = screen:fullFrame()
-  local display, other = 1, 1
-  for _, s in ipairs(hs.screen.allScreens()) do
-    if s ~= hs.screen.primaryScreen() then other = other + 1 end
-    if s == screen then display = (s == hs.screen.primaryScreen()) and 1 or other end
-  end
-  return string.format("cleanshot://capture-area?x=%d&y=%d&width=%d&height=%d&display=%d%s",
-    f.x - sf.x, sf.h - (f.y - sf.y) - f.h, f.w, f.h, display, extra)
+-- args: screencapture options that end with the image on the clipboard. An abandoned selection leaves the clipboard unchanged, so nothing is pasted.
+local function captureToLund(args)
+  local before = hs.pasteboard.changeCount()
+  hs.task.new(screencapture, function()
+    if hs.pasteboard.changeCount() ~= before then pasteToLund() end
+  end, args):start()
 end
 
+local function captureFocusedWindow()
+  local win = hs.window.focusedWindow()
+  if not win then return false end
+  local screen, f = win:screen(), win:frame()
+  local origin = screen:fullFrame()
+  local image = screen:snapshot(hs.geometry.rect(f.x - origin.x, f.y - origin.y, f.w, f.h))
+  return image ~= nil and hs.pasteboard.writeObjects(image)
+end
+local function captureFocusedWindowToLund()
+  if captureFocusedWindow() then pasteToLund() end
+end
+local function captureAreaToLund() captureToLund({"-x", "-c", "-i"}) end
+local function capturePickedWindowToLund() captureToLund({"-x", "-c", "-i", "-w"}) end
+local function capturePickedWindow() hs.task.new(screencapture, nil, {"-i", "-w"}):start() end
+
+-- macshot URL actions do nothing while it is not running.
+hs.task.new("/usr/bin/open", nil, {"-g", "-a", "macshot"}):start()
+
 -- Q10 middle key (L2) number row, all alt+shift+cmd+: 1 sends 7 (focused window), 2 sends 9 (picked window), 3 sends 8 (area), each pasted into Lund.
--- 4 sends 0 (focused window, no paste), 7 sends minus (history). 5, 6, 8, 9 and 0 send CleanShot's own 2, 4, 3, 5 and 1.
+-- 4 sends 0 (focused window, no paste), 5 sends 2 (picked window, saved as a file). 6, 7, 8 and 9 are macshot's own hotkeys: 4 (area), the + key (history), 3 (OCR text) and 5 (whole screen).
 local csMods = {"alt", "shift", "cmd"}
-hs.hotkey.bind(csMods, "7", function()
-  local url = focusedWindowCaptureURL("&action=copy")
-  if url then captureToLund(url, lundShotPreset, 5) end
-end)
-hs.hotkey.bind(csMods, "8", function() captureToLund("cleanshot://capture-area?action=copy", nil, 60) end)
-hs.hotkey.bind(csMods, "9", function() captureToLund("cleanshot://capture-window?action=copy", nil, 60) end)
-hs.hotkey.bind(csMods, "0", function()
-  local url = focusedWindowCaptureURL("")
-  if url then hs.urlevent.openURL(url) end
-end)
-hs.hotkey.bind(csMods, "-", function() hs.urlevent.openURL("cleanshot://open-history") end)
+hs.hotkey.bind(csMods, "7", captureFocusedWindowToLund)
+hs.hotkey.bind(csMods, "8", captureAreaToLund)
+hs.hotkey.bind(csMods, "9", capturePickedWindowToLund)
+hs.hotkey.bind(csMods, "0", captureFocusedWindow)
+hs.hotkey.bind(csMods, "2", capturePickedWindow)
 
 local function mediaKey(name)
   return function()
@@ -252,7 +235,7 @@ local function syncVimKeymap()
   if have ~= want then hs.task.new(keymapScript, nil, {want}):start() end
 end
 
--- Laptop only: with the Q10 attached, L2 already has S/D as tab cycle, arrows, word jump and the CleanShot number row.
+-- Laptop only: with the Q10 attached, L2 already has S/D as tab cycle, arrows, word jump and the capture number row.
 local laptopKeys = {
   hs.hotkey.new({"alt"}, "s", function() hs.eventtap.keyStroke({"ctrl", "shift"}, "tab", 0) end),
   hs.hotkey.new({"alt"}, "d", function() hs.eventtap.keyStroke({"ctrl"}, "tab", 0) end),
@@ -272,22 +255,16 @@ for key, spec in pairs(arrowKeys) do
   table.insert(laptopKeys, hs.hotkey.new({"alt"}, key, press, nil, press))
 end
 
-local cleanShotKeys = {
-  function()
-    local url = focusedWindowCaptureURL("&action=copy")
-    if url then captureToLund(url, lundShotPreset, 5) end
-  end,
-  function() captureToLund("cleanshot://capture-window?action=copy", nil, 60) end,
-  function() captureToLund("cleanshot://capture-area?action=copy", nil, 60) end,
-  function()
-    local url = focusedWindowCaptureURL("")
-    if url then hs.urlevent.openURL(url) end
-  end,
-  function() hs.urlevent.openURL("cleanshot://capture-window") end,
-  function() hs.urlevent.openURL("cleanshot://capture-area") end,
-  function() hs.urlevent.openURL("cleanshot://open-history") end,
+local captureKeys = {
+  captureFocusedWindowToLund,
+  capturePickedWindowToLund,
+  captureAreaToLund,
+  captureFocusedWindow,
+  capturePickedWindow,
+  function() hs.urlevent.openURL("macshot://capture") end,
+  function() hs.urlevent.openURL("macshot://history") end,
 }
-for i, capture in ipairs(cleanShotKeys) do
+for i, capture in ipairs(captureKeys) do
   table.insert(laptopKeys, hs.hotkey.new({"cmd", "shift"}, tostring(i), capture))
 end
 
