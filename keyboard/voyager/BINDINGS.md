@@ -2,7 +2,7 @@
 
 Generated from the firmware repo by `scripts/bindings.py`. Do not edit. Oryx source revision: `5L3pB/pjMyob`.
 Each grid is one layer: rows r0 (top) to r3, left half `||` right half, then the thumb keys (left outer, left inner `||` right inner, right outer).
-`·` falls through to Main. `X / hold Y` taps X, holds Y. Layer 7, the Nav boot key and the top-right cheat sheet key come from `patch_layout.py`, not Oryx.
+`·` falls through to Main. `X / hold Y` taps X, holds Y. Layer 7, the Nav boot key, the cleared Meh R and Z keys and the top-right cheat sheet key come from `patch_layout.py`, not Oryx.
 
 ## L0 Main
 ```
@@ -13,7 +13,7 @@ r3  A / hold L6 | Z | X | C | V | B || N | M | , | . | - | TAB
 thumbs  hold L1 | SPACE / hold L2 || ENTER / hold Ctrl | BSPC / hold Shift
 ```
 
-## L1 Sym+Num
+## L1 Symbols
 ```
 r0  QK_DYNAMIC_TAPPING_TERM_DOWN | QK_DYNAMIC_TAPPING_TERM_UP | QK_DYNAMIC_TAPPING_TERM_PRINT | · | · | · || · | · | · | · | · | ·
 r1  · | % | { | } | @ | ~ || ´ | + | < | > | = | ·
@@ -31,7 +31,7 @@ r3  · | ~Z | Ctrl+Shift+Z | MEDIA_PREV_TRACK | MEDIA_NEXT_TRACK | MEDIA_PLAY_PA
 thumbs  · | · || · | ·
 ```
 
-## L3 Cmd+Sft  (~ = Alt+Ctrl+; ^ = Alt+Ctrl+Shift+ the key)
+## L3 Ctrl+Alt  (~ = Alt+Ctrl+; ^ = Alt+Ctrl+Shift+ the key)
 ```
 r0  · | ~1 | ~2 | ~3 | ~4 | ~5 || ~6 | ~7 | ~8 | ~9 | ~0 | ·
 r1  · | ~Q | ~W | ~E | ~R | ~T || ^Y | ^U | ^I | ^O | ^P | ·
@@ -49,7 +49,7 @@ r3  · | · | · | · | · | · || · | · | · | · | · | ·
 thumbs  · | · || · | ·
 ```
 
-## L5 Color
+## L5 RGB
 ```
 r0  · | · | · | · | · | · || RGB_SLD | TOGGLE_LAYER_COLOR | RGB_TOG | · | LED_LEVEL | HSV_139_255_255
 r1  · | · | · | · | · | · || · | · | · | · | · | HSV_202_255_255
@@ -58,16 +58,16 @@ r3  · | · | · | · | · | · || RGB_MODE_FORWARD | RGB_SAD | RGB_VAD | RGB_SP
 thumbs  · | · || · | ·
 ```
 
-## L6 NumPad  (~ = Alt+Ctrl+Shift+ the key)
+## L6 Meh+Pad  (~ = Alt+Ctrl+Shift+ the key)
 ```
 r0  · | ~1 | ~2 | ~3 | ~4 | ~5 || · | · | · | · | · | ·
-r1  · | ~Q | ~W | ~E | ~R | ~T || KP_PLUS | KP_7 | KP_8 | KP_9 | , | KP_EQUAL
+r1  · | ~Q | ~W | ~E | · | ~T || KP_PLUS | KP_7 | KP_8 | KP_9 | , | KP_EQUAL
 r2  · | ~A | ~S | ~D | ~F | ~G || KP_MINUS | KP_4 | KP_5 | KP_6 | . | *
-r3  · | ~Z | ~X | ~C | ~V | ~B || KP_0 | KP_1 | KP_2 | KP_3 | / | ·
+r3  · | · | ~X | ~C | ~V | ~B || KP_0 | KP_1 | KP_2 | KP_3 | / | ·
 thumbs  · | · || KP_ENTER | ·
 ```
 
-## L7 Number  (~ = Ctrl+Alt+Win+ the key)
+## L7 CAW  (~ = Ctrl+Alt+Win+ the key)
 ```
 r0  · | ~1 | ~2 | ~3 | ~4 | ~5 || ~6 | ~7 | ~8 | ~9 | ~0 | ·
 r1  · | ~Q | ~W | ~E | ~R | ~T || ~Y | ~U | ~I | ~O | ~P | ~Å
@@ -104,11 +104,11 @@ thumbs  · | SPACE || · | ·
 - A / hold Alt + SPACE / hold L2 → Ctrl+A
 
 ## AutoHotkey slash-command chords (`hotkeys-and-remaps.ahk`)
-- Ctrl+Alt+Win+R → types /mr:deep-review
-- Ctrl+Alt+Win+T → types /generate:long-title
 - Ctrl+Alt+Win+D → types /dev:restart
 - Ctrl+Alt+Win+N → types /next
 - Ctrl+Alt+Win+C → types /cut
-- Ctrl+Alt+Shift+R → types /rebuild
-- Ctrl+Alt+Shift+Z → types /generate:long-title, then /copy, then /rename
+- Ctrl+Alt+Win+R → types /rebuild
+- Ctrl+Alt+Win+O → types /git:commit-detailed-push
+- Ctrl+Alt+Win+H → types /how-to-test
+- Ctrl+Alt+Win+Z → types /generate:long-title, then /copy, then /rename
 

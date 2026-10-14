@@ -7,6 +7,7 @@ Persistent
 ; Display and device changes arrive as window messages; the 30 s re-check covers any that are missed.
 logFile := EnvGet("LOCALAPPDATA") "\watchers.log"
 Log(msg) => FileAppend(FormatTime(, "yyyy-MM-dd HH:mm:ss") "  " msg "`n", logFile)
+#Include arrange-windows.ahk
 
 ; Desk mode = the laptop panel is not on the desktop (lid closed, external screen only): GlazeWM on and the
 ; Voyager preset, whose remaps are off so Alt+HJKL reaches GlazeWM. Laptop panel on: GlazeWM off, Standard preset.
@@ -74,9 +75,20 @@ ApplyMode() {
     mode := desk ? "desk" : "laptop"
     if (mode = appliedMode)
         return
+    leftDesk := (appliedMode = "desk" && !desk)
     appliedMode := mode
     preset := desk ? "voyager" : "standard"
     Log(mode " mode: GlazeWM " (desk ? "on" : "off") ", " preset " preset")
+    if leftDesk {
+        ; wm-exit is asynchronous; moving windows while GlazeWM still runs makes it re-tile them.
+        Loop 30 {
+            if !ProcessExist("glazewm.exe")
+                break
+            Sleep 100
+        }
+        Sleep 500
+        Log("arranged windows:`n" ArrangeWindows())
+    }
     hotkeysFile := A_ScriptDir "\hotkeys-and-remaps.ahk"
     before := FileGetTime(hotkeysFile)
     RunWait A_ComSpec ' /c wsl.exe bash ' setAllKeymap ' ' preset ' --no-reload >> "' logFile '" 2>&1', , "Hide"

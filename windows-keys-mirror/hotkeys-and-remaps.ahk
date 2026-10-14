@@ -169,6 +169,7 @@ CaptureToTerminal(workflow, timeout)
 {
     KeyWait "Ctrl"
     KeyWait "Alt"
+    KeyWait "Shift"
     A_Clipboard := ""
     Run '"' EnvGet("LOCALAPPDATA") '\Programs\ShareX\ShareX.exe" -workflow ' workflow
     if !ClipWait(timeout, 1)
@@ -182,12 +183,19 @@ CaptureToTerminal(workflow, timeout)
     }
 }
 
+ShareX(args)
+{
+    KeyWait "Ctrl"
+    KeyWait "Shift"
+    Run '"' EnvGet("LOCALAPPDATA") '\Programs\ShareX\ShareX.exe" ' args
+}
+
 <^<!q::CaptureToTerminal "ActiveWindowPlain", 5
 
 <^<!w::CaptureToTerminal "RegionPlain", 30
 
 
-; Chords from the Q10's left space layer and the Voyager's layer 7. The keys are held when the hotkey fires, so wait for release before typing.
+; Chords from the Q10's left space layer and the Voyager's layer 7 (Ctrl+Alt+Win). The keys are held when the hotkey fires, so wait for release before typing.
 SlashCommand(name, submit := true)
 {
     KeyWait "Ctrl"
@@ -205,19 +213,19 @@ SlashCommand(name, submit := true)
     }
 }
 
-^!#r::SlashCommand "/mr:deep-review", false
-
-^!#t::SlashCommand "/generate:long-title"
-
 ^!#d::SlashCommand "/dev:restart"
 
 ^!#n::SlashCommand "/next"
 
 ^!#c::SlashCommand "/cut"
 
-^!+r::SlashCommand "/rebuild"
+^!#r::SlashCommand "/rebuild"
 
-^!+z::
+^!#o::SlashCommand "/git:commit-detailed-push"
+
+^!#h::SlashCommand "/how-to-test"
+
+^!#z::
 {
     SlashCommand "/generate:long-title"
     Sleep 300
@@ -226,16 +234,52 @@ SlashCommand(name, submit := true)
     SlashCommand "/rename", false
 }
 
+; Laptop keyboard: no Win-layer chords there. Active while GlazeWM is off (watchers.ahk keeps it off with the laptop screen on, and Alt+Shift+key belongs to GlazeWM otherwise).
+; The /generate:long-title, /copy, /rename macro is repeated below rather than shared: scripts/bindings.py reads it from the z chord block above.
+#HotIf !ProcessExist("glazewm.exe")
+; Ctrl+Shift+1-5 stand in for the ShareX keys on Ctrl+Alt Q W E R T (the last three are ShareX's own hotkeys, all default task settings).
+^+1::CaptureToTerminal "ActiveWindowPlain", 5
+
+^+2::CaptureToTerminal "RegionPlain", 30
+
+^+3::ShareX "-ActiveWindow"
+
+^+4::ShareX "-RectangleRegion"
+
+^+5::ShareX "-OpenImageHistory"
+
+<!+d::SlashCommand "/dev:restart"
+
+<!+n::SlashCommand "/next"
+
+<!+c::SlashCommand "/cut"
+
+<!+r::SlashCommand "/rebuild"
+
+<!+o::SlashCommand "/git:commit-detailed-push"
+
+<!+h::SlashCommand "/how-to-test"
+
+<!+z::
+{
+    SlashCommand "/generate:long-title"
+    Sleep 300
+    SlashCommand "/copy"
+    Sleep 300
+    SlashCommand "/rename", false
+}
+#HotIf
+
 ;---REMAP ESC---
-;Esc::CapsLock
-;CapsLock::Esc
+Esc::CapsLock
+CapsLock::Esc
 ;---------------
 
 ;---REMAP ALT+HJKL---
-;!h::Left
-;!j::Down
-;!k::Up
-;!l::Right
-;!u::^Left
-;!i::^Right
+!h::Left
+!j::Down
+!k::Up
+!l::Right
+!u::^Left
+!i::^Right
 ;---------------------
