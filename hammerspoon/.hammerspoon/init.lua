@@ -66,7 +66,9 @@ local function capturePickedWindowToLund() captureToLund({"-x", "-c", "-i", "-w"
 local function capturePickedWindow() hs.task.new(screencapture, nil, {"-i", "-w"}):start() end
 
 -- macshot URL actions do nothing while it is not running.
-hs.task.new("/usr/bin/open", nil, {"-g", "-a", "macshot"}):start()
+if not hs.application.get("macshot") then
+  hs.task.new("/usr/bin/open", nil, {"-g", "-a", "macshot"}):start()
+end
 
 -- Q10 middle key (L2) number row, all alt+shift+cmd+: 1 sends 7 (focused window), 2 sends 9 (picked window), 3 sends 8 (area), each pasted into Lund.
 -- 4 sends 0 (focused window, no paste), 5 sends 2 (picked window, saved as a file). 6, 7, 8 and 9 are macshot's own hotkeys: 4 (area), the + key (history), 3 (OCR text) and 5 (whole screen).
@@ -268,6 +270,10 @@ for i, capture in ipairs(captureKeys) do
   table.insert(laptopKeys, hs.hotkey.new({"cmd", "shift"}, tostring(i), capture))
 end
 
+for key, text in pairs(commands) do
+  table.insert(laptopKeys, hs.hotkey.new({"alt", "shift"}, key, function() typeCommand(text, true) end))
+end
+
 local aerospaceBin = "/opt/homebrew/bin/aerospace"
 
 -- Fn + key runs an AeroSpace command, Fn + Shift + key the second one. Keycodes 43, 44, 27 and 24 are the keys
@@ -307,12 +313,63 @@ fnTap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(e)
   return true
 end)
 
+local rotatePercentPerDegree = 1
+local rotateAngle, rotateVolume, rotateDevice, rotateWrittenAt, rotateNativeAt = nil, nil, nil, 0, 0
+local rotateIdle = hs.timer.delayed.new(0.15, function()
+  if rotateDevice and rotateVolume then rotateDevice:setVolume(rotateVolume) end
+  rotateVolume, rotateDevice = nil, nil
+end)
+-- degrees: positive is counter-clockwise. Touch frames arrive about 250 times a second and a volume write blocks for about 4 ms, so writes are limited to one per 20 ms and the last value is written once input stops.
+local function rotateBy(degrees)
+  if not rotateVolume then
+    rotateDevice = hs.audiodevice.defaultOutputDevice()
+    if not rotateDevice then return end
+    rotateVolume = rotateDevice:volume()
+  end
+  rotateVolume = math.max(0, math.min(100, rotateVolume - degrees * rotatePercentPerDegree))
+  local now = hs.timer.secondsSinceEpoch()
+  if now - rotateWrittenAt >= 0.02 then
+    rotateDevice:setVolume(rotateVolume)
+    rotateWrittenAt = now
+  end
+  rotateIdle:start()
+end
+
+-- When both fingers turn, macOS stops sending touches and sends its own rotate events instead: field 110 is 5 and field 164 holds the float32 degrees.
+-- When one finger stays put, only touches arrive. Touch y grows upward, so clockwise gives a negative angle change.
+-- Touch order and identities change between frames, so the two fingers are treated as an unordered line: the angle is taken modulo 180 degrees.
+rotateTap = hs.eventtap.new({hs.eventtap.event.types.gesture}, function(e)
+  local now = hs.timer.secondsSinceEpoch()
+  local touches = {}
+  for _, t in ipairs(e:getTouches() or {}) do
+    if t.phase ~= "ended" and t.phase ~= "cancelled" then touches[#touches + 1] = t.normalizedPosition end
+  end
+  if #touches == 0 then
+    if e:getProperty(110) == 5 then
+      rotateNativeAt = now
+      rotateBy(string.unpack("<f", string.pack("<I4", e:getProperty(164) & 0xFFFFFFFF)))
+    end
+    return false
+  end
+  if #touches ~= 2 then
+    rotateAngle = nil
+    return false
+  end
+  local angle = math.atan(touches[2].y - touches[1].y, touches[2].x - touches[1].x)
+  if rotateAngle and now - rotateNativeAt > 0.15 then
+    rotateBy(math.deg((angle - rotateAngle + math.pi / 2) % math.pi - math.pi / 2))
+  end
+  rotateAngle = angle
+  return false
+end)
+
 local function syncLaptop()
   hs.task.new(aerospaceBin, nil, {"mode", q10Attached() and "main" or "laptop"}):start()
   for _, k in ipairs(laptopKeys) do
     if q10Attached() then k:disable() else k:enable() end
   end
   if q10Attached() then fnTap:stop() else fnTap:start() end
+  if q10Attached() then rotateTap:stop() else rotateTap:start() end
 end
 
 keymapWatcher = hs.usb.watcher.new(function(e)
