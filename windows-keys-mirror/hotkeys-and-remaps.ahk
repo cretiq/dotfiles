@@ -287,6 +287,11 @@ SlashCommand(name, submit := true)
 <!d::Send "^{Tab}"
 #HotIf
 
+; Laptop mode is GlazeWM stopped (watchers.ahk); desk mode keeps Ctrl+Shift+6 free.
+#HotIf !ProcessExist("glazewm.exe")
+^+6::Run '"' EnvGet("LOCALAPPDATA") '\Programs\ShareX\ShareX.exe" -ScrollingCapture'
+#HotIf
+
 ;---REMAP ESC---
 Esc::CapsLock
 CapsLock::Esc
