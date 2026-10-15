@@ -72,8 +72,10 @@ ApplyMode() {
         ; Waking the laptop briefly drops the panel from the desktop; GlazeWM started then dies with
         ; "Failed to get container to focus". Start it only if desk mode still holds after the monitors settle.
         Sleep 5000
-        if (PanelOnDesktop() || !MonitorGetCount())
+        if (PanelOnDesktop() || !MonitorGetCount()) {
+            Log("desk mode not held after settle: GlazeWM start skipped")
             return
+        }
         Run '"' glazewmDir '\glazewm.exe"'
     } else if (!desk && running)
         Run '"' glazewmDir '\cli\glazewm.exe" command wm-exit', , "Hide"
