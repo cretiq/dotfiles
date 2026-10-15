@@ -68,9 +68,14 @@ ApplyMode() {
         return
     desk := !PanelOnDesktop()
     running := ProcessExist("glazewm.exe")
-    if (desk && !running)
+    if (desk && !running) {
+        ; Waking the laptop briefly drops the panel from the desktop; GlazeWM started then dies with
+        ; "Failed to get container to focus". Start it only if desk mode still holds after the monitors settle.
+        Sleep 5000
+        if (PanelOnDesktop() || !MonitorGetCount())
+            return
         Run '"' glazewmDir '\glazewm.exe"'
-    else if (!desk && running)
+    } else if (!desk && running)
         Run '"' glazewmDir '\cli\glazewm.exe" command wm-exit', , "Hide"
     mode := desk ? "desk" : "laptop"
     if (mode = appliedMode)

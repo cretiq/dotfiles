@@ -11,6 +11,16 @@ OpenLocalhost(port, *) => Run('msedge.exe "https://localhost:' port '"')
 Loop 6
     Hotkey "<^<!" A_Index, OpenLocalhost.Bind(5170 + A_Index)
 
+ToggleTheme() {
+    key := "HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+    next := RegRead(key, "AppsUseLightTheme") = 0 ? 1 : 0
+    RegWrite(next, "REG_DWORD", key, "AppsUseLightTheme")
+    RegWrite(next, "REG_DWORD", key, "SystemUsesLightTheme")
+    DllCall("SendMessageTimeout", "Ptr", 0xFFFF, "UInt", 0x1A, "Ptr", 0, "Str", "ImmersiveColorSet", "UInt", 2, "UInt", 5000, "Ptr", 0)
+}
+
+^#!+8::ToggleTheme()
+
 ^#!+v::
 {
     if WinExist("ahk_exe Spotify.exe")
@@ -268,6 +278,13 @@ SlashCommand(name, submit := true)
     Sleep 300
     SlashCommand "/rename", false
 }
+#HotIf
+
+; Laptop only (GlazeWM off): Alt+S / Alt+D = previous / next tab in any app (Ctrl+Shift+Tab / Ctrl+Tab). Windows Terminal has its own Alt+S/D bindings; dialogs (#32770) keep their Alt+letter button shortcuts.
+#HotIf !ProcessExist("glazewm.exe") && !WinActive("ahk_exe WindowsTerminal.exe") && !WinActive("ahk_class #32770")
+<!s::Send "^+{Tab}"
+
+<!d::Send "^{Tab}"
 #HotIf
 
 ;---REMAP ESC---
