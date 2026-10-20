@@ -31,12 +31,35 @@ hs.hotkey.bind({"ctrl", "alt", "cmd"}, "m", minimizeFocused)
 hs.hotkey.bind({}, "f2", hs.spaces.toggleMissionControl)
 
 -- Claude Code takes a pasted image on ctrl+v, not cmd+v.
+-- Installed, agent-built and scratch Lunds share one bundle id, so a bundle id lookup can land on a windowless or stale one.
+-- The target is the instance last in front, else any with a window.
 local lundBundle = "app.supabit.supacode.debug"
+local lundPath = os.getenv("HOME") .. "/Applications/Lund-dev.app"
 local screencapture = "/usr/sbin/screencapture"
 
+local lundLast = hs.application.frontmostApplication()
+if lundLast:bundleID() ~= lundBundle then lundLast = nil end
+lundWatcher = hs.application.watcher.new(function(_, event, app)
+  if event == hs.application.watcher.activated and app:bundleID() == lundBundle then lundLast = app end
+end):start()
+
+local function focusLund()
+  local target = lundLast
+  if not (target and target:isRunning() and #target:allWindows() > 0) then
+    target = nil
+    for _, app in ipairs(hs.application.applicationsForBundleID(lundBundle)) do
+      if #app:allWindows() > 0 then target = app break end
+    end
+  end
+  if target then target:activate() else hs.application.launchOrFocus(lundPath) end
+end
+
+-- Abort when Lund did not come to the front: the space would scroll whatever app is there instead.
 local function pasteToLund()
-  hs.application.launchOrFocusByBundleID(lundBundle)
+  focusLund()
   hs.timer.doAfter(0.3, function()
+    local front = hs.application.frontmostApplication()
+    if front:bundleID() ~= lundBundle then return end
     hs.eventtap.keyStroke({"ctrl"}, "v", 0)
     hs.timer.doAfter(0.3, function() hs.eventtap.keyStrokes(" ") end)
   end)
@@ -179,6 +202,18 @@ for key, text in pairs(voyagerCommands) do
 end
 hs.hotkey.bind({"ctrl", "alt", "cmd"}, "z", function()
   whenModifiersReleased(function() titleCopyRename("/generate:long-title ") end)
+end)
+
+-- Hammerspoon has no Bluetooth permission, so blueutil aborts under it. AirPodsConnect.app holds the grant; source in hammerspoon/airpods-connect.
+local airpodsOutputUID = "34-0E-22-23-9F-BA:output"
+hs.hotkey.bind(meh, "1", function()
+  local dev = hs.audiodevice.findOutputByUID(airpodsOutputUID)
+  if dev then
+    dev:setDefaultOutputDevice()
+    dev:setDefaultEffectDevice()
+  else
+    hs.task.new("/usr/bin/open", nil, {"-g", os.getenv("HOME") .. "/Applications/AirPodsConnect.app"}):start()
+  end
 end)
 
 -- Keychron Q10 Max: the cable (PID 0x08A1) gets the newest Mac layout on connect. The 2.4 GHz receiver is never written.
@@ -338,53 +373,41 @@ fnTap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(e)
   return true
 end)
 
-local rotatePercentPerDegree = 1
-local rotateAngle, rotateVolume, rotateDevice, rotateWrittenAt, rotateNativeAt = nil, nil, nil, 0, 0
-local rotateIdle = hs.timer.delayed.new(0.15, function()
-  if rotateDevice and rotateVolume then rotateDevice:setVolume(rotateVolume) end
-  rotateVolume, rotateDevice = nil, nil
-end)
--- degrees: positive is counter-clockwise. Touch frames arrive about 250 times a second and a volume write blocks for about 4 ms, so writes are limited to one per 20 ms and the last value is written once input stops.
-local function rotateBy(degrees)
-  if not rotateVolume then
-    rotateDevice = hs.audiodevice.defaultOutputDevice()
-    if not rotateDevice then return end
-    rotateVolume = rotateDevice:volume()
+local rotateDegreesPerStep = 2.6
+local rotateDeadZone = 6
+local rotateAcc, rotateActive, rotateLastAt, scrollLastAt = 0, false, 0, 0
+
+-- Shift+Option makes the key step in quarters (1.56%), and macOS shows its volume overlay for the key.
+local function fineVolumeKey(name)
+  for _, down in ipairs({true, false}) do
+    hs.eventtap.event.newSystemKeyEvent(name, down):setFlags({shift = true, alt = true}):post()
   end
-  rotateVolume = math.max(0, math.min(100, rotateVolume - degrees * rotatePercentPerDegree))
-  local now = hs.timer.secondsSinceEpoch()
-  if now - rotateWrittenAt >= 0.02 then
-    rotateDevice:setVolume(rotateVolume)
-    rotateWrittenAt = now
-  end
-  rotateIdle:start()
 end
 
--- When both fingers turn, macOS stops sending touches and sends its own rotate events instead: field 110 is 5 and field 164 holds the float32 degrees.
--- When one finger stays put, only touches arrive. Touch y grows upward, so clockwise gives a negative angle change.
--- Touch order and identities change between frames, so the two fingers are treated as an unordered line: the angle is taken modulo 180 degrees.
-rotateTap = hs.eventtap.new({hs.eventtap.event.types.gesture}, function(e)
+-- Only macOS's own rotate events count: when two fingers turn it stops sending touches and sends rotate events (field 110 is 5, field 164 holds the float32 degrees, counter-clockwise positive).
+-- Two-finger scrolling and pinching can wobble the finger angle, so rotation is ignored for 0.4 s after any scroll and until a new gesture has turned past the dead zone.
+rotateTap = hs.eventtap.new({hs.eventtap.event.types.gesture, hs.eventtap.event.types.scrollWheel}, function(e)
   local now = hs.timer.secondsSinceEpoch()
-  local touches = {}
-  for _, t in ipairs(e:getTouches() or {}) do
-    if t.phase ~= "ended" and t.phase ~= "cancelled" then touches[#touches + 1] = t.normalizedPosition end
-  end
-  if #touches == 0 then
-    if e:getProperty(110) == 5 then
-      rotateNativeAt = now
-      rotateBy(string.unpack("<f", string.pack("<I4", e:getProperty(164) & 0xFFFFFFFF)))
-    end
+  if e:getType() == hs.eventtap.event.types.scrollWheel then
+    scrollLastAt = now
     return false
   end
-  if #touches ~= 2 then
-    rotateAngle = nil
+  if #(e:getTouches() or {}) > 0 or e:getProperty(110) ~= 5 then return false end
+  if now - rotateLastAt > 0.3 then rotateAcc, rotateActive = 0, false end
+  rotateLastAt = now
+  if now - scrollLastAt < 0.4 then
+    rotateAcc, rotateActive = 0, false
     return false
   end
-  local angle = math.atan(touches[2].y - touches[1].y, touches[2].x - touches[1].x)
-  if rotateAngle and now - rotateNativeAt > 0.15 then
-    rotateBy(math.deg((angle - rotateAngle + math.pi / 2) % math.pi - math.pi / 2))
+  rotateAcc = rotateAcc + string.unpack("<f", string.pack("<I4", e:getProperty(164) & 0xFFFFFFFF))
+  if not rotateActive then
+    if math.abs(rotateAcc) < rotateDeadZone then return false end
+    rotateActive, rotateAcc = true, 0
   end
-  rotateAngle = angle
+  while math.abs(rotateAcc) >= rotateDegreesPerStep do
+    fineVolumeKey(rotateAcc < 0 and "SOUND_UP" or "SOUND_DOWN")
+    rotateAcc = rotateAcc + (rotateAcc < 0 and rotateDegreesPerStep or -rotateDegreesPerStep)
+  end
   return false
 end)
 
@@ -415,9 +438,17 @@ end):start()
 
 -- macOS steps volume and brightness in quarters when Option is held with Shift; the knob cannot send that conditionally.
 local fineKeys = {SOUND_UP = true, SOUND_DOWN = true, BRIGHTNESS_UP = true, BRIGHTNESS_DOWN = true}
+-- Q10 M4 sends ctrl+alt; held with the volume knob it turns the knob into brightness.
+local brightnessOf = {SOUND_UP = "BRIGHTNESS_UP", SOUND_DOWN = "BRIGHTNESS_DOWN"}
 fineStepTap = hs.eventtap.new({hs.eventtap.event.types.systemDefined}, function(e)
   local k = e:systemKey()
   local f = e:getFlags()
+  if k and brightnessOf[k.key] and f.ctrl and f.alt and not f.cmd then
+    local ev = hs.eventtap.event.newSystemKeyEvent(brightnessOf[k.key], k.down)
+    ev:setFlags(f.shift and {shift = true, alt = true} or {})
+    ev:post()
+    return true
+  end
   if k and fineKeys[k.key] and f.shift and not f.alt then
     local ev = hs.eventtap.event.newSystemKeyEvent(k.key, k.down)
     ev:setFlags({shift = true, alt = true})
