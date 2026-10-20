@@ -2,7 +2,7 @@
 
 Generated from the firmware repo by `scripts/bindings.py`. Do not edit. Oryx source revision: `5L3pB/pjMyob`.
 Each grid is one layer: rows r0 (top) to r3, left half `||` right half, then the thumb keys (left outer, left inner `||` right inner, right outer).
-`·` falls through to Main. `X / hold Y` taps X, holds Y. Layer 7, the Nav boot key, the cleared Meh R and Z keys and the top-right cheat sheet key come from `patch_layout.py`, not Oryx.
+`·` falls through to Main. `X / hold Y` taps X, holds Y. Layer 7, the Nav boot key, the Nav brightness keys, the cleared Meh R and Z keys and the top-right cheat sheet key come from `patch_layout.py`, not Oryx.
 
 ## L0 Main
 ```
@@ -24,7 +24,7 @@ thumbs  · | · || · | ·
 
 ## L2 Nav  (~ = Ctrl+ the key)
 ```
-r0  BOOTLOADER | · | · | AUDIO_VOL_DOWN | AUDIO_VOL_UP | RAlt+Ctrl+5 || CAPS | NUM | MS_WH_DOWN | MS_WH_UP | · | DELETE
+r0  BOOTLOADER | BRIGHTNESS_DOWN | BRIGHTNESS_UP | AUDIO_VOL_DOWN | AUDIO_VOL_UP | RAlt+Ctrl+5 || CAPS | NUM | MS_WH_DOWN | MS_WH_UP | · | DELETE
 r1  · | Alt+F4 | ~G | ~E | ~R | Ctrl+Shift+T || · | Alt+LEFT | ~LEFT | ~RIGHT | Alt+RIGHT | ·
 r2  · | ~R | Ctrl+Shift+TAB | ~TAB | ~T | ~W || · | LEFT | DOWN | UP | RIGHT | ·
 r3  · | ~Z | Ctrl+Shift+Z | MEDIA_PREV_TRACK | MEDIA_NEXT_TRACK | MEDIA_PLAY_PAUSE || · | HOME | PGDN | PAGE_UP | END | go to L8

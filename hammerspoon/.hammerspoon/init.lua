@@ -450,9 +450,7 @@ do
     local image = hs.pasteboard.readImage()
     return image ~= nil and hs.pasteboard.writeObjects(framedImage(image))
   end
-  local function framedFocusedToLund()
-    if captureFocusedWindow() and framedClipboard() then pasteToLund() end
-  end
+  local function captureAreaMacshot() hs.urlevent.openURL("macshot://capture") end
   -- -o leaves out the window's own shadow, so only the frame's shadow shows.
   local function framedPickedToLund()
     local before = hs.pasteboard.changeCount()
@@ -461,9 +459,9 @@ do
     end, {"-x", "-c", "-i", "-w", "-o"}):start()
   end
 
-  -- Hold Space + the far-left Ctrl key: Q W E R T A send Alt+Ctrl+key, read as Alt+Cmd+key. Q W E send the key the Q10's L2 number row 1, 2, 3 sends for the same screenshot action (Alt+Shift+Cmd+key), A sends the + key (key code 27, macshot history). R and T are Q and W with rounded corners and a background.
+  -- Hold Space + the far-left Ctrl key: Q W E R T A send Alt+Ctrl+key, read as Alt+Cmd+key. Q W E send the key the Q10's L2 number row 1, 2, 3 sends for the same screenshot action (Alt+Shift+Cmd+key), R and A are macshot's area capture, S sends the + key (key code 27, macshot history). T is W with rounded corners and a background.
   local keyToCapture = {
-    [map.q] = map["7"], [map.w] = map["9"], [map.e] = map["8"], [map.r] = framedFocusedToLund, [map.t] = framedPickedToLund, [map.a] = 27,
+    [map.q] = map["7"], [map.w] = map["9"], [map.e] = map["8"], [map.r] = captureAreaMacshot, [map.t] = framedPickedToLund, [map.a] = captureAreaMacshot, [map.s] = 27,
   }
   local watched = {}
   for _, code in ipairs({map["delete"], map.f4, map.k, map.tab, map.space, map.j, map.l, map.z, ouml, map.left, map.right, map.down, map.up, map.d, 44, 27}) do watched[code] = true end
@@ -488,6 +486,24 @@ do
   end
   local function aerospace(command) shell("aerospace " .. command) end
 
+  -- AeroSpace cannot change gaps while running, so this rewrites the wide monitor's left and right outer gap in its config and reloads it.
+  -- 1920 keeps the outer quarters of the 7680-wide screen empty, 960 the outer eighths, 16 uses the full width.
+  local function cycleWideGap()
+    local path = os.getenv("HOME") .. "/.config/aerospace/aerospace.toml"
+    local file = assert(io.open(path, "r"))
+    local text = file:read("a")
+    file:close()
+    local steps = {1920, 960, 16}
+    local current = tonumber(text:match('monitor%."Odyssey G95NC" = (%d+)'))
+    local width = steps[1]
+    for i, step in ipairs(steps) do if step == current then width = steps[i % #steps + 1] end end
+    local out = assert(io.open(path, "w"))
+    out:write((text:gsub('(monitor%."Odyssey G95NC" = )%d+', "%1" .. width)))
+    out:close()
+    aerospace("reload-config --no-gui")
+    hs.alert.show("Wide monitor side gap " .. width, 1)
+  end
+
   -- GlazeWM's keys from the Windows machine as AeroSpace commands: Option + key runs the first, Option+Control (A+S held) + key the second.
   -- Left out: resize mode, cycle focus, centered floating and moving a workspace between monitors (no AeroSpace match, or no Voyager key).
   local glaze = {
@@ -498,6 +514,7 @@ do
     [map.v] = {"layout tiles horizontal vertical"}, [map.t] = {"layout tiling"}, [map.f] = {"fullscreen"},
     [map.space] = {false, "layout floating tiling"}, [map.q] = {false, "close"}, [map.r] = {false, "reload-config"},
     [map.m] = {minimizeFocused},
+    [map.g] = {false, cycleWideGap},
     -- From workspace 1 go to 2, from any other go to 1.
     [map.h] = {function() shell('if [ "$(aerospace list-workspaces --focused)" = 1 ]; then aerospace workspace 2; else aerospace workspace 1; fi') end},
   }
@@ -514,6 +531,8 @@ do
   end
   -- On the Voyager B opens Bitwarden; the Q10's B stays BetterTouchTool.
   appByCode[map.b] = "Bitwarden"
+  appByCode[map.w] = function() hs.task.new("/usr/bin/open", nil, {"x-apple.systempreferences:com.apple.Wallpaper-Settings.extension"}):start() end
+  watched[map.w] = true
 
   -- An action either replaces the key (code and flags) or runs once and swallows it.
   -- Windows Terminal moves between panes with A + Space + J K L Ö, which arrives as Alt + arrow. Lund's keys are Cmd+H J K L.
@@ -559,11 +578,11 @@ do
     if (voyagerCommands[code] or code == map.z) and exactly(f, "ctrl", "alt", "cmd") then
       return {run = function()
         whenModifiersReleased(function()
-          if code == map.z then titleCopyRename("/generate:long-title ") else typeCommand(voyagerCommands[code], true) end
+          if code == map.z then titleCopyRename("/generate:short-title ") else typeCommand(voyagerCommands[code], true) end
         end)
       end}
     end
-    -- The top-right key sends Ctrl+Alt+Shift+K and opens Convey's keyboard cheat sheet (Cmd+Shift+§, key code 10).
+    -- The top-right key sends Ctrl+Alt+Shift+K and opens Convey Mac's keyboard cheat sheet (Cmd+Shift+§, key code 10).
     if code == map.k and exactly(f, "cmd", "alt", "shift") then
       return {run = function() post({"cmd", "shift"}, 10) end}
     end
@@ -580,7 +599,7 @@ do
     end
     local app = appByCode[code]
     if app and exactly(f, "ctrl", "alt", "shift", "cmd") then
-      return {run = function() hs.application.launchOrFocus(app) end}
+      return {run = function() if type(app) == "function" then app() else hs.application.launchOrFocus(app) end end}
     end
     -- The right Option key types symbols (AltGr: @ [ ] { } | \), so only the left one, the A hold, runs these.
     local entry = not rightAlt and glaze[code]
@@ -664,12 +683,22 @@ fineStepTap = hs.eventtap.new({hs.eventtap.event.types.systemDefined}, function(
   end
 end):start()
 
--- Over the 2.4 GHz dongle macOS numbers the key above Tab as 50 instead of 10, and Convey and VolumeGuard listen for 10.
+-- Over the 2.4 GHz dongle macOS numbers the key above Tab as 50 instead of 10, and Convey Mac and VolumeGuard listen for 10.
 for _, mods in ipairs({{"cmd", "shift"}, meh}) do
   hs.hotkey.bind(mods, 50, function()
     hs.eventtap.event.newKeyEvent(mods, 10, true):post()
     hs.eventtap.event.newKeyEvent(mods, 10, false):post()
   end)
 end
+
+-- Safari ignores the mouse's Back and Forward buttons (buttons 3 and 4), so run its History menu items instead.
+local safariHistoryItem = {[3] = "Back", [4] = "Forward"}
+safariMouseTap = hs.eventtap.new({hs.eventtap.event.types.otherMouseDown, hs.eventtap.event.types.otherMouseUp}, function(e)
+  local item = safariHistoryItem[e:getProperty(hs.eventtap.event.properties.mouseEventButtonNumber)]
+  local app = hs.application.frontmostApplication()
+  if not item or app:bundleID() ~= "com.apple.Safari" then return false end
+  if e:getType() == hs.eventtap.event.types.otherMouseDown then app:selectMenuItem({"History", item}) end
+  return true
+end):start()
 
 hs.alert.show("Hammerspoon config loaded")

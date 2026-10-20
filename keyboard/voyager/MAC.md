@@ -8,7 +8,7 @@ The firmware is the same on Mac and Windows (see `FLASHED.md` in the firmware re
 |---|---|---|
 | Homerow A = Option, S = Control, D = Cmd | macOS Modifier Keys, Voyager entry | macOS keeps it per keyboard (vendor 12951, product 6519) |
 | Cmd/Option+Backspace, Control+Backspace, Nav+Q, Nav+S/D tabs, top-right key, Option+J/K/L/Ö focus and Option+Control move, Control+Space (Spotlight), Alt+Cmd+digit screenshots, layer 7 slash commands | `voyagerKeyTap` in `hammerspoon/.hammerspoon/init.lua` | the tap runs only while the Voyager is attached and a Q10 receiver is not, and only acts on events with keyboard type 40 |
-| Convey keyboard view | Voyager tab reads `BINDINGS.md` | display only |
+| Convey Mac keyboard view | Voyager tab reads `BINDINGS.md` | display only |
 
 Limits: Hammerspoon cannot tell keyboards apart, only keyboard type. The Voyager and a Q10 on its 2.4 GHz receiver both report type 40, and so may another ANSI keyboard. Verified: the Voyager reports 40 and a Q10 on its cable reports 41. Not verified: the laptop's own keyboard.
 
@@ -39,7 +39,7 @@ Run `mac-voyager.sh off` first. It makes the Voyager count as absent for Hammers
 | Modifier Keys remap for the Voyager | the Voyager only | `mac-voyager.sh off`, or Restore Defaults in System Settings |
 | Keyboard layout set to Swedish (it was U.S.) | every keyboard | `hs -c 'hs.keycodes.setLayout("U.S.")'`, or the input menu |
 | U.S. keyboard layout removed, only Swedish - Pro is left (2026-10-20, so nothing can switch to English) | every keyboard | System Settings > Keyboard > Input Sources > Edit > + > English > U.S. |
-| Q10 / Voyager picker in the Convey cheat sheet | the Convey keyboard view only | choose Q10 Max (it is remembered) |
+| Q10 / Voyager picker in the Convey Mac cheat sheet | the Convey Mac keyboard view only | choose Q10 Max (it is remembered) |
 
 Not changed: the Q10's layout or its auto-apply, the laptop's Modifier Keys, Spotlight (Cmd+Space), AeroSpace's key bindings, Lund's key bindings.
 

@@ -22,9 +22,9 @@ if [ -d /Applications/Convey.app ] && ! pgrep -x Convey >/dev/null; then
   defaults write $d keyboard_hotkey_disabled -bool false
   defaults write $d hotkey_keyCode -int 17
   defaults write $d hotkey_modifiers -int 6656
-  echo "Convey hotkeys restored"
+  echo "Convey Mac hotkeys restored"
 else
-  echo "Convey hotkeys skipped (not installed, or running: quit it and run again)"
+  echo "Convey Mac hotkeys skipped (not installed, or running: quit it and run again)"
 fi
 
 cat <<'MSG'

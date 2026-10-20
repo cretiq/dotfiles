@@ -1,10 +1,10 @@
 ---
-description: Refresh the Convey cheat sheets from the config files they describe
+description: Refresh the Convey Mac cheat sheets from the config files they describe
 allowed-tools: Read, Edit, Glob, Grep, Bash(ls:*), Bash(date:*), Bash(defaults read:*)
 argument-hint: [sheet name, e.g. hammerspoon | empty = all sheets]
 ---
 
-# /update-convey-cheatsheets — bring Convey cheat sheets up to date
+# /update-convey-cheatsheets — bring Convey Mac cheat sheets up to date
 
 Scope: $ARGUMENTS
 
