@@ -181,28 +181,20 @@ local function titleCopyRename(titleCommand)
 end
 hs.hotkey.bind(meh, "z", function() titleCopyRename("/generate:short-title ") end)
 
--- Voyager layer 7 (ctrl+alt+cmd): the Mac side of the Windows AutoHotkey slash-command chords.
--- The keys are still held when the hotkey fires, so typing waits for them to be released.
+-- Voyager layer 7 (ctrl+alt+cmd): the Mac side of the Windows AutoHotkey slash-command chords, run from voyagerKeyTap so no other keyboard triggers them.
+-- The keys are still held when the chord arrives, so typing waits for them to be released.
 local function whenModifiersReleased(fn)
   if next(hs.eventtap.checkKeyboardModifiers()) == nil then return fn() end
   hs.timer.doAfter(0.02, function() whenModifiersReleased(fn) end)
 end
 local voyagerCommands = {
-  d = "/dev:restart ",
-  n = "/next ",
-  c = "/cut ",
-  r = "/rebuild ",
-  o = "/git:commit-detailed-push ",
-  h = "/how-to-test ",
+  [hs.keycodes.map.d] = "/dev:restart ",
+  [hs.keycodes.map.n] = "/next ",
+  [hs.keycodes.map.c] = "/cut ",
+  [hs.keycodes.map.r] = "/rebuild ",
+  [hs.keycodes.map.o] = "/git:commit-detailed-push ",
+  [hs.keycodes.map.h] = "/how-to-test ",
 }
-for key, text in pairs(voyagerCommands) do
-  hs.hotkey.bind({"ctrl", "alt", "cmd"}, key, function()
-    whenModifiersReleased(function() typeCommand(text, true) end)
-  end)
-end
-hs.hotkey.bind({"ctrl", "alt", "cmd"}, "z", function()
-  whenModifiersReleased(function() titleCopyRename("/generate:long-title ") end)
-end)
 
 -- Hammerspoon has no Bluetooth permission, so blueutil aborts under it. AirPodsConnect.app holds the grant; source in hammerspoon/airpods-connect.
 local airpodsOutputUID = "34-0E-22-23-9F-BA:output"
@@ -277,7 +269,7 @@ for _, d in ipairs(hs.usb.attachedDevices()) do
   if d.vendorID == 0x3434 and d.productID == 0x08A1 then hs.timer.doAfter(3, applyQ10) end
 end
 
--- Q10 attached (cable or 2.4 GHz receiver) = desk: JKLÖ. Otherwise laptop keyboard: HJKL.
+-- Q10 or Voyager attached (cable or 2.4 GHz receiver) = desk: JKLÖ. Otherwise laptop keyboard: HJKL.
 local keymapScript = os.getenv("HOME") .. "/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh"
 local keymapStateFile = os.getenv("HOME") .. "/.dotfiles/vim/.vim/keymap_state"
 
@@ -288,8 +280,17 @@ local function q10Attached()
   return false
 end
 
+-- With ~/.local/share/voyager/auto-off present the Voyager counts as absent: its key tap and the JKLÖ rule both stand down.
+local function voyagerAttached()
+  if hs.fs.attributes(os.getenv("HOME") .. "/.local/share/voyager/auto-off") then return false end
+  for _, d in ipairs(hs.usb.attachedDevices()) do
+    if d.vendorID == 0x3297 then return true end
+  end
+  return false
+end
+
 local function syncVimKeymap()
-  local want = q10Attached() and "custom" or "default"
+  local want = (q10Attached() or voyagerAttached()) and "custom" or "default"
   local f = io.open(keymapStateFile)
   local have = f and f:read("*l")
   if f then f:close() end
@@ -302,6 +303,7 @@ local laptopKeys = {
   hs.hotkey.new({"alt"}, "d", function() hs.eventtap.keyStroke({"ctrl"}, "tab", 0) end),
 }
 
+local arrowHotkeys = {}
 local arrowKeys = {
   h = {"left"}, j = {"down"}, k = {"up"}, l = {"right"},
   u = {"left", {alt = true}}, i = {"right", {alt = true}},
@@ -313,7 +315,7 @@ for key, spec in pairs(arrowKeys) do
       hs.eventtap.event.newKeyEvent(spec[1], down):setFlags(spec[2] or {}):post()
     end
   end
-  table.insert(laptopKeys, hs.hotkey.new({"alt"}, key, press, nil, press))
+  table.insert(arrowHotkeys, hs.hotkey.new({"alt"}, key, press, nil, press))
 end
 
 local captureKeys = {
@@ -411,9 +413,214 @@ rotateTap = hs.eventtap.new({hs.eventtap.event.types.gesture, hs.eventtap.event.
   return false
 end)
 
+local function q10ReceiverAttached()
+  for _, d in ipairs(hs.usb.attachedDevices()) do
+    if d.vendorID == 0x3434 and d.productID == 0xD030 then return true end
+  end
+  return false
+end
+
+-- Everything the Voyager gets on the Mac lives in this tap, so no other keyboard is affected. The Voyager reports keyboard type 40,
+-- as does a Q10 on its 2.4 GHz receiver, so it runs only while the Voyager is attached and that receiver is not.
+-- Pause it with keyboard/voyager/mac-voyager.sh off, resume with on.
+do
+  local map = hs.keycodes.map
+  local ouml = 41
+  -- Rounded corners on the orange-to-pink gradient of the window border, with a soft shadow, like CleanShot's preset.
+  local function framedImage(image)
+    local size = image:size()
+    local pad, radius = 64, 22
+    local box = {x = pad, y = pad, w = size.w, h = size.h}
+    local radii = {xRadius = radius, yRadius = radius}
+    local c = hs.canvas.new({x = 0, y = 0, w = size.w + 2 * pad, h = size.h + 2 * pad})
+    c:appendElements(
+      {type = "rectangle", action = "fill", fillGradient = "linear", fillGradientAngle = 45,
+       fillGradientColors = {{red = 1, green = 0.584, blue = 0}, {red = 1, green = 0.176, blue = 0.529}}},
+      {type = "rectangle", action = "fill", frame = box, roundedRectRadii = radii, fillColor = {white = 0, alpha = 1},
+       shadow = {blurRadius = 28, color = {alpha = 0.5}, offset = {h = -10, w = 0}}},
+      {type = "rectangle", action = "clip", frame = box, roundedRectRadii = radii},
+      {type = "image", image = image, frame = box, imageScaling = "scaleToFit"},
+      {type = "resetClip"}
+    )
+    local framed = c:imageFromCanvas()
+    c:delete()
+    return framed
+  end
+  local function framedClipboard()
+    local image = hs.pasteboard.readImage()
+    return image ~= nil and hs.pasteboard.writeObjects(framedImage(image))
+  end
+  local function framedFocusedToLund()
+    if captureFocusedWindow() and framedClipboard() then pasteToLund() end
+  end
+  -- -o leaves out the window's own shadow, so only the frame's shadow shows.
+  local function framedPickedToLund()
+    local before = hs.pasteboard.changeCount()
+    hs.task.new(screencapture, function()
+      if hs.pasteboard.changeCount() ~= before and framedClipboard() then pasteToLund() end
+    end, {"-x", "-c", "-i", "-w", "-o"}):start()
+  end
+
+  -- Hold Space + the far-left Ctrl key: Q W E R T A send Alt+Ctrl+key, read as Alt+Cmd+key. Q W E send the key the Q10's L2 number row 1, 2, 3 sends for the same screenshot action (Alt+Shift+Cmd+key), A sends the + key (key code 27, macshot history). R and T are Q and W with rounded corners and a background.
+  local keyToCapture = {
+    [map.q] = map["7"], [map.w] = map["9"], [map.e] = map["8"], [map.r] = framedFocusedToLund, [map.t] = framedPickedToLund, [map.a] = 27,
+  }
+  local watched = {}
+  for _, code in ipairs({map["delete"], map.f4, map.k, map.tab, map.space, map.j, map.l, map.z, ouml, map.left, map.right, map.down, map.up, map.d, 44, 27}) do watched[code] = true end
+  for code in pairs(voyagerCommands) do watched[code] = true end
+  for code in pairs(keyToCapture) do watched[code] = true end
+
+  local function exactly(f, ...)
+    local want = {}
+    for _, name in ipairs({...}) do want[name] = true end
+    for _, name in ipairs({"cmd", "alt", "ctrl", "shift"}) do
+      if (f[name] or false) ~= (want[name] or false) then return false end
+    end
+    return true
+  end
+
+  local function post(mods, code)
+    for _, isDown in ipairs({true, false}) do hs.eventtap.event.newKeyEvent(mods, code, isDown):post() end
+  end
+
+  local function shell(script)
+    hs.task.new("/bin/sh", nil, {"-c", "export PATH=/opt/homebrew/bin:$PATH; " .. script}):start()
+  end
+  local function aerospace(command) shell("aerospace " .. command) end
+
+  -- GlazeWM's keys from the Windows machine as AeroSpace commands: Option + key runs the first, Option+Shift + key the second.
+  -- Left out: resize mode, cycle focus, centered floating and moving a workspace between monitors (no AeroSpace match, or no Voyager key).
+  local glaze = {
+    [map.j] = {"focus left", "move left"}, [ouml] = {"focus right", "move right"},
+    [map.l] = {"focus up", "move up"}, [map.k] = {"focus down", "move down"},
+    [map.u] = {"resize width -50"}, [map.p] = {"resize width +50", "enable toggle"},
+    [map.o] = {"resize height +50"}, [map.i] = {"resize height -50"},
+    [map.v] = {"layout tiles horizontal vertical"}, [map.t] = {"layout tiling"}, [map.f] = {"fullscreen"},
+    [map.space] = {false, "layout floating tiling"}, [map.q] = {false, "close"}, [map.r] = {false, "reload-config"},
+    [map.m] = {minimizeFocused},
+    -- From workspace 1 go to 2, from any other go to 1.
+    [map.h] = {function() shell('if [ "$(aerospace list-workspaces --focused)" = 1 ]; then aerospace workspace 2; else aerospace workspace 1; fi') end},
+  }
+  for i = 1, 9 do
+    glaze[map[tostring(i)]] = {"workspace " .. i, "move-node-to-workspace --focus-follows-window " .. i}
+  end
+  for code in pairs(glaze) do watched[code] = true end
+
+  -- Space + Esc holds RAlt+Ctrl+Shift+Win, read as Ctrl+Opt+Shift+Cmd. With a key it launches the apps the Q10's M3 launchers do.
+  local appByCode = {}
+  for key, app in pairs(apps) do
+    appByCode[map[key]] = app
+    watched[map[key]] = true
+  end
+  -- On the Voyager B opens Bitwarden; the Q10's B stays BetterTouchTool.
+  appByCode[map.b] = "Bitwarden"
+
+  -- An action either replaces the key (code and flags) or runs once and swallows it.
+  -- Windows Terminal moves between panes with A + Space + J K L Ö, which arrives as Alt + arrow. Lund's keys are Cmd+H J K L.
+  local paneKey = {[map.left] = map.h, [map.down] = map.j, [map.up] = map.k, [map.right] = map.l}
+  local function choose(code, f, rightAlt)
+    local front = hs.application.frontmostApplication()
+    local inLund = front and front:bundleID() == lundBundle
+    if inLund and paneKey[code] and exactly(f, "alt") then return {code = paneKey[code], flags = {cmd = true}} end
+    if code == map["delete"] then
+      -- Cmd+Backspace deletes a word and Option+Backspace deletes to the line start, the reverse of macOS.
+      if exactly(f, "cmd") then
+        -- Lund treats only the right Option key as Alt, so the word delete is sent as Ctrl+W there.
+        if inLund then return {code = map.w, flags = {ctrl = true}} end
+        return {flags = {alt = true}}
+      end
+      if exactly(f, "alt") then return {flags = {cmd = true}} end
+      if exactly(f, "ctrl") then return {run = function() end} end
+    elseif code == map.left or code == map.right then
+      -- Like the Backspace pair: Cmd+arrow moves by word and Option+arrow to the line start or end, so Nav+I and Nav+O move by word and Nav+U and Nav+P go to the start and end.
+      if exactly(f, "alt") then return {flags = {cmd = true}} end
+      if exactly(f, "cmd") then return {flags = {alt = true}} end
+      if exactly(f, "alt", "shift") then return {flags = {cmd = true, shift = true}} end
+      if exactly(f, "cmd", "shift") then return {flags = {alt = true, shift = true}} end
+    elseif code == map.f4 then
+      -- Nav+Q sends Alt+F4, the Windows close key.
+      if exactly(f, "alt") then return {code = map.q, flags = {cmd = true}} end
+    elseif code == map.tab then
+      -- Nav+S and Nav+D send Ctrl+Shift+Tab and Ctrl+Tab, which the Control/Command swap turns into Cmd+Tab.
+      if exactly(f, "cmd") then return {flags = {ctrl = true}} end
+      if exactly(f, "cmd", "shift") then return {flags = {ctrl = true, shift = true}} end
+      -- Cmd+Tab is taken by the tab cycling above, so Option+Tab (hold A) switches to the previous app.
+      if exactly(f, "alt") then return {run = function() post({"cmd"}, map.tab) end} end
+    elseif code == map.space then
+      -- Hold S (Control) + Space opens Spotlight, whose system shortcut stays Cmd+Space.
+      if exactly(f, "ctrl") then return {run = function() post({"cmd"}, map.space) end} end
+    end
+    if keyToCapture[code] and exactly(f, "alt", "cmd") then
+      return {run = function()
+        local capture = keyToCapture[code]
+        if type(capture) == "function" then capture() else post({"alt", "shift", "cmd"}, capture) end
+      end}
+    end
+    if (voyagerCommands[code] or code == map.z) and exactly(f, "ctrl", "alt", "cmd") then
+      return {run = function()
+        whenModifiersReleased(function()
+          if code == map.z then titleCopyRename("/generate:long-title ") else typeCommand(voyagerCommands[code], true) end
+        end)
+      end}
+    end
+    -- The top-right key sends Ctrl+Alt+Shift+K and opens Convey's keyboard cheat sheet (Cmd+Shift+§, key code 10).
+    if code == map.k and exactly(f, "cmd", "alt", "shift") then
+      return {run = function() post({"cmd", "shift"}, 10) end}
+    end
+    -- Layer 7 + 1 cycles VolumeGuard's headphone listening mode (Ctrl+Alt+Shift+§, key code 10).
+    if code == map["1"] and exactly(f, "ctrl", "alt", "cmd") then
+      return {run = function() post({"ctrl", "alt", "shift"}, 10) end}
+    end
+    -- Windows Terminal's split keys with the same presses in Lund: Alt+- splits down (key code 44, the - key) and Alt+Shift+D splits right.
+    -- Lund's own keys are Option+Shift+- (code 44) and Option+Shift++ (code 27). Both are re-sent as new events, which Lund accepts where it ignores the Voyager's own left Option key.
+    if inLund then
+      if code == 44 and exactly(f, "alt") then return {flags = {alt = true, shift = true}} end
+      if code == 27 and (exactly(f, "alt") or exactly(f, "alt", "shift")) then return {flags = {alt = true, shift = true}} end
+      if code == map.d and exactly(f, "alt", "shift") then return {code = 27, flags = {alt = true, shift = true}} end
+    end
+    local app = appByCode[code]
+    if app and exactly(f, "ctrl", "alt", "shift", "cmd") then
+      return {run = function() hs.application.launchOrFocus(app) end}
+    end
+    -- The right Option key types symbols (AltGr: @ [ ] { } | \), so only the left one, the A hold, runs these.
+    local entry = not rightAlt and glaze[code]
+    if entry then
+      local command
+      if exactly(f, "alt") then command = entry[1] elseif exactly(f, "alt", "shift") then command = entry[2] end
+      if command then return {run = type(command) == "function" and command or function() aerospace(command) end} end
+    end
+  end
+
+  local pending = {}
+  voyagerKeyTap = hs.eventtap.new({hs.eventtap.event.types.keyDown, hs.eventtap.event.types.keyUp}, function(e)
+    local code = e:getKeyCode()
+    if not watched[code] then return false end
+    if e:getProperty(hs.eventtap.event.properties.keyboardEventKeyboardType) ~= 40 then return false end
+    local action
+    if e:getType() == hs.eventtap.event.types.keyDown then
+      local ok, raw = pcall(function() return e:getRawEventData().CGEventData.flags end)
+      action = choose(code, e:getFlags(), ok and raw & 0x40 ~= 0)
+      pending[code] = action
+      if action and action.run and e:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat) == 0 then action.run() end
+    else
+      action = pending[code]
+      pending[code] = nil
+    end
+    if not action then return false end
+    if action.run then return true end
+    local copy = e:copy():setFlags(action.flags)
+    if action.code then copy:setKeyCode(action.code) end
+    return true, {copy}
+  end)
+end
+
 local function syncLaptop()
+  if voyagerAttached() and not q10ReceiverAttached() then voyagerKeyTap:start() else voyagerKeyTap:stop() end
   hs.task.new(aerospaceBin, nil, {"mode", q10Attached() and "main" or "laptop"}):start()
   for _, k in ipairs(laptopKeys) do
+    if q10Attached() then k:disable() else k:enable() end
+  end
+  for _, k in ipairs(arrowHotkeys) do
     if q10Attached() then k:disable() else k:enable() end
   end
   if q10Attached() then fnTap:stop() else fnTap:start() end
@@ -421,7 +628,7 @@ local function syncLaptop()
 end
 
 keymapWatcher = hs.usb.watcher.new(function(e)
-  if e.vendorID == 0x3434 then
+  if e.vendorID == 0x3434 or e.vendorID == 0x3297 then
     hs.timer.doAfter(1, function()
       syncVimKeymap()
       syncLaptop()
