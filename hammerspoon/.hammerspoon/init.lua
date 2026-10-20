@@ -488,7 +488,7 @@ do
   end
   local function aerospace(command) shell("aerospace " .. command) end
 
-  -- GlazeWM's keys from the Windows machine as AeroSpace commands: Option + key runs the first, Option+Shift + key the second.
+  -- GlazeWM's keys from the Windows machine as AeroSpace commands: Option + key runs the first, Option+Control (A+S held) + key the second.
   -- Left out: resize mode, cycle focus, centered floating and moving a workspace between monitors (no AeroSpace match, or no Voyager key).
   local glaze = {
     [map.j] = {"focus left", "move left"}, [ouml] = {"focus right", "move right"},
@@ -586,7 +586,7 @@ do
     local entry = not rightAlt and glaze[code]
     if entry then
       local command
-      if exactly(f, "alt") then command = entry[1] elseif exactly(f, "alt", "shift") then command = entry[2] end
+      if exactly(f, "alt") then command = entry[1] elseif exactly(f, "alt", "ctrl") then command = entry[2] end
       if command then return {run = type(command) == "function" and command or function() aerospace(command) end} end
     end
   end
