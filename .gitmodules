@@ -1,0 +1,3 @@
+[submodule "keyboard/voyager/firmware"]
+	path = keyboard/voyager/firmware
+	url = git@github.com:cretiq/voyager-firmware.git

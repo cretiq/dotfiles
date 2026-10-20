@@ -149,12 +149,36 @@ for key, text in pairs(commands) do
 end
 
 -- Claude Code queues a command sent mid-turn and runs it after the turn, so /copy picks up the generated title.
-hs.hotkey.bind(meh, "z", function()
-  typeCommand("/generate:short-title ", true, function()
+local function titleCopyRename(titleCommand)
+  typeCommand(titleCommand, true, function()
     typeCommand("/copy ", true, function()
       typeCommand("/rename ", false)
     end)
   end)
+end
+hs.hotkey.bind(meh, "z", function() titleCopyRename("/generate:short-title ") end)
+
+-- Voyager layer 7 (ctrl+alt+cmd): the Mac side of the Windows AutoHotkey slash-command chords.
+-- The keys are still held when the hotkey fires, so typing waits for them to be released.
+local function whenModifiersReleased(fn)
+  if next(hs.eventtap.checkKeyboardModifiers()) == nil then return fn() end
+  hs.timer.doAfter(0.02, function() whenModifiersReleased(fn) end)
+end
+local voyagerCommands = {
+  d = "/dev:restart ",
+  n = "/next ",
+  c = "/cut ",
+  r = "/rebuild ",
+  o = "/git:commit-detailed-push ",
+  h = "/how-to-test ",
+}
+for key, text in pairs(voyagerCommands) do
+  hs.hotkey.bind({"ctrl", "alt", "cmd"}, key, function()
+    whenModifiersReleased(function() typeCommand(text, true) end)
+  end)
+end
+hs.hotkey.bind({"ctrl", "alt", "cmd"}, "z", function()
+  whenModifiersReleased(function() titleCopyRename("/generate:long-title ") end)
 end)
 
 -- Keychron Q10 Max: the cable (PID 0x08A1) gets the newest Mac layout on connect. The 2.4 GHz receiver is never written.
@@ -273,6 +297,7 @@ end
 for key, text in pairs(commands) do
   table.insert(laptopKeys, hs.hotkey.new({"alt", "shift"}, key, function() typeCommand(text, true) end))
 end
+table.insert(laptopKeys, hs.hotkey.new({"alt", "shift"}, "z", function() titleCopyRename("/generate:short-title ") end))
 
 local aerospaceBin = "/opt/homebrew/bin/aerospace"
 
