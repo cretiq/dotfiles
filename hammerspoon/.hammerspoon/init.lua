@@ -33,22 +33,32 @@ hs.hotkey.bind({}, "f2", hs.spaces.toggleMissionControl)
 -- Claude Code takes a pasted image on ctrl+v, not cmd+v.
 -- Installed, agent-built and scratch Lunds share one bundle id, so a bundle id lookup can land on a windowless or stale one.
 -- The target is the instance last in front, else any with a window.
-local lundBundle = "app.supabit.supacode.debug"
+-- Lund-dev and the real Lund (/Applications/Lund.app) have different bundle ids; every Lund key applies to both.
+local lundBundles = {"app.supabit.supacode.debug", "app.supabit.supacode"}
+local function isLund(app)
+  local id = app and app:bundleID()
+  for _, bundle in ipairs(lundBundles) do
+    if id == bundle then return true end
+  end
+  return false
+end
 local lundPath = os.getenv("HOME") .. "/Applications/Lund-dev.app"
 local screencapture = "/usr/sbin/screencapture"
 
 local lundLast = hs.application.frontmostApplication()
-if lundLast:bundleID() ~= lundBundle then lundLast = nil end
+if not isLund(lundLast) then lundLast = nil end
 lundWatcher = hs.application.watcher.new(function(_, event, app)
-  if event == hs.application.watcher.activated and app:bundleID() == lundBundle then lundLast = app end
+  if event == hs.application.watcher.activated and isLund(app) then lundLast = app end
 end):start()
 
 local function focusLund()
   local target = lundLast
   if not (target and target:isRunning() and #target:allWindows() > 0) then
     target = nil
-    for _, app in ipairs(hs.application.applicationsForBundleID(lundBundle)) do
-      if #app:allWindows() > 0 then target = app break end
+    for _, bundle in ipairs(lundBundles) do
+      for _, app in ipairs(hs.application.applicationsForBundleID(bundle)) do
+        if not target and #app:allWindows() > 0 then target = app end
+      end
     end
   end
   if target then target:activate() else hs.application.launchOrFocus(lundPath) end
@@ -59,7 +69,7 @@ local function pasteToLund()
   focusLund()
   hs.timer.doAfter(0.3, function()
     local front = hs.application.frontmostApplication()
-    if front:bundleID() ~= lundBundle then return end
+    if not isLund(front) then return end
     hs.eventtap.keyStroke({"ctrl"}, "v", 0)
     hs.timer.doAfter(0.3, function() hs.eventtap.keyStrokes(" ") end)
   end)
@@ -539,7 +549,7 @@ do
   local paneKey = {[map.left] = map.h, [map.down] = map.j, [map.up] = map.k, [map.right] = map.l}
   local function choose(code, f, rightAlt)
     local front = hs.application.frontmostApplication()
-    local inLund = front and front:bundleID() == lundBundle
+    local inLund = isLund(front)
     if inLund and paneKey[code] and exactly(f, "alt") then return {code = paneKey[code], flags = {cmd = true}} end
     if code == map["delete"] then
       -- Cmd+Backspace deletes a word and Option+Backspace deletes to the line start, the reverse of macOS.
