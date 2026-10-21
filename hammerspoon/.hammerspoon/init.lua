@@ -478,6 +478,10 @@ do
   for code in pairs(voyagerCommands) do watched[code] = true end
   for code in pairs(keyToCapture) do watched[code] = true end
 
+  -- The firmware sends the Windows AltGr combos for these, which type | [ ] ≈ on the Mac's Swedish layout, and Lund reads Right Option as Alt.
+  local altGrChar = {[map["7"]] = "{", [map["8"]] = "[", [map["9"]] = "]", [map["0"]] = "}"}
+  for code in pairs(altGrChar) do watched[code] = true end
+
   local function exactly(f, ...)
     local want = {}
     for _, name in ipairs({...}) do want[name] = true end
@@ -623,6 +627,9 @@ do
     local app = appByCode[code]
     if app and exactly(f, "ctrl", "alt", "shift", "cmd") then
       return {run = function() if type(app) == "function" then app() else hs.application.launchOrFocus(app) end end}
+    end
+    if rightAlt and exactly(f, "alt") and altGrChar[code] then
+      return {run = function() hs.eventtap.keyStrokes(altGrChar[code]) end}
     end
     -- The right Option key types symbols (AltGr: @ [ ] { } | \), so only the left one, the A hold, runs these.
     local entry = not rightAlt and glaze[code]
