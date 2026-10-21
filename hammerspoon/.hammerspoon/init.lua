@@ -491,6 +491,14 @@ do
     for _, isDown in ipairs({true, false}) do hs.eventtap.event.newKeyEvent(mods, code, isDown):post() end
   end
 
+  -- VoxFlow's hotkey is Ctrl+Shift+Space. The firmware combo Space + E sends Ctrl+E, read as Cmd+E, and it becomes that hotkey:
+  -- down on press, up on release, so VoxFlow's smart hotkey toggles on a tap and does push-to-talk on a hold.
+  -- The homerow D (Cmd) held with E makes the same Cmd+E, so that chord starts dictation too.
+  local function postDictationKey(isDown)
+    hs.eventtap.event.newKeyEvent({"ctrl", "shift"}, map.space, isDown):post()
+  end
+  local dictation = {run = function() postDictationKey(true) end, up = function() postDictationKey(false) end}
+
   local function shell(script)
     hs.task.new("/bin/sh", nil, {"-c", "export PATH=/opt/homebrew/bin:$PATH; " .. script}):start()
   end
@@ -543,6 +551,8 @@ do
   appByCode[map.b] = "Bitwarden"
   appByCode[map.w] = function() hs.task.new("/usr/bin/open", nil, {"x-apple.systempreferences:com.apple.Wallpaper-Settings.extension"}):start() end
   watched[map.w] = true
+  appByCode[map.c] = "Safari"
+  watched[map.c] = true
 
   -- An action either replaces the key (code and flags) or runs once and swallows it.
   -- Windows Terminal moves between panes with A + Space + J K L Ö, which arrives as Alt + arrow. Lund's keys are Cmd+H J K L.
@@ -579,6 +589,8 @@ do
       -- Hold S (Control) + Space opens Spotlight, whose system shortcut stays Cmd+Space.
       if exactly(f, "ctrl") then return {run = function() post({"cmd"}, map.space) end} end
     end
+    -- Option+Shift+Cmd+Q logs out at once, with no confirmation and no chance to save.
+    if code == map.q and exactly(f, "alt", "shift", "cmd") then return {run = function() end} end
     if keyToCapture[code] and exactly(f, "alt", "cmd") then
       return {run = function()
         local capture = keyToCapture[code]
@@ -607,6 +619,7 @@ do
       if code == 27 and (exactly(f, "alt") or exactly(f, "alt", "shift")) then return {flags = {alt = true, shift = true}} end
       if code == map.d and exactly(f, "alt", "shift") then return {code = 27, flags = {alt = true, shift = true}} end
     end
+    if code == map.e and exactly(f, "cmd") then return dictation end
     local app = appByCode[code]
     if app and exactly(f, "ctrl", "alt", "shift", "cmd") then
       return {run = function() if type(app) == "function" then app() else hs.application.launchOrFocus(app) end end}
@@ -634,6 +647,7 @@ do
     else
       action = pending[code]
       pending[code] = nil
+      if action and action.up then action.up() end
     end
     if not action then return false end
     if action.run then return true end

@@ -2,7 +2,7 @@
 
 Generated from the firmware repo by `scripts/bindings.py`. Do not edit. Oryx source revision: `5L3pB/pjMyob`.
 Each grid is one layer: rows r0 (top) to r3, left half `||` right half, then the thumb keys (left outer, left inner `||` right inner, right outer).
-`·` falls through to Main. `X / hold Y` taps X, holds Y. Layer 7, the Nav boot key, the Nav brightness keys, the cleared Meh R and Z keys and the top-right cheat sheet key come from `patch_layout.py`, not Oryx.
+`·` falls through to Main. `X / hold Y` taps X, holds Y. Layer 7, the Nav boot key, the Nav brightness keys, the cleared Meh Q, R and Z keys and the top-right cheat sheet key come from `patch_layout.py`, not Oryx.
 
 ## L0 Main
 ```
@@ -61,7 +61,7 @@ thumbs  · | · || · | ·
 ## L6 Meh+Pad  (~ = Alt+Ctrl+Shift+ the key)
 ```
 r0  · | ~1 | ~2 | ~3 | ~4 | ~5 || · | · | · | · | · | ·
-r1  · | ~Q | ~W | ~E | · | ~T || KP_PLUS | KP_7 | KP_8 | KP_9 | , | KP_EQUAL
+r1  · | · | ~W | ~E | · | ~T || KP_PLUS | KP_7 | KP_8 | KP_9 | , | KP_EQUAL
 r2  · | ~A | ~S | ~D | ~F | ~G || KP_MINUS | KP_4 | KP_5 | KP_6 | . | *
 r3  · | · | ~X | ~C | ~V | ~B || KP_0 | KP_1 | KP_2 | KP_3 | / | ·
 thumbs  · | · || KP_ENTER | ·
