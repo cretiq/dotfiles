@@ -8,35 +8,39 @@ after-startup-command = []
 [gaps]
 inner.horizontal = [{ monitor."built-in" = 10 }, 16]
 inner.vertical = [{ monitor."built-in" = 10 }, 16]
-outer.left = [{ monitor."built-in" = 10 }, { monitor."Odyssey G95NC" = 1920 }, 16]
-outer.right = [{ monitor."built-in" = 10 }, { monitor."Odyssey G95NC" = 1920 }, 16]
+outer.left = [{ monitor."built-in" = 10 }, { monitor."Odyssey G95NC" = 16 }, 16]
+outer.right = [{ monitor."built-in" = 10 }, { monitor."Odyssey G95NC" = 16 }, 16]
 outer.top = [{ monitor."built-in" = 10 }, 16]
 outer.bottom = [{ monitor."built-in" = 10 }, 16]
 
 [[on-window-detected]]
-if.app-id = 'com.apple.systempreferences'
+check-further-callbacks = true
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.bitwarden.desktop'
-run = 'layout floating'
+if.app-id = 'app.supabit.supacode.debug'
+run = 'layout tiling'
+
+[[on-window-detected]]
+if.app-id = 'app.supabit.supacode'
+run = 'layout tiling'
+
+[[on-window-detected]]
+if.app-id = 'com.anthropic.claudefordesktop'
+run = 'layout tiling'
+
+[[on-window-detected]]
+if.app-id = 'com.openai.codex'
+run = 'layout tiling'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.Safari'
+run = 'layout tiling'
 
 [[on-window-detected]]
 if.app-id = 'com.example.Convey'
 if.window-title-regex-substring = 'Cheat Sheet'
 run = 'layout tiling'
-
-[[on-window-detected]]
-if.app-id = 'com.example.Convey'
-run = 'layout floating'
-
-[[on-window-detected]]
-if.app-id = 'com.apple.MobileSMS'
-run = 'layout floating'
-
-[[on-window-detected]]
-if.app-id = 'com.apple.iCal'
-run = 'layout floating'
 
 # Q10 left space (L1) sends ctrl-alt-cmd; holding Shift as well makes it hyper
 [mode.main.binding]
