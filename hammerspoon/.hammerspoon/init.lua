@@ -51,6 +51,39 @@ lundWatcher = hs.application.watcher.new(function(_, event, app)
   if event == hs.application.watcher.activated and isLund(app) then lundLast = app end
 end):start()
 
+-- Cmd+. , Cmd+B and Cmd+U in Lund go to the first tab of the .dotfiles, business-hub and Lund repos. Lund's own Stop Run Script uses Cmd+. too, so while Lund is in front this takes it.
+-- Cmd+L is Lund's split navigation, so the Lund repo sits on Cmd+U instead.
+-- The Lund CLI of the instance in front talks to that instance's socket, which is named after its pid.
+local lundRepoKeys = {
+  ["."] = "/.dotfiles/",
+  b = "/CursorProjects/webapps/business-hub/",
+  u = "/CursorProjects/macapps/Lund/",
+}
+local function focusFirstRepoTab(repoPath)
+  local app = hs.application.frontmostApplication()
+  if not isLund(app) then return end
+  local worktree = (os.getenv("HOME") .. repoPath):gsub("/", "%%2F")
+  local cli = app:path() .. "/Contents/Resources/bin/supacode"
+  local script = string.format(
+    'export SUPACODE_SOCKET_PATH=/tmp/supacode-$(id -u)/pid-%d; tab=$("%s" tab list -w "%s" | head -n 1); [ -n "$tab" ] && "%s" tab focus -w "%s" -t "$tab"',
+    app:pid(), cli, worktree, cli, worktree)
+  hs.task.new("/bin/sh", nil, {"-c", script}):start()
+end
+lundRepoHotkeys = {}
+for key, repoPath in pairs(lundRepoKeys) do
+  table.insert(lundRepoHotkeys, hs.hotkey.new({"cmd"}, key, function() focusFirstRepoTab(repoPath) end))
+end
+local function setLundRepoHotkeys(enabled)
+  for _, hotkey in ipairs(lundRepoHotkeys) do
+    if enabled then hotkey:enable() else hotkey:disable() end
+  end
+end
+setLundRepoHotkeys(isLund(hs.application.frontmostApplication()))
+lundRepoWatcher = hs.application.watcher.new(function(_, event, app)
+  if event ~= hs.application.watcher.activated then return end
+  setLundRepoHotkeys(isLund(app))
+end):start()
+
 local function focusLund()
   local target = lundLast
   if not (target and target:isRunning() and #target:allWindows() > 0) then
@@ -662,10 +695,33 @@ do
     if action.code then copy:setKeyCode(action.code) end
     return true, {copy}
   end)
+
+  -- Hold A and D (Option and Cmd on the Mac) and scroll: one volume step per notch, scroll up is louder.
+  -- A smooth-scrolling mouse sends several events per notch (a 0.1 line event, then bursts up to 45 times larger),
+  -- so only the direction counts, and one direction steps at most once per 0.15 s.
+  local scrollStepGap = 0.15
+  local scrollLastStep, scrollLastSign = 0, 0
+  voyagerScrollTap = hs.eventtap.new({hs.eventtap.event.types.scrollWheel}, function(e)
+    if not exactly(e:getFlags(), "alt", "cmd") then return false end
+    local delta = e:getProperty(hs.eventtap.event.properties.scrollWheelEventFixedPtDeltaAxis1)
+    local sign = delta > 0 and 1 or delta < 0 and -1 or 0
+    local now = hs.timer.secondsSinceEpoch()
+    if sign ~= 0 and (sign ~= scrollLastSign or now - scrollLastStep >= scrollStepGap) then
+      scrollLastStep, scrollLastSign = now, sign
+      mediaKey(sign > 0 and "SOUND_UP" or "SOUND_DOWN")()
+    end
+    return true
+  end)
 end
 
 local function syncLaptop()
-  if voyagerAttached() and not q10ReceiverAttached() then voyagerKeyTap:start() else voyagerKeyTap:stop() end
+  if voyagerAttached() and not q10ReceiverAttached() then
+    voyagerKeyTap:start()
+    voyagerScrollTap:start()
+  else
+    voyagerKeyTap:stop()
+    voyagerScrollTap:stop()
+  end
   hs.task.new(aerospaceBin, nil, {"mode", q10Attached() and "main" or "laptop"}):start()
   for _, k in ipairs(laptopKeys) do
     if q10Attached() then k:disable() else k:enable() end
