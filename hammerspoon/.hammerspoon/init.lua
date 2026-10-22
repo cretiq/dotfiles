@@ -559,6 +559,36 @@ do
     hs.alert.show("Wide monitor side gap " .. width, 1)
   end
 
+  -- Tiled windows follow the wide monitor's outer gaps, so shifting them moves nudgeStep from one gap to the other and reloads AeroSpace.
+  -- AeroSpace has no command for floating windows, so those on the wide monitor's visible workspaces are moved by the same amount.
+  local nudgeStep = 240
+  local function nudgeWindows(direction)
+    local path = os.getenv("HOME") .. "/.config/aerospace/aerospace.toml"
+    local file = assert(io.open(path, "r"))
+    local text = file:read("a")
+    file:close()
+    local left = tonumber(text:match('outer%.left = %[.-monitor%."Odyssey G95NC" = (%d+)'))
+    local right = tonumber(text:match('outer%.right = %[.-monitor%."Odyssey G95NC" = (%d+)'))
+    local newLeft, newRight = left + direction * nudgeStep, right - direction * nudgeStep
+    if newLeft < 16 or newRight < 16 then return hs.alert.show("Wide monitor at its edge", 1) end
+    text = (text:gsub('(outer%.left = %[.-monitor%."Odyssey G95NC" = )%d+', "%1" .. newLeft))
+    text = (text:gsub('(outer%.right = %[.-monitor%."Odyssey G95NC" = )%d+', "%1" .. newRight))
+    local out = assert(io.open(path, "w"))
+    out:write(text)
+    out:close()
+    aerospace("reload-config --no-gui")
+    hs.task.new(aerospaceBin, function(_, listing)
+      for line in listing:gmatch("[^\n]+") do
+        local id = tonumber(line:match("^(%d+)|floating|Odyssey G95NC$"))
+        local win = id and hs.window.get(id)
+        if win then
+          local topLeft = win:topLeft()
+          win:setTopLeft({x = topLeft.x + direction * nudgeStep, y = topLeft.y})
+        end
+      end
+    end, {"list-windows", "--workspace", "visible", "--format", "%{window-id}|%{window-layout}|%{monitor-name}"}):start()
+  end
+
   -- GlazeWM's keys from the Windows machine as AeroSpace commands: Option + key runs the first, Option+Control (A+S held) + key the second.
   -- Left out: resize mode, cycle focus, centered floating and moving a workspace between monitors (no AeroSpace match, or no Voyager key).
   local glaze = {
@@ -633,6 +663,9 @@ do
         local capture = keyToCapture[code]
         if type(capture) == "function" then capture() else post({"alt", "shift", "cmd"}, capture) end
       end}
+    end
+    if (code == map.j or code == ouml) and exactly(f, "ctrl", "alt", "cmd") then
+      return {run = function() nudgeWindows(code == map.j and -1 or 1) end}
     end
     if (voyagerCommands[code] or code == map.z) and exactly(f, "ctrl", "alt", "cmd") then
       return {run = function()
