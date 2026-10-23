@@ -3,8 +3,8 @@
 #
 # Port scheme (N = trailing digit of worktree dir name, default 1):
 #   Backend (Kestrel):  501N   (via settings.Development.json)
-#   Vite proxy target:  501N   (via BACKEND_PORT in .env → vite.config.ts reads it)
-#   Vite dev server:    517N   (via VITE_PORT in .env → vite.config.ts reads it)
+#   Vite proxy target:  501N   (PHOENIX_API_PORT in .env; BACKEND_PORT for the pasted vite.config.ts)
+#   Vite dev server:    517N   (PHOENIX_CLIENT_PORT in .env; VITE_PORT for the pasted vite.config.ts and playwright)
 #   gRPC:               5320   (shared, not per-worktree)
 #
 # Dual-mode scheme detection:
@@ -71,6 +71,21 @@ _pwsl_scheme() {
   [[ "$sf" == *"M5Settings.cs" ]] && echo "new" || echo "old"
 }
 
+# Branches from before vite.config.ts read its ports from .env (dev 9ae43b303, 2026-10-06; main had not
+# caught up on 2026-10-23) still need the pasted copy. Newer ones keep their own, so it cannot go stale.
+_pwsl_pastes_vite() {
+  ! git -C "$1" show HEAD:client/phoenix-client/vite.config.ts 2>/dev/null | grep -q 'PHOENIX_CLIENT_PORT'
+}
+
+_pwsl_files() {
+  local root="$1" f
+  for f in "${_PWSL_COMMON_FILES[@]}"; do
+    [[ "$f" == */vite.config.ts ]] && ! _pwsl_pastes_vite "$root" && continue
+    echo "$f"
+  done
+  _pwsl_scheme_file "$root"
+}
+
 # Set or update a key=value in a .env file (creates file if missing)
 _pwsl_set_env() {
   local envfile="$1" key="$2" value="$3"
@@ -94,7 +109,7 @@ _pwsl_verify() {
   local c="$root/$(_pwsl_scheme_file "$root")"
   local envfile="$root/client/phoenix-client/.env"
 
-  local files=("${_PWSL_COMMON_FILES[@]}" "$(_pwsl_scheme_file "$root")")
+  local files=("${(@f)$(_pwsl_files "$root")}")
 
   echo "  worktree number: $n (backend=501$n, vite=517$n)"
   echo "  scheme: $scheme ($(basename "$c"))"
@@ -117,12 +132,30 @@ _pwsl_verify() {
     ((fails++))
   fi
 
-  # --- Vite config uses loadEnv (not hardcoded ports) ---
-  if grep -q 'loadEnv' "$v" 2>/dev/null; then
-    echo "  OK   vite.config.ts uses loadEnv"
+  # --- Vite config: pasted copy on old branches, the branch's own everywhere else ---
+  if _pwsl_pastes_vite "$root"; then
+    if grep -q 'loadEnv' "$v" 2>/dev/null; then
+      echo "  OK   vite.config.ts pasted (branch predates .env ports)"
+    else
+      echo "  FAIL vite.config.ts does NOT use loadEnv (stale golden copy?)"
+      ((fails++))
+    fi
   else
-    echo "  FAIL vite.config.ts does NOT use loadEnv (stale golden copy?)"
-    ((fails++))
+    if git -C "$root" diff --quiet HEAD -- client/phoenix-client/vite.config.ts 2>/dev/null \
+      && [[ "$(git -C "$root" ls-files -v client/phoenix-client/vite.config.ts | cut -c1)" != "h" ]]; then
+      echo "  OK   vite.config.ts is the branch's own, not pinned"
+    else
+      echo "  FAIL vite.config.ts differs from the branch or is still pinned"
+      ((fails++))
+    fi
+    for key in "PHOENIX_CLIENT_PORT=517${n}" "PHOENIX_API_PORT=501${n}"; do
+      if grep -q "^${key}$" "$envfile" 2>/dev/null; then
+        echo "  OK   .env ${key}"
+      else
+        echo "  FAIL .env ${key%%=*} is NOT ${key#*=}"
+        ((fails++))
+      fi
+    done
   fi
 
   # --- .env port vars ---
@@ -185,6 +218,8 @@ _pwsl_verify() {
   # --- assume-unchanged flags ---
   local hidden_ok=true
   for f in "${files[@]}"; do
+    # An untracked file (settings.Development.json is excluded in .bare/info/exclude) has nothing to pin.
+    git -C "$root" ls-files --error-unmatch "$f" &>/dev/null || continue
     local flag=$(git -C "$root" ls-files -v "$f" 2>/dev/null | cut -c1)
     if [[ "$flag" != "h" ]]; then
       echo "  FAIL assume-unchanged NOT set: $f"
@@ -192,7 +227,7 @@ _pwsl_verify() {
       ((fails++))
     fi
   done
-  $hidden_ok && echo "  OK   assume-unchanged on all 4 files"
+  $hidden_ok && echo "  OK   assume-unchanged on every pasted tracked file"
 
   return $fails
 }
@@ -206,7 +241,7 @@ pwsl() {
   echo "pwsl: $root"
   echo "scheme: $scheme"
 
-  local files=("${_PWSL_COMMON_FILES[@]}" "$(_pwsl_scheme_file "$root")")
+  local files=("${(@f)$(_pwsl_files "$root")}")
 
   # Check golden files exist
   for f in "${files[@]}"; do
@@ -238,6 +273,16 @@ pwsl() {
   local envfile="$root/client/phoenix-client/.env"
   _pwsl_set_env "$envfile" "VITE_PORT" "517${n}"
   _pwsl_set_env "$envfile" "BACKEND_PORT" "501${n}"
+  # The names a branch's own vite.config.ts and playwright.config.ts read their ports from.
+  _pwsl_set_env "$envfile" "PHOENIX_CLIENT_PORT" "517${n}"
+  _pwsl_set_env "$envfile" "PHOENIX_API_PORT" "501${n}"
+
+  if ! _pwsl_pastes_vite "$root"; then
+    local own_vite="client/phoenix-client/vite.config.ts"
+    git -C "$root" update-index --no-assume-unchanged "$own_vite" 2>/dev/null
+    # git show, not git checkout: checkout fires the post-checkout hook, which runs pwsl again.
+    git -C "$root" show "HEAD:$own_vite" > "$root/$own_vite"
+  fi
 
   # Set assume-unchanged
   for f in "${files[@]}"; do
@@ -293,6 +338,8 @@ _pwsl_auto_check() {
   grep -q "501${n}" "$root/server/Phoenix/settings.Development.json" 2>/dev/null \
     && grep -q "^VITE_PORT=517${n}$" "$envfile" 2>/dev/null \
     && grep -q "^BACKEND_PORT=501${n}$" "$envfile" 2>/dev/null \
+    && grep -q "^PHOENIX_CLIENT_PORT=517${n}$" "$envfile" 2>/dev/null \
+    && grep -q "^PHOENIX_API_PORT=501${n}$" "$envfile" 2>/dev/null \
     && { _PWSL_CHECKING=0; return; }
   echo "pwsl: auto-fixing WSL overrides for $(basename "$root")..."
   pwsl "$root" > /dev/null 2>&1
