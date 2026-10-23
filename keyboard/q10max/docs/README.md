@@ -29,11 +29,13 @@ Hammerspoon and AeroSpace match modifiers exactly, so each combo is its own name
 | Left space (L1) + key | ⌃⌥⌘ | AeroSpace: focus, workspaces, layout |
 | Left space + physical Shift + key | Hyper (⌃⌥⇧⌘) | AeroSpace: move, send to workspace, join, fullscreen |
 | Right big key (L3) + key | Meh (⌃⌥⇧) | Hammerspoon: `/next`, `/cut`, `/git:commit-detailed-push`, `/compact`, `/copy`, `/rebuild`, title-and-rename text. Convey: Meh+`T` |
+| Right big key (L3) + `-` / `+` | Meh (⌃⌥⇧) | Lund: split down / split right (`keybind` lines in `lund/.config/lund/config`). Middle key (L2) + `N` (Cmd+N) also splits right |
 | Middle key (L2) `1` `2` `3` | ⌥⇧⌘ | Hammerspoon: capture, then paste into Lund. `1` focused window (sends ⌥⇧⌘+7), `2` picked window (⌥⇧⌘+9), `3` area (⌥⇧⌘+8) |
 | Middle key (L2) `4` | ⌥⇧⌘ | Hammerspoon: screenshot the focused window without pasting. Sends ⌥⇧⌘+0 |
 | Middle key (L2) `5` | ⌥⇧⌘ | Hammerspoon: pick a window, save it as a file. Sends ⌥⇧⌘+2 |
 | Middle key (L2) `6` `7` `8` `9` | ⌥⇧⌘ | macshot's own hotkeys: `6` area (⌥⇧⌘+4), `7` history (⌥⇧⌘ and the `+` key), `8` OCR (⌥⇧⌘+3), `9` whole screen (⌥⇧⌘+5) |
-| Middle key (L2) `0` and other number row, F-row | ⌥⇧⌘ | Free slots. `0` still sends ⌥⇧⌘+1, which was CleanShot's close-all-popups and has no replacement |
+| Middle key (L2) F1 / F2 / F3 | ⌥⇧⌘ | Hammerspoon, wide monitor: `F1` nudge all windows left, `F2` nudge all windows right (240 px each), `F3` cycle the side gap (1920 / 960 / 16) |
+| Middle key (L2) `0` and other number row, F4–F12 | ⌥⇧⌘ | Free slots. `0` still sends ⌥⇧⌘+1, which was CleanShot's close-all-popups and has no replacement |
 | M1 + `1`–`5` | ⇧⌘ | Hammerspoon: same screenshot actions as middle key `1`–`5` |
 | M1 + other key | ⇧⌘ | Free. `E` was CleanShot's pin-last-screenshot |
 | M3 + key | ⌃⇧⌘ | Hammerspoon: app launchers (avoid `3` / `4`, macOS screenshot) |
@@ -80,6 +82,8 @@ AeroSpace has no border of its own. JankyBorders draws it. AeroSpace starts it (
 | Right big key + `Z` | Type `/generate:short-title ` + Enter, `/copy ` + Enter, then `/rename ` and stop |
 | F1, or left space + `M` | Minimize window |
 | F2 | Mission Control |
+| Middle key + F1 / F2 | Nudge all windows left / right on the wide monitor, 240 px |
+| Middle key + F3 | Cycle the wide monitor's side gap (1920 / 960 / 16) |
 | F7 / F8 / F9 / F10 | Previous / play-pause / next / mute |
 | F11 / F12 | Volume down / up |
 | Scroll down over a Dock icon | Minimize that app's windows |

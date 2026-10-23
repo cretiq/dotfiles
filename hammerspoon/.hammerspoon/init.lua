@@ -396,6 +396,64 @@ table.insert(laptopKeys, hs.hotkey.new({"alt", "shift"}, "z", function() titleCo
 
 local aerospaceBin = "/opt/homebrew/bin/aerospace"
 
+local function shell(script)
+  hs.task.new("/bin/sh", nil, {"-c", "export PATH=/opt/homebrew/bin:$PATH; " .. script}):start()
+end
+local function aerospace(command) shell("aerospace " .. command) end
+
+-- AeroSpace cannot change gaps while running, so this rewrites the wide monitor's left and right outer gap in its config and reloads it.
+-- 1920 keeps the outer quarters of the 7680-wide screen empty, 960 the outer eighths, 16 uses the full width.
+local function cycleWideGap()
+  local path = os.getenv("HOME") .. "/.config/aerospace/aerospace.toml"
+  local file = assert(io.open(path, "r"))
+  local text = file:read("a")
+  file:close()
+  local steps = {1920, 960, 16}
+  local current = tonumber(text:match('monitor%."Odyssey G95NC" = (%d+)'))
+  local width = steps[1]
+  for i, step in ipairs(steps) do if step == current then width = steps[i % #steps + 1] end end
+  local out = assert(io.open(path, "w"))
+  out:write((text:gsub('(monitor%."Odyssey G95NC" = )%d+', "%1" .. width)))
+  out:close()
+  aerospace("reload-config --no-gui")
+  hs.alert.show("Wide monitor side gap " .. width, 1)
+end
+
+-- Tiled windows follow the wide monitor's outer gaps, so shifting them moves nudgeStep from one gap to the other and reloads AeroSpace.
+-- AeroSpace has no command for floating windows, so those on the wide monitor's visible workspaces are moved by the same amount.
+local nudgeStep = 240
+local function nudgeWindows(direction)
+  local path = os.getenv("HOME") .. "/.config/aerospace/aerospace.toml"
+  local file = assert(io.open(path, "r"))
+  local text = file:read("a")
+  file:close()
+  local left = tonumber(text:match('outer%.left = %[.-monitor%."Odyssey G95NC" = (%d+)'))
+  local right = tonumber(text:match('outer%.right = %[.-monitor%."Odyssey G95NC" = (%d+)'))
+  local newLeft, newRight = left + direction * nudgeStep, right - direction * nudgeStep
+  if newLeft < 16 or newRight < 16 then return hs.alert.show("Wide monitor at its edge", 1) end
+  text = (text:gsub('(outer%.left = %[.-monitor%."Odyssey G95NC" = )%d+', "%1" .. newLeft))
+  text = (text:gsub('(outer%.right = %[.-monitor%."Odyssey G95NC" = )%d+', "%1" .. newRight))
+  local out = assert(io.open(path, "w"))
+  out:write(text)
+  out:close()
+  aerospace("reload-config --no-gui")
+  hs.task.new(aerospaceBin, function(_, listing)
+    for line in listing:gmatch("[^\n]+") do
+      local id = tonumber(line:match("^(%d+)|floating|Odyssey G95NC$"))
+      local win = id and hs.window.get(id)
+      if win then
+        local topLeft = win:topLeft()
+        win:setTopLeft({x = topLeft.x + direction * nudgeStep, y = topLeft.y})
+      end
+    end
+  end, {"list-windows", "--workspace", "visible", "--format", "%{window-id}|%{window-layout}|%{monitor-name}"}):start()
+end
+
+-- Q10 middle key (L2) F1 and F2 nudge the windows left and right, F3 cycles the wide monitor's side gap (all alt+shift+cmd+).
+hs.hotkey.bind(csMods, "f1", function() nudgeWindows(-1) end)
+hs.hotkey.bind(csMods, "f2", function() nudgeWindows(1) end)
+hs.hotkey.bind(csMods, "f3", cycleWideGap)
+
 -- Fn + key runs an AeroSpace command, Fn + Shift + key the second one. Keycodes 43, 44, 27 and 24 are the keys
 -- AeroSpace calls comma, slash, minus and equal: , - + ´ on the Swedish layout.
 local fnActions = {
@@ -550,59 +608,6 @@ do
     hs.eventtap.event.newKeyEvent({"ctrl", "shift"}, map.space, isDown):post()
   end
   local dictation = {run = function() postDictationKey(true) end, up = function() postDictationKey(false) end}
-
-  local function shell(script)
-    hs.task.new("/bin/sh", nil, {"-c", "export PATH=/opt/homebrew/bin:$PATH; " .. script}):start()
-  end
-  local function aerospace(command) shell("aerospace " .. command) end
-
-  -- AeroSpace cannot change gaps while running, so this rewrites the wide monitor's left and right outer gap in its config and reloads it.
-  -- 1920 keeps the outer quarters of the 7680-wide screen empty, 960 the outer eighths, 16 uses the full width.
-  local function cycleWideGap()
-    local path = os.getenv("HOME") .. "/.config/aerospace/aerospace.toml"
-    local file = assert(io.open(path, "r"))
-    local text = file:read("a")
-    file:close()
-    local steps = {1920, 960, 16}
-    local current = tonumber(text:match('monitor%."Odyssey G95NC" = (%d+)'))
-    local width = steps[1]
-    for i, step in ipairs(steps) do if step == current then width = steps[i % #steps + 1] end end
-    local out = assert(io.open(path, "w"))
-    out:write((text:gsub('(monitor%."Odyssey G95NC" = )%d+', "%1" .. width)))
-    out:close()
-    aerospace("reload-config --no-gui")
-    hs.alert.show("Wide monitor side gap " .. width, 1)
-  end
-
-  -- Tiled windows follow the wide monitor's outer gaps, so shifting them moves nudgeStep from one gap to the other and reloads AeroSpace.
-  -- AeroSpace has no command for floating windows, so those on the wide monitor's visible workspaces are moved by the same amount.
-  local nudgeStep = 240
-  local function nudgeWindows(direction)
-    local path = os.getenv("HOME") .. "/.config/aerospace/aerospace.toml"
-    local file = assert(io.open(path, "r"))
-    local text = file:read("a")
-    file:close()
-    local left = tonumber(text:match('outer%.left = %[.-monitor%."Odyssey G95NC" = (%d+)'))
-    local right = tonumber(text:match('outer%.right = %[.-monitor%."Odyssey G95NC" = (%d+)'))
-    local newLeft, newRight = left + direction * nudgeStep, right - direction * nudgeStep
-    if newLeft < 16 or newRight < 16 then return hs.alert.show("Wide monitor at its edge", 1) end
-    text = (text:gsub('(outer%.left = %[.-monitor%."Odyssey G95NC" = )%d+', "%1" .. newLeft))
-    text = (text:gsub('(outer%.right = %[.-monitor%."Odyssey G95NC" = )%d+', "%1" .. newRight))
-    local out = assert(io.open(path, "w"))
-    out:write(text)
-    out:close()
-    aerospace("reload-config --no-gui")
-    hs.task.new(aerospaceBin, function(_, listing)
-      for line in listing:gmatch("[^\n]+") do
-        local id = tonumber(line:match("^(%d+)|floating|Odyssey G95NC$"))
-        local win = id and hs.window.get(id)
-        if win then
-          local topLeft = win:topLeft()
-          win:setTopLeft({x = topLeft.x + direction * nudgeStep, y = topLeft.y})
-        end
-      end
-    end, {"list-windows", "--workspace", "visible", "--format", "%{window-id}|%{window-layout}|%{monitor-name}"}):start()
-  end
 
   -- GlazeWM's keys from the Windows machine as AeroSpace commands: Option + key runs the first, Option+Control (A+S held) + key the second.
   -- Left out: resize mode, cycle focus, centered floating and moving a workspace between monitors (no AeroSpace match, or no Voyager key).
@@ -825,15 +830,5 @@ for _, mods in ipairs({{"cmd", "shift"}, meh}) do
     hs.eventtap.event.newKeyEvent(mods, 10, false):post()
   end)
 end
-
--- Safari ignores the mouse's Back and Forward buttons (buttons 3 and 4), so run its History menu items instead.
-local safariHistoryItem = {[3] = "Back", [4] = "Forward"}
-safariMouseTap = hs.eventtap.new({hs.eventtap.event.types.otherMouseDown, hs.eventtap.event.types.otherMouseUp}, function(e)
-  local item = safariHistoryItem[e:getProperty(hs.eventtap.event.properties.mouseEventButtonNumber)]
-  local app = hs.application.frontmostApplication()
-  if not item or app:bundleID() ~= "com.apple.Safari" then return false end
-  if e:getType() == hs.eventtap.event.types.otherMouseDown then app:selectMenuItem({"History", item}) end
-  return true
-end):start()
 
 hs.alert.show("Hammerspoon config loaded")

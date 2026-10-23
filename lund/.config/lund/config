@@ -110,6 +110,9 @@ keybind = cmd+shift+d=unbind
 keybind = shift+opt+minus=new_split:right
 keybind = shift+opt+slash=new_split:down
 keybind = cmd+n=new_split:right
+# Q10 L3 sends Meh. Names are physical keys: slash is the Swedish - key, minus the Swedish + key
+keybind = ctrl+alt+shift+slash=new_split:down
+keybind = ctrl+alt+shift+minus=new_split:right
 
 # Split Resize
 keybind = shift+opt+left=resize_split:left,20
