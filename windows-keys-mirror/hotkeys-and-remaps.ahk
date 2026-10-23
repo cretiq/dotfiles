@@ -21,6 +21,24 @@ ToggleTheme() {
 
 ^#!+8::ToggleTheme()
 
+; Keeps the PC awake and Teams Available. The execution state covers sleep and display-off; the lock (machine inactivity limit) and Teams Away follow input idle, so F15 (bound to nothing) goes out every minute. Reload turns it off.
+KeepAwake := false
+A_TrayMenu.Add("Keep awake", (*) => ToggleKeepAwake())
+
+KeepAwakeNudge() => Send("{F15}")
+
+ToggleKeepAwake() {
+    global KeepAwake := !KeepAwake
+    DllCall("SetThreadExecutionState", "UInt", KeepAwake ? 0x80000003 : 0x80000000)
+    SetTimer(KeepAwakeNudge, KeepAwake ? 60000 : 0)
+    state := KeepAwake ? "on" : "off"
+    KeepAwake ? A_TrayMenu.Check("Keep awake") : A_TrayMenu.Uncheck("Keep awake")
+    A_IconTip := "Keep awake " state
+    TrayTip("Keep awake " state, "hotkeys-and-remaps.ahk")
+}
+
+^#!+7::ToggleKeepAwake()
+
 ^#!+v::
 {
     if WinExist("ahk_exe Spotify.exe")
@@ -293,15 +311,15 @@ SlashCommand(name, submit := true)
 #HotIf
 
 ;---REMAP ESC---
-Esc::CapsLock
-CapsLock::Esc
+;Esc::CapsLock
+;CapsLock::Esc
 ;---------------
 
 ;---REMAP ALT+HJKL---
-!h::Left
-!j::Down
-!k::Up
-!l::Right
-!u::^Left
-!i::^Right
+;!h::Left
+;!j::Down
+;!k::Up
+;!l::Right
+;!u::^Left
+;!i::^Right
 ;---------------------

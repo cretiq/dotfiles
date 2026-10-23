@@ -277,6 +277,10 @@ keybindings:
   - commands: ['shell-exec --hide-window powershell -NoProfile -File C:\Users\FilipM\.glzr\glazewm\cycle-workspace.ps1']
     bindings: ['alt+h']
 
+  # No runtime gap command: the script rewrites gaps.outer_gap and reloads.
+  - commands: ['shell-exec --hide-window powershell -NoProfile -File C:\Users\FilipM\.glzr\glazewm\cycle-width.ps1']
+    bindings: ['alt+c']
+
   # Change focus to a workspace defined in `workspaces` config.
   - commands: ['focus --workspace 1']
     bindings: ['alt+1']
