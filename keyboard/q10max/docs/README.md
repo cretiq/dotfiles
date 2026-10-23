@@ -28,13 +28,14 @@ Hammerspoon and AeroSpace match modifiers exactly, so each combo is its own name
 |---|---|---|
 | Left space (L1) + key | ⌃⌥⌘ | AeroSpace: focus, workspaces, layout |
 | Left space + physical Shift + key | Hyper (⌃⌥⇧⌘) | AeroSpace: move, send to workspace, join, fullscreen |
-| Right big key (L3) + key | Meh (⌃⌥⇧) | Hammerspoon: `/next`, `/cut`, `/compact`, `/copy`, `/rebuild`, title-and-rename text. Convey: Meh+`T` |
+| Right big key (L3) + key | Meh (⌃⌥⇧) | Hammerspoon: `/next`, `/cut`, `/git:commit-detailed-push`, `/compact`, `/copy`, `/rebuild`, title-and-rename text. Convey: Meh+`T` |
 | Middle key (L2) `1` `2` `3` | ⌥⇧⌘ | Hammerspoon: capture, then paste into Lund. `1` focused window (sends ⌥⇧⌘+7), `2` picked window (⌥⇧⌘+9), `3` area (⌥⇧⌘+8) |
 | Middle key (L2) `4` | ⌥⇧⌘ | Hammerspoon: screenshot the focused window without pasting. Sends ⌥⇧⌘+0 |
 | Middle key (L2) `5` | ⌥⇧⌘ | Hammerspoon: pick a window, save it as a file. Sends ⌥⇧⌘+2 |
 | Middle key (L2) `6` `7` `8` `9` | ⌥⇧⌘ | macshot's own hotkeys: `6` area (⌥⇧⌘+4), `7` history (⌥⇧⌘ and the `+` key), `8` OCR (⌥⇧⌘+3), `9` whole screen (⌥⇧⌘+5) |
 | Middle key (L2) `0` and other number row, F-row | ⌥⇧⌘ | Free slots. `0` still sends ⌥⇧⌘+1, which was CleanShot's close-all-popups and has no replacement |
-| M1 + key | ⇧⌘ | Free. `E` was CleanShot's pin-last-screenshot |
+| M1 + `1`–`5` | ⇧⌘ | Hammerspoon: same screenshot actions as middle key `1`–`5` |
+| M1 + other key | ⇧⌘ | Free. `E` was CleanShot's pin-last-screenshot |
 | M3 + key | ⌃⇧⌘ | Hammerspoon: app launchers (avoid `3` / `4`, macOS screenshot) |
 
 Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L3 keeps the media F-row.
@@ -71,9 +72,10 @@ AeroSpace has no border of its own. JankyBorders draws it. AeroSpace starts it (
 
 | Press | Action |
 |---|---|
-| M3 + `Q F A H Z J E X B S` | Obsidian, Finder, Spotify, Claude, Bitwarden, ChatGPT, X Pro, Xcode, BetterTouchTool, Simulator |
+| M3 + `Q F A H Z J E X B S M` | Obsidian, Finder, Spotify, Claude, Bitwarden, ChatGPT, X Pro, Xcode, BetterTouchTool, Simulator, Mail |
+| M3 + `W` | Wallpaper settings |
 | Right big key + `T` | Convey translator (Meh+`T`, set in Convey's settings) |
-| Right big key + `N` / `C` / `O` / `X` / `R` | Type `/next ` / `/cut ` / `/compact ` / `/copy ` / `/rebuild ` then Enter |
+| Right big key + `N` / `C` / `O` / `K` / `X` / `R` | Type `/next ` / `/cut ` / `/git:commit-detailed-push ` / `/compact ` / `/copy ` / `/rebuild ` then Enter |
 | Right big key + `D` | Type `done` then Enter |
 | Right big key + `Z` | Type `/generate:short-title ` + Enter, `/copy ` + Enter, then `/rename ` and stop |
 | F1, or left space + `M` | Minimize window |

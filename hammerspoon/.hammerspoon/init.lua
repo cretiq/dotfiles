@@ -16,10 +16,16 @@ local apps = {
   x = "Xcode",
   b = "BetterTouchTool",
   s = "Simulator",
+  m = "Mail",
 }
 for key, app in pairs(apps) do
   hs.hotkey.bind(m3, key, function() hs.application.launchOrFocus(app) end)
 end
+
+local function openWallpaperSettings()
+  hs.task.new("/usr/bin/open", nil, {"x-apple.systempreferences:com.apple.Wallpaper-Settings.extension"}):start()
+end
+hs.hotkey.bind(m3, "w", openWallpaperSettings)
 
 local function minimizeFocused()
   local win = hs.window.focusedWindow()
@@ -145,6 +151,14 @@ hs.hotkey.bind(csMods, "9", capturePickedWindowToLund)
 hs.hotkey.bind(csMods, "0", captureFocusedWindow)
 hs.hotkey.bind(csMods, "2", capturePickedWindow)
 
+-- Q10 M1 (shift+cmd) + 1 to 5, and Cmd+Shift+1 to 5 on the laptop: same actions as the middle key's 1 to 5.
+local m1 = {"shift", "cmd"}
+hs.hotkey.bind(m1, "1", captureFocusedWindowToLund)
+hs.hotkey.bind(m1, "2", capturePickedWindowToLund)
+hs.hotkey.bind(m1, "3", captureAreaToLund)
+hs.hotkey.bind(m1, "4", captureFocusedWindow)
+hs.hotkey.bind(m1, "5", capturePickedWindow)
+
 local function mediaKey(name)
   return function()
     hs.eventtap.event.newSystemKeyEvent(name, true):post()
@@ -205,7 +219,8 @@ end
 local commands = {
   n = "/next ",
   c = "/cut ",
-  o = "/compact ",
+  o = "/git:commit-detailed-push ",
+  k = "/compact ",
   x = "/copy ",
   r = "/rebuild ",
   d = "done",
@@ -616,7 +631,7 @@ do
   end
   -- On the Voyager B opens Bitwarden; the Q10's B stays BetterTouchTool.
   appByCode[map.b] = "Bitwarden"
-  appByCode[map.w] = function() hs.task.new("/usr/bin/open", nil, {"x-apple.systempreferences:com.apple.Wallpaper-Settings.extension"}):start() end
+  appByCode[map.w] = openWallpaperSettings
   watched[map.w] = true
   appByCode[map.c] = "Safari"
   watched[map.c] = true
