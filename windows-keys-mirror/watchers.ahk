@@ -8,6 +8,7 @@ Persistent
 logFile := EnvGet("LOCALAPPDATA") "\watchers.log"
 Log(msg) => FileAppend(FormatTime(, "yyyy-MM-dd HH:mm:ss") "  " msg "`n", logFile)
 #Include arrange-windows.ahk
+#Include focus-border.ahk
 
 ; Desk mode = the laptop panel is not on the desktop (lid closed, external screen only): GlazeWM on and the
 ; Voyager preset, whose remaps are off so Alt+HJKL reaches GlazeWM. Laptop panel on: GlazeWM off, Standard preset.
@@ -180,3 +181,4 @@ OnMessage(0x007E, OnDisplayChange)  ; WM_DISPLAYCHANGE
 OnMessage(0x0219, OnDeviceChange)   ; WM_DEVICECHANGE
 SyncAll()
 SetTimer(SyncAll, 30000)
+SetTimer(FocusBorderTick, 50)
