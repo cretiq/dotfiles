@@ -158,6 +158,7 @@ _show_help() {
   cr            --resume             lg       lazygit
   cs            sonnet 5.5 high      vim      nvim
   co            opus 5.5             code     vscode
+  ch            haiku 5.5 high
   ccc           claude-scratch       mw       macrowhisper
   cdot          dotfiles + claude    obs      ranger in Obsidian
                                      todo     vim Obsidian TODO
@@ -191,6 +192,7 @@ alias '?'='_show_help'
 alias cr='claude --model claude-sonnet-5-5 --effort high --resume'
 alias cs='claude --model claude-sonnet-5-5 --effort high'
 alias co='claude --model "claude-opus-5-5[1m]"'
+alias ch='claude --model claude-haiku-5-5 --effort high'
 alias ccc='cd ~/claude-scratch && claude --model claude-sonnet-5-5 --effort high'
 alias cdot='cd ~/.dotfiles && claude --model claude-sonnet-5-5 --effort high'
 
