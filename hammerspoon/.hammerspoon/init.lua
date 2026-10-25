@@ -17,6 +17,7 @@ local apps = {
   b = "BetterTouchTool",
   s = "Simulator",
   m = "Mail",
+  c = "Microsoft Edge",
 }
 for key, app in pairs(apps) do
   hs.hotkey.bind(m3, key, function() hs.application.launchOrFocus(app) end)
@@ -137,6 +138,23 @@ local function captureAreaToLund() captureToLund({"-x", "-c", "-i"}) end
 local function capturePickedWindowToLund() captureToLund({"-x", "-c", "-i", "-w"}) end
 local function capturePickedWindow() hs.task.new(screencapture, nil, {"-i", "-w"}):start() end
 
+-- macshot has no URL parameter for a window or rect, so drag-select the focused window's frame once its overlay is up.
+local function macshotFocusedWindow()
+  local win = hs.window.focusedWindow()
+  if not win then return end
+  local f = win:frame()
+  local from = hs.geometry.point(f.x, f.y)
+  local to = hs.geometry.point(f.x + f.w - 1, f.y + f.h - 1)
+  local types = hs.eventtap.event.types
+  hs.urlevent.openURL("macshot://capture")
+  hs.timer.doAfter(0.4, function()
+    hs.mouse.absolutePosition(from)
+    hs.eventtap.event.newMouseEvent(types.leftMouseDown, from):post()
+    hs.eventtap.event.newMouseEvent(types.leftMouseDragged, to):post()
+    hs.eventtap.event.newMouseEvent(types.leftMouseUp, to):post()
+  end)
+end
+
 -- macshot URL actions do nothing while it is not running.
 if not hs.application.get("macshot") then
   hs.task.new("/usr/bin/open", nil, {"-g", "-a", "macshot"}):start()
@@ -150,14 +168,6 @@ hs.hotkey.bind(csMods, "8", captureAreaToLund)
 hs.hotkey.bind(csMods, "9", capturePickedWindowToLund)
 hs.hotkey.bind(csMods, "0", captureFocusedWindow)
 hs.hotkey.bind(csMods, "2", capturePickedWindow)
-
--- Q10 M1 (shift+cmd) + 1 to 5, and Cmd+Shift+1 to 5 on the laptop: same actions as the middle key's 1 to 5.
-local m1 = {"shift", "cmd"}
-hs.hotkey.bind(m1, "1", captureFocusedWindowToLund)
-hs.hotkey.bind(m1, "2", capturePickedWindowToLund)
-hs.hotkey.bind(m1, "3", captureAreaToLund)
-hs.hotkey.bind(m1, "4", captureFocusedWindow)
-hs.hotkey.bind(m1, "5", capturePickedWindow)
 
 local function mediaKey(name)
   return function()
@@ -378,15 +388,14 @@ end
 
 local captureKeys = {
   captureFocusedWindowToLund,
-  capturePickedWindowToLund,
   captureAreaToLund,
-  captureFocusedWindow,
-  capturePickedWindow,
+  macshotFocusedWindow,
+  function() hs.urlevent.openURL("macshot://quick-capture") end,
   function() hs.urlevent.openURL("macshot://capture") end,
   function() hs.urlevent.openURL("macshot://history") end,
 }
 for i, capture in ipairs(captureKeys) do
-  table.insert(laptopKeys, hs.hotkey.new({"cmd", "shift"}, tostring(i), capture))
+  hs.hotkey.bind({"cmd", "shift"}, tostring(i), capture)
 end
 
 for key, text in pairs(commands) do
@@ -638,8 +647,6 @@ do
   appByCode[map.b] = "Bitwarden"
   appByCode[map.w] = openWallpaperSettings
   watched[map.w] = true
-  appByCode[map.c] = "Safari"
-  watched[map.c] = true
 
   -- An action either replaces the key (code and flags) or runs once and swallows it.
   -- Windows Terminal moves between panes with A + Space + J K L Ö, which arrives as Alt + arrow. Lund's keys are Cmd+H J K L.

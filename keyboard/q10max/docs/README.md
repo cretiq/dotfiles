@@ -36,7 +36,10 @@ Hammerspoon and AeroSpace match modifiers exactly, so each combo is its own name
 | Middle key (L2) `6` `7` `8` `9` | ⌥⇧⌘ | macshot's own hotkeys: `6` area (⌥⇧⌘+4), `7` history (⌥⇧⌘ and the `+` key), `8` OCR (⌥⇧⌘+3), `9` whole screen (⌥⇧⌘+5) |
 | Middle key (L2) F1 / F2 / F3 | ⌥⇧⌘ | Hammerspoon, wide monitor: `F1` nudge all windows left, `F2` nudge all windows right (240 px each), `F3` cycle the side gap (1920 / 960 / 16) |
 | Middle key (L2) `0` and other number row, F4–F12 | ⌥⇧⌘ | Free slots. `0` still sends ⌥⇧⌘+1, which was CleanShot's close-all-popups and has no replacement |
-| M1 + `1`–`5` | ⇧⌘ | Hammerspoon: same screenshot actions as middle key `1`–`5` |
+| M1 + `1` `2` | ⇧⌘ | Hammerspoon: capture, then paste into Lund. `1` focused window, `2` area |
+| M1 + `3` | ⇧⌘ | Hammerspoon + macshot: open macshot's area capture and drag-select the focused window's frame |
+| M1 + `4` | ⇧⌘ | macshot: quick capture of an area (`macshot://quick-capture`) |
+| M1 + `5` `6` | ⇧⌘ | macshot: `5` area capture, `6` history |
 | M1 + other key | ⇧⌘ | Free. `E` was CleanShot's pin-last-screenshot |
 | M3 + key | ⌃⇧⌘ | Hammerspoon: app launchers (avoid `3` / `4`, macOS screenshot) |
 
@@ -74,7 +77,7 @@ AeroSpace has no border of its own. JankyBorders draws it. AeroSpace starts it (
 
 | Press | Action |
 |---|---|
-| M3 + `Q F A H Z J E X B S M` | Obsidian, Finder, Spotify, Claude, Bitwarden, ChatGPT, X Pro, Xcode, BetterTouchTool, Simulator, Mail |
+| M3 + `Q F A H Z J E X B S M C` | Obsidian, Finder, Spotify, Claude, Bitwarden, ChatGPT, X Pro, Xcode, BetterTouchTool, Simulator, Mail, Microsoft Edge |
 | M3 + `W` | Wallpaper settings |
 | Right big key + `T` | Convey translator (Meh+`T`, set in Convey's settings) |
 | Right big key + `N` / `C` / `O` / `K` / `X` / `R` | Type `/next ` / `/cut ` / `/git:commit-detailed-push ` / `/compact ` / `/copy ` / `/rebuild ` then Enter |
