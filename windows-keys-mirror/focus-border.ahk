@@ -1,8 +1,9 @@
 #Requires AutoHotkey v2.0
 
-; Thicker focus border on the Samsung Odyssey (monitor id SAM73D0). GlazeWM's border is a 1 px DWM frame with no
-; width option, too thin on a 7680 px screen. A click-through ring in the same orange is drawn in the gap just
-; outside the focused window, over the DWM frame. On any other monitor the ring hides and only the DWM border shows.
+; Thicker focus border on every monitor. GlazeWM's border is a 1 px DWM frame with no width option, too thin on
+; a 7680 px screen. A click-through ring in the same orange is drawn in the gap just outside the focused window,
+; over the DWM frame. Ring width is per monitor id: the home monitor (Samsung Odyssey, SAM73D0) gets 4 px, any
+; other monitor (office: Samsung LS49A950U, SAM71CE / SAM71CD) 3 px.
 ; Included by watchers.ahk, which starts FocusBorderTick; run directly it starts it itself.
 FocusBorderTick() {
     static g := "", shownKey := ""
@@ -37,7 +38,7 @@ FocusBorderTick() {
 
 ; The focused window's frame and the ring around it (clipped to its monitor), or "" when no ring is wanted.
 FocusBorderRect() {
-    static DWMWA_EXTENDED_FRAME_BOUNDS := 9, DWMWA_CLOAKED := 14, thickness := 5, odysseyId := "SAM73D0"
+    static DWMWA_EXTENDED_FRAME_BOUNDS := 9, DWMWA_CLOAKED := 14, thicknessById := Map("SAM73D0", 4), defaultThickness := 3
     if !ProcessExist("glazewm.exe")
         return ""
     try {
@@ -56,9 +57,12 @@ FocusBorderRect() {
             return ""
         dd := Buffer(840)  ; DISPLAY_DEVICEW: DeviceID at 328
         NumPut("UInt", 840, dd)
-        if !DllCall("EnumDisplayDevicesW", "Str", StrGet(mi.Ptr + 40, 32, "UTF-16"), "UInt", 0, "Ptr", dd, "UInt", 1)
-            || !InStr(StrGet(dd.Ptr + 328, 128, "UTF-16"), odysseyId)
-            return ""
+        DllCall("EnumDisplayDevicesW", "Str", StrGet(mi.Ptr + 40, 32, "UTF-16"), "UInt", 0, "Ptr", dd, "UInt", 1)
+        monitorId := StrGet(dd.Ptr + 328, 128, "UTF-16")
+        thickness := defaultThickness
+        for id, px in thicknessById
+            if InStr(monitorId, id)
+                thickness := px
 
         rc := Buffer(16)
         DllCall("dwmapi\DwmGetWindowAttribute", "Ptr", hwnd, "UInt", DWMWA_EXTENDED_FRAME_BOUNDS, "Ptr", rc, "UInt", 16)
