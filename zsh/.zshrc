@@ -195,6 +195,8 @@ alias co='claude --model "claude-opus-5-5[1m]"'
 alias ch='claude --model claude-haiku-5-5 --effort high'
 alias ccc='cd ~/claude-scratch && claude --model claude-sonnet-5-5 --effort high'
 alias cdot='cd ~/.dotfiles && claude --model claude-sonnet-5-5 --effort high'
+alias ccv='cd /mnt/c/Dev/Own/Convey && claude --model claude-sonnet-5-5 --effort high'
+alias ctb='cd ~/Dev/treeboard-ratatui && claude --model claude-sonnet-5-5 --effort high'
 
 # Needs the keyboard on a USB cable: the 2.4 GHz receiver cannot write the keymap.
 function q10 {
