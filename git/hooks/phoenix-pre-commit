@@ -1,0 +1,115 @@
+#!/bin/sh
+# Guard: block commits containing WSL-specific local overrides.
+# These files must never be committed — they're machine-specific (port 5001+, PFX cert, WSL systems.json fallback).
+# Protected by assume-unchanged, but this hook is the hard safety net.
+
+WSL_FILES="
+server/Phoenix/settings.Development.json
+server/Phoenix/M5Settings.cs
+server/Phoenix/ConnectionManager.cs
+client/phoenix-client/vite.config.ts
+client/phoenix-client/playwright.config.ts
+"
+
+blocked=""
+
+for f in $WSL_FILES; do
+  if git diff --cached --name-only | grep -qF "$f"; then
+    staged=$(git show ":$f" 2>/dev/null)
+    if echo "$staged" | grep -qE '500[0-9]|dev-cert\.pfx|localhost,1434|process\.env\.VITE_PORT|pwsl-wsl-local'; then
+      blocked="$blocked\n  $f"
+    fi
+  fi
+done
+
+if [ -n "$blocked" ]; then
+  echo ""
+  echo "BLOCKED: WSL-specific overrides detected in staged files:"
+  echo "$blocked"
+  echo ""
+  echo "These files contain local WSL config (port 500x, PFX cert, pwsl-wsl-local fallback)"
+  echo "and must NEVER be committed. They are machine-specific."
+  echo ""
+  echo "To fix:"
+  echo "  git reset HEAD <file>     # unstage the file"
+  echo "  pwsl                      # re-apply overrides + assume-unchanged"
+  echo ""
+  exit 1
+fi
+
+# Guard: personal Claude assets and local machine files must never be committed.
+# They are excluded through info/exclude; this catches a forced add.
+personal_files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(CLAUDE\.local\.md|AGENTS\.md|\.claude/settings\.local\.json|scratchpad/|server/Phoenix/settings\.Development\.json)' || true)
+personal_links=$(git diff --cached --raw --diff-filter=ACMR | awk '$2=="120000"{print $NF}' | grep -E '(^|/)\.claude/|^CLAUDE\.local\.md$' || true)
+if [ -n "$personal_files$personal_links" ]; then
+  echo ""
+  echo "BLOCKED: personal Claude assets or local machine files are staged:"
+  [ -n "$personal_files" ] && echo "$personal_files" | sed 's/^/  /'
+  [ -n "$personal_links" ] && echo "$personal_links" | sed 's/^/  (symlink) /'
+  echo ""
+  echo "These stay local and untracked. To fix:  git reset HEAD <file>"
+  echo ""
+  exit 1
+fi
+
+# Guard: a backend contract change must ship with the regenerated TS client.
+# Touching a contract file does not mean the API changed (an auth check in a controller does not), so
+# instead of guessing from paths, regenerate the client and see whether it moves. Only the regen is
+# run here (~4s); the server build (~25s) is not, so a spec older than the staged files blocks instead.
+
+CONTRACT_PATHS='^server/(Api\.Internal/(DTOs|Controllers)|Application/Models|Shared/Query)/'
+GEN_DIR='client/packages/core/src/api'
+
+staged_files=$(git diff --cached --name-only)
+backend_staged=$(echo "$staged_files" | grep -E "$CONTRACT_PATHS" || true)
+gen_staged=$(echo "$staged_files" | grep -E "^$GEN_DIR/" || true)
+
+gen_dirty() {
+  ! git diff --quiet -- "$GEN_DIR" || [ -n "$(git ls-files --others --exclude-standard -- "$GEN_DIR")" ]
+}
+
+block_contract() {
+  echo ""
+  echo "BLOCKED: $1"
+  echo ""
+  echo "Contract files staged (DTOs/Controllers/Models/Query):"
+  echo "$backend_staged" | sed 's/^/  /'
+  echo ""
+  echo "To fix:"
+  echo "$2"
+  echo ""
+  exit 1
+}
+
+if [ -n "$backend_staged" ] && [ -z "$gen_staged" ]; then
+  top=$(git rev-parse --show-toplevel)
+  spec="$top/server/Phoenix_openapi.json"
+
+  # The build rewrites the spec only when its content changes, so a comment-only edit leaves it older
+  # than the file. A newer DLL from the file's own project proves the build ran after the edit.
+  stale=""
+  [ -f "$spec" ] || stale=1
+  for f in $backend_staged; do
+    [ "$top/$f" -nt "$spec" ] || continue
+    proj=$(echo "$f" | cut -d/ -f1-2)
+    [ -n "$(find "$top/$proj/bin" -name '*.dll' -newer "$top/$f" 2>/dev/null | head -n 1)" ] || stale=1
+  done
+  [ -n "$stale" ] && block_contract \
+    "the OpenAPI spec is older than the staged contract files, so the client cannot be checked." \
+    "  cd server && dotnet build Phoenix.sln   (the server does not need to run), then retry the commit"
+
+  # A dirty generated client would hide whether this regen moved anything.
+  gen_dirty && block_contract \
+    "$GEN_DIR has unstaged changes." \
+    "  stage them (git add $GEN_DIR) or discard them, then retry the commit"
+
+  (cd "$top/client/phoenix-client" && npm run --silent generate:all >/dev/null 2>&1) || block_contract \
+    "npm run generate:all failed." \
+    "  run it in client/phoenix-client to see the error"
+
+  gen_dirty && block_contract \
+    "the regenerated client differs from the committed one: the API changed." \
+    "  git add $GEN_DIR, then retry the commit"
+
+  echo "pre-commit: contract files staged, regenerated client unchanged — API shape not affected."
+fi
