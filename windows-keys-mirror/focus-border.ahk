@@ -37,7 +37,7 @@ FocusBorderTick() {
 
 ; The focused window's frame and the ring around it (clipped to its monitor), or "" when no ring is wanted.
 FocusBorderRect() {
-    static DWMWA_EXTENDED_FRAME_BOUNDS := 9, DWMWA_CLOAKED := 14, thickness := 4, odysseyId := "SAM73D0"
+    static DWMWA_EXTENDED_FRAME_BOUNDS := 9, DWMWA_CLOAKED := 14, thickness := 5, odysseyId := "SAM73D0"
     if !ProcessExist("glazewm.exe")
         return ""
     try {
