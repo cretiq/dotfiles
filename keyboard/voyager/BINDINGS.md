@@ -104,10 +104,11 @@ thumbs  · | SPACE || · | ·
 - A / hold Alt + SPACE / hold L2 → Ctrl+A
 
 ## AutoHotkey slash-command chords (`hotkeys-and-remaps.ahk`)
-- Ctrl+Alt+Win+D → types /dev:restart
+- Ctrl+Alt+Win+D → types /restart
 - Ctrl+Alt+Win+N → types /next
-- Ctrl+Alt+Win+C → types /cut
+- Ctrl+Alt+Win+X → types /cut
 - Ctrl+Alt+Win+R → types /rebuild
+- Ctrl+Alt+Win+C → types /copy
 - Ctrl+Alt+Win+O → types /git:commit-detailed-push
 - Ctrl+Alt+Win+H → types /how-to-test
 - Ctrl+Alt+Win+Z → types /generate:long-title, then /copy, then /rename
