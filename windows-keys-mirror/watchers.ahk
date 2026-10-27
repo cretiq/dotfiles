@@ -9,6 +9,7 @@ logFile := EnvGet("LOCALAPPDATA") "\watchers.log"
 Log(msg) => FileAppend(FormatTime(, "yyyy-MM-dd HH:mm:ss") "  " msg "`n", logFile)
 #Include arrange-windows.ahk
 #Include focus-border.ahk
+#Include theme-sync.ahk
 
 ; Desk mode = the laptop panel is not on the desktop (lid closed, external screen only): GlazeWM on and the
 ; Voyager preset, whose remaps are off so Alt+HJKL reaches GlazeWM. Laptop panel on: GlazeWM off, Standard preset.
@@ -172,9 +173,18 @@ OnDeviceChange(wParam, *) {
         SetTimer(SyncQ10, -2000)
 }
 
+; speaker-guard.ps1 mutes the laptop speaker when the headphones disconnect. It holds a mutex, so a second copy exits at once.
+SyncSpeakerGuard() {
+    for p in ComObjGet("winmgmts:").ExecQuery("SELECT CommandLine FROM Win32_Process WHERE Name = 'powershell.exe'")
+        if InStr(p.CommandLine, "speaker-guard.ps1")
+            return
+    Run 'powershell.exe -MTA -NoProfile -WindowStyle Hidden -File "' A_ScriptDir '\speaker-guard.ps1"', , "Hide"
+}
+
 SyncAll() {
     SyncMode()
     SyncQ10()
+    SyncSpeakerGuard()
 }
 
 OnMessage(0x007E, OnDisplayChange)  ; WM_DISPLAYCHANGE
@@ -182,3 +192,4 @@ OnMessage(0x0219, OnDeviceChange)   ; WM_DEVICECHANGE
 SyncAll()
 SetTimer(SyncAll, 30000)
 SetTimer(FocusBorderTick, 50)
+SetTimer(ThemeSyncTick, 1000)

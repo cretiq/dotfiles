@@ -1,24 +1,33 @@
 #Requires AutoHotkey v2.0
 
 ; Thicker focus border on every monitor. GlazeWM's border is a 1 px DWM frame with no width option, too thin on
-; a 7680 px screen. A click-through ring in the same orange is drawn in the gap just outside the focused window,
-; over the DWM frame. Ring width is per monitor id: the home monitor (Samsung Odyssey, SAM73D0) gets 4 px, any
-; other monitor (office: Samsung LS49A950U, SAM71CE / SAM71CD) 3 px.
+; a 7680 px screen. A click-through ring is drawn just outside the focused window
+; and over its DWM frame. Ring width is per monitor id: the home monitor (Samsung Odyssey, SAM73D0) gets 4 px, any
+; other monitor (office: Samsung LS49A950U, SAM71CE / SAM71CD) 2 px.
 ; Included by watchers.ahk, which starts FocusBorderTick; run directly it starts it itself.
+; The colour follows the Windows light/dark mode: theme-sync.ahk sets focusRingColor.
+focusRingColor := "00c8ff"
 FocusBorderTick() {
-    static g := "", shownKey := ""
+    static g := "", shownKey := "", ringColor := "", blipHwnd := ""
     if !g {
         g := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x80020 +E0x08000000 -DPIScale")
-        g.BackColor := "ff9500"
         WinSetTransparent(255, g)
+    }
+    if (ringColor != focusRingColor) {
+        g.BackColor := ringColor := focusRingColor
     }
     r := FocusBorderRect()
     if !r {
+        blipHwnd := ""
         if shownKey {
             g.Hide()
             shownKey := ""
         }
         return
+    }
+    if (r.hwnd != blipHwnd) {
+        blipHwnd := r.hwnd
+        FocusFlash(r)
     }
     key := r.ox1 "," r.oy1 "," r.ox2 "," r.oy2 "," r.l "," r.t "," r.r "," r.b
     if (key = shownKey)
@@ -27,8 +36,9 @@ FocusBorderTick() {
     ; CreateRoundRectRgn takes ellipse diameters and leaves out the right and bottom edge, hence 2 * and + 1.
     outer := DllCall("CreateRoundRectRgn", "Int", 0, "Int", 0, "Int", w + 1, "Int", h + 1
         , "Int", 2 * (r.rad + r.thickness), "Int", 2 * (r.rad + r.thickness), "Ptr")
-    hole := DllCall("CreateRoundRectRgn", "Int", r.l - r.ox1, "Int", r.t - r.oy1, "Int", r.r - r.ox1 + 1, "Int", r.b - r.oy1 + 1
-        , "Int", 2 * r.rad, "Int", 2 * r.rad, "Ptr")
+    ; The hole is inset 1 px so the ring also covers GlazeWM's own frame, whose colour it only updates on a focus change.
+    hole := DllCall("CreateRoundRectRgn", "Int", r.l - r.ox1 + 1, "Int", r.t - r.oy1 + 1, "Int", r.r - r.ox1, "Int", r.b - r.oy1
+        , "Int", 2 * (r.rad - 1), "Int", 2 * (r.rad - 1), "Ptr")
     DllCall("CombineRgn", "Ptr", outer, "Ptr", outer, "Ptr", hole, "Int", 4)  ; RGN_DIFF
     DllCall("DeleteObject", "Ptr", hole)
     DllCall("SetWindowRgn", "Ptr", g.Hwnd, "Ptr", outer, "Int", true)
@@ -36,9 +46,37 @@ FocusBorderTick() {
     shownKey := key
 }
 
+; A white wash over the window that just got focus, 2 % opaque fading to 0 over ~80 ms. Called with the ring rect to
+; start it, and by its own 15 ms timer with no argument to step the fade.
+FocusFlash(r := "") {
+    static g := "", alpha := 0
+    if r {
+        if !g {
+            g := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x80020 +E0x08000000 -DPIScale")
+            g.BackColor := "ffffff"
+        }
+        w := r.r - r.l, h := r.b - r.t
+        rgn := DllCall("CreateRoundRectRgn", "Int", 0, "Int", 0, "Int", w + 1, "Int", h + 1
+            , "Int", 2 * r.rad, "Int", 2 * r.rad, "Ptr")
+        DllCall("SetWindowRgn", "Ptr", g.Hwnd, "Ptr", rgn, "Int", true)
+        alpha := 5
+        WinSetTransparent(alpha, g)
+        g.Show("NA x" r.l " y" r.t " w" w " h" h)
+        SetTimer(FocusFlash, 15)
+        return
+    }
+    alpha -= 1
+    if (alpha <= 0) {
+        SetTimer(FocusFlash, 0)
+        g.Hide()
+        return
+    }
+    WinSetTransparent(alpha, g)
+}
+
 ; The focused window's frame and the ring around it (clipped to its monitor), or "" when no ring is wanted.
 FocusBorderRect() {
-    static DWMWA_EXTENDED_FRAME_BOUNDS := 9, DWMWA_CLOAKED := 14, thicknessById := Map("SAM73D0", 4), defaultThickness := 3
+    static DWMWA_EXTENDED_FRAME_BOUNDS := 9, DWMWA_CLOAKED := 14, thicknessById := Map("SAM73D0", 4), defaultThickness := 2
     if !ProcessExist("glazewm.exe")
         return ""
     try {
@@ -69,7 +107,7 @@ FocusBorderRect() {
         l := NumGet(rc, 0, "Int"), t := NumGet(rc, 4, "Int"), r := NumGet(rc, 8, "Int"), b := NumGet(rc, 12, "Int")
         ; Windows 11 rounds window corners at 8 px, scaled by DPI.
         rad := Round(8 * DllCall("GetDpiForWindow", "Ptr", hwnd, "UInt") / 96)
-        return {l: l, t: t, r: r, b: b, rad: rad, thickness: thickness
+        return {hwnd: hwnd, l: l, t: t, r: r, b: b, rad: rad, thickness: thickness
             , ox1: Max(l - thickness, NumGet(mi, 4, "Int")), oy1: Max(t - thickness, NumGet(mi, 8, "Int"))
             , ox2: Min(r + thickness, NumGet(mi, 12, "Int")), oy2: Min(b + thickness, NumGet(mi, 16, "Int"))}
     } catch
