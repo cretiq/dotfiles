@@ -139,11 +139,20 @@ window_rules:
     match:
       - window_process: { equals: 'ms-teams' }
       - window_process: { equals: 'keymapp' }
+      - window_process: { equals: 'lghub' }
+
+  - commands: ['set-floating']
+    match:
+      - window_process: { equals: 'firefox' }
+        window_title: { regex: '^Extension: \(Bitwarden Password Manager\)' }
 
   - commands: ['ignore']
     match:
       # Ignores any Zebar windows.
       - window_process: { equals: 'zebar' }
+
+      # Elevated windows do not follow GlazeWM's tiling; as tiling they leave an empty slot.
+      - window_title: { regex: '^Administrator:' }
 
       # Ignores picture-in-picture windows for browsers.
       - window_title: { regex: '[Pp]icture.in.[Pp]icture' }

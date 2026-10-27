@@ -83,6 +83,11 @@ FocusBorderRect() {
         hwnd := WinExist("A")
         if (!hwnd || WinGetMinMax(hwnd) = -1 || RegExMatch(WinGetClass(hwnd), "^(Progman|WorkerW|Shell_(Secondary)?TrayWnd)$"))
             return ""
+        ; ShellExperienceHost hosts Notification Center, Quick Settings and the calendar flyout; lghub is Logitech G HUB.
+        if RegExMatch(WinGetProcessName(hwnd), "i)^(ShellExperienceHost|lghub|ms-teams)\.exe$")
+            return ""
+        if (SubStr(WinGetTitle(hwnd), 1, 14) = "Administrator:")
+            return ""
         cloaked := 0
         DllCall("dwmapi\DwmGetWindowAttribute", "Ptr", hwnd, "UInt", DWMWA_CLOAKED, "UInt*", &cloaked, "UInt", 4)
         if cloaked
