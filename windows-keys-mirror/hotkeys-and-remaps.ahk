@@ -146,7 +146,6 @@ ToastRender(text, scale, l, t, r, b) {
     DllCall("gdiplus\GdipGraphicsClear", "Ptr", g, "UInt", 0)
     pill := GdipPill(m, m, w, h)
 
-    DllCall("gdiplus\GdipSetClipPath", "Ptr", g, "Ptr", pill, "Int", 4)
     step := Max(1, Round(2.2 * scale)), drop := Round(5 * scale)
     Loop 8 {
         grow := (9 - A_Index) * step
@@ -154,7 +153,6 @@ ToastRender(text, scale, l, t, r, b) {
         GdipFill(g, 0x10000000, layer)
         DllCall("gdiplus\GdipDeletePath", "Ptr", layer)
     }
-    DllCall("gdiplus\GdipSetClipPath", "Ptr", g, "Ptr", pill, "Int", 0)
 
     hdcScreen := DllCall("GetDC", "Ptr", 0, "Ptr")
     hdcFull := DllCall("CreateCompatibleDC", "Ptr", hdcScreen, "Ptr")
@@ -169,8 +167,18 @@ ToastRender(text, scale, l, t, r, b) {
     DllCall("StretchBlt", "Ptr", hdcSmall, "Int", 0, "Int", 0, "Int", sw, "Int", sh, "Ptr", hdcFull, "Int", 0, "Int", 0, "Int", w, "Int", h, "UInt", 0xCC0020)
     small := 0
     DllCall("gdiplus\GdipCreateBitmapFromHBITMAP", "Ptr", hbmSmall, "Ptr", 0, "Ptr*", &small)
-    DllCall("gdiplus\GdipDrawImageRectI", "Ptr", g, "Ptr", small, "Int", m, "Int", m, "Int", w, "Int", h)
+    ; The blur is stretched back to full size and painted into the pill outline as a texture: a clip path has hard,
+    ; stair-stepped edges, a filled outline is anti-aliased.
+    stretch := GdipCanvas(w, h, &stretchBmp)
+    DllCall("gdiplus\GdipDrawImageRectI", "Ptr", stretch, "Ptr", small, "Int", 0, "Int", 0, "Int", w, "Int", h)
+    DllCall("gdiplus\GdipDeleteGraphics", "Ptr", stretch)
     DllCall("gdiplus\GdipDisposeImage", "Ptr", small)
+    texture := 0
+    DllCall("gdiplus\GdipCreateTexture", "Ptr", stretchBmp, "Int", 4, "Ptr*", &texture)
+    DllCall("gdiplus\GdipTranslateTextureTransform", "Ptr", texture, "Float", m, "Float", m, "Int", 0)
+    DllCall("gdiplus\GdipFillPath", "Ptr", g, "Ptr", texture, "Ptr", pill)
+    DllCall("gdiplus\GdipDeleteBrush", "Ptr", texture)
+    DllCall("gdiplus\GdipDisposeImage", "Ptr", stretchBmp)
     DllCall("DeleteDC", "Ptr", hdcSmall), DllCall("DeleteDC", "Ptr", hdcFull)
     DllCall("DeleteObject", "Ptr", hbmSmall), DllCall("DeleteObject", "Ptr", hbmFull)
     DllCall("ReleaseDC", "Ptr", 0, "Ptr", hdcScreen)
@@ -183,7 +191,6 @@ ToastRender(text, scale, l, t, r, b) {
     DllCall("gdiplus\GdipCreateLineBrushFromRectI", "Ptr", rect, "UInt", 0x18FFFFFF, "UInt", 0x00FFFFFF, "Int", 1, "Int", 0, "Ptr*", &sheen)
     DllCall("gdiplus\GdipFillPath", "Ptr", g, "Ptr", sheen, "Ptr", pill)
     DllCall("gdiplus\GdipDeleteBrush", "Ptr", sheen)
-    DllCall("gdiplus\GdipResetClip", "Ptr", g)
 
     DllCall("gdiplus\GdipCreateLineBrushFromRectI", "Ptr", rect, "UInt", 0xB8FFFFFF, "UInt", 0x28FFFFFF, "Int", 2, "Int", 0, "Ptr*", &rimBrush)
     DllCall("gdiplus\GdipCreatePen2", "Ptr", rimBrush, "Float", Max(1.2, 1.3 * scale), "Int", 2, "Ptr*", &pen)
