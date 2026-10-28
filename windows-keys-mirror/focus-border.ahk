@@ -4,11 +4,12 @@
 ; a 7680 px screen. A click-through ring is drawn just outside the focused window
 ; and over its DWM frame. Ring width is per monitor id: the home monitor (Samsung Odyssey, SAM73D0) gets 4 px, any
 ; other monitor (office: Samsung LS49A950U, SAM71CE / SAM71CD) 2 px.
-; Included by watchers.ahk, which starts FocusBorderTick; run directly it starts it itself.
+; Included by watchers.ahk, which starts only FocusFlashTick (the ring, FocusBorderTick, is off); run directly it starts the ring.
 ; The colour follows the Windows light/dark mode: theme-sync.ahk sets focusRingColor.
 focusRingColor := "00c8ff"
+focusFlashColor := "ffffff"
 FocusBorderTick() {
-    static g := "", shownKey := "", ringColor := "", blipHwnd := ""
+    static g := "", shownKey := "", ringColor := ""
     if !g {
         g := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x80020 +E0x08000000 -DPIScale")
         WinSetTransparent(255, g)
@@ -18,16 +19,11 @@ FocusBorderTick() {
     }
     r := FocusBorderRect()
     if !r {
-        blipHwnd := ""
         if shownKey {
             g.Hide()
             shownKey := ""
         }
         return
-    }
-    if (r.hwnd != blipHwnd) {
-        blipHwnd := r.hwnd
-        FocusFlash(r)
     }
     key := r.ox1 "," r.oy1 "," r.ox2 "," r.oy2 "," r.l "," r.t "," r.r "," r.b
     if (key = shownKey)
@@ -46,26 +42,40 @@ FocusBorderTick() {
     shownKey := key
 }
 
-; A white wash over the window that just got focus, 2 % opaque fading to 0 over ~80 ms. Called with the ring rect to
-; start it, and by its own 15 ms timer with no argument to step the fade.
+FocusFlashTick() {
+    static flashHwnd := ""
+    r := FocusBorderRect()
+    if !r {
+        flashHwnd := ""
+        return
+    }
+    if (r.hwnd != flashHwnd) {
+        flashHwnd := r.hwnd
+        FocusFlash(r)
+    }
+}
+
+; A wash over the window that just got focus, 3 % opaque (alpha 8 of 255) fading to 0 in ~60 ms (alpha 2 per 15 ms step). White in dark
+; mode, black in light mode (white on a light window is invisible); theme-sync.ahk sets focusFlashColor. Called with
+; the window rect to start it, and by its own timer with no argument to step the fade.
 FocusFlash(r := "") {
+    global focusFlashColor
     static g := "", alpha := 0
     if r {
-        if !g {
+        if !g
             g := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x80020 +E0x08000000 -DPIScale")
-            g.BackColor := "ffffff"
-        }
+        g.BackColor := focusFlashColor
         w := r.r - r.l, h := r.b - r.t
         rgn := DllCall("CreateRoundRectRgn", "Int", 0, "Int", 0, "Int", w + 1, "Int", h + 1
             , "Int", 2 * r.rad, "Int", 2 * r.rad, "Ptr")
         DllCall("SetWindowRgn", "Ptr", g.Hwnd, "Ptr", rgn, "Int", true)
-        alpha := 5
+        alpha := 8
         WinSetTransparent(alpha, g)
         g.Show("NA x" r.l " y" r.t " w" w " h" h)
         SetTimer(FocusFlash, 15)
         return
     }
-    alpha -= 1
+    alpha -= 2
     if (alpha <= 0) {
         SetTimer(FocusFlash, 0)
         g.Hide()
