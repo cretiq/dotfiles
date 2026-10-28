@@ -143,8 +143,15 @@ window_rules:
 
   - commands: ['set-floating']
     match:
+      # Not a title match: the popup is managed as "Mozilla Firefox" and tiles until it is retitled ~1.7 s later.
       - window_process: { equals: 'firefox' }
-        window_title: { regex: '^Extension: \(Bitwarden Password Manager\)' }
+        window_class: { equals: 'MozillaDialogClass' }
+        window_title: { not_regex: '[Pp]icture.in.[Pp]icture' }
+
+  - commands: ['set-floating']
+    match:
+      - window_process: { equals: 'ShareX' }
+        window_title: { regex: '^ShareX - Image Editor' }
 
   - commands: ['ignore']
     match:
