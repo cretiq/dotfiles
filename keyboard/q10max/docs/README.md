@@ -28,6 +28,8 @@ Hammerspoon and AeroSpace match modifiers exactly, so each combo is its own name
 |---|---|---|
 | Left space (L1) + key | ⌃⌥⌘ | AeroSpace: focus, workspaces, layout |
 | Left space + the key above Tab | ⌃⌥⌘ | Hammerspoon: screenshot the focused window, paste it into Lund's Claude chat, press Enter, then focus the window it was taken from |
+| Cmd + `O` | ⌘ | Hammerspoon, only while Lund is in front, any keyboard: open the quick switcher (⌘⌥K) |
+| Middle key (L2) + `R` | ⌃⌥⌘ + F16 | Hammerspoon: Ctrl+R in Lund, Cmd+R in every other app. No Shift in the chord, because Shift+Option held turns Lund's cursor into a crosshair |
 | Left space + physical Shift + key | Hyper (⌃⌥⇧⌘) | AeroSpace: move, send to workspace, join, fullscreen |
 | Right big key (L3) + key | Meh (⌃⌥⇧) | Hammerspoon: `/next`, `/cut`, `/git:commit-detailed-push`, `/compact`, `/copy`, `/rebuild`, title-and-rename text. Convey: Meh+`T` |
 | Right big key (L3) + `-` / `+` | Meh (⌃⌥⇧) | Lund: split down / split right (`keybind` lines in `lund/.config/lund/config`). Middle key (L2) + `N` (Cmd+N) also splits right |

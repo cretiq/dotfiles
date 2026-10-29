@@ -97,6 +97,8 @@ lundRepoHotkeys = {}
 for key, repoPath in pairs(lundRepoKeys) do
   table.insert(lundRepoHotkeys, hs.hotkey.new({"cmd"}, key, function() focusFirstRepoTab(repoPath) end))
 end
+-- Cmd+O opens Lund's quick switcher (cmd+opt+k).
+table.insert(lundRepoHotkeys, hs.hotkey.new({"cmd"}, "o", function() hs.eventtap.keyStroke({"cmd", "alt"}, "k", 0) end))
 local function setLundRepoHotkeys(enabled)
   for _, hotkey in ipairs(lundRepoHotkeys) do
     if enabled then hotkey:enable() else hotkey:disable() end
@@ -254,13 +256,9 @@ hs.hotkey.bind(csMods, "9", capturePickedWindowToLund)
 hs.hotkey.bind(csMods, "0", captureFocusedWindow)
 hs.hotkey.bind(csMods, "2", capturePickedWindow)
 
--- Q10 L2 + O sends alt+shift+cmd+o. In Lund it opens the quick switcher (cmd+opt+k); elsewhere it stays the word jump to the right (opt+right).
+-- Q10 L2 + O sends alt+shift+cmd+o and stays the word jump to the right (opt+right) in every app.
 hs.hotkey.bind(csMods, "o", function()
-  if isLund(hs.application.frontmostApplication()) then
-    hs.eventtap.keyStroke({"cmd", "alt"}, "k", 0)
-  else
-    hs.eventtap.keyStroke({"alt"}, "right", 0)
-  end
+  hs.eventtap.keyStroke({"alt"}, "right", 0)
 end)
 
 local function mediaKey(name)
@@ -349,6 +347,17 @@ local function whenModifiersReleased(fn)
   if next(hs.eventtap.checkKeyboardModifiers()) == nil then return fn() end
   hs.timer.doAfter(0.02, function() whenModifiersReleased(fn) end)
 end
+
+-- Q10 L2 + R sends ctrl+alt+cmd+f16. In Lund it is ctrl+r (history search in the terminal); elsewhere it stays cmd+r.
+-- No shift in the chord: holding shift and option together turns Lund's cursor into a crosshair.
+hs.hotkey.bind({"ctrl", "alt", "cmd"}, "f16", function()
+  if isLund(hs.application.frontmostApplication()) then
+    hs.eventtap.keyStroke({"ctrl"}, "r", 0)
+  else
+    hs.eventtap.keyStroke({"cmd"}, "r", 0)
+  end
+end)
+
 local voyagerCommands = {
   [hs.keycodes.map.d] = "/dev:restart ",
   [hs.keycodes.map.n] = "/next ",
