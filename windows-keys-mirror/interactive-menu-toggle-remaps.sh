@@ -12,10 +12,11 @@ TOGGLE_HJKL="$TOGGLE_DIR/bash-toggle-alt-hjkl.sh"
 TOGGLE_WS="$TOGGLE_DIR/bash-toggle-window-switcher.sh"
 TOGGLE_OBS="$TOGGLE_DIR/bash-toggle-obsidian.sh"
 TOGGLE_RANGER="$TOGGLE_DIR/bash-toggle-ranger.sh"
+TOGGLE_WT="$TOGGLE_DIR/bash-toggle-windows-terminal.sh"
 VIM_TOGGLE="$HOME/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh"
 STATUS_ALL="$STATUS_DIR/get-all-status.sh"
 
-for f in "$AHK_FILE" "$TOGGLE_ESC" "$TOGGLE_HJKL" "$TOGGLE_WS" "$TOGGLE_OBS" "$TOGGLE_RANGER" "$VIM_TOGGLE" "$STATUS_ALL"; do
+for f in "$AHK_FILE" "$TOGGLE_ESC" "$TOGGLE_HJKL" "$TOGGLE_WS" "$TOGGLE_OBS" "$TOGGLE_RANGER" "$TOGGLE_WT" "$VIM_TOGGLE" "$STATUS_ALL"; do
     if [[ ! -f "$f" ]]; then
         echo "Error: not found — $f"
         exit 1
@@ -29,7 +30,7 @@ reload_ahk() {
 }
 
 get_statuses() {
-    IFS='|' read -r esc_state hjkl_state vim_status nvim_status obsidian_status ranger_status ws_status \
+    IFS='|' read -r esc_state hjkl_state vim_status nvim_status obsidian_status ranger_status ws_status wt_status \
         < <("$STATUS_ALL" "$AHK_FILE")
 }
 
@@ -41,6 +42,7 @@ show_statuses() {
     echo "  Obsidian         [$obsidian_status]"
     echo "  Ranger           [$ranger_status]"
     echo "  Window Switcher  [$ws_status]"
+    echo "  Windows Terminal [$wt_status]"
 }
 
 # Toggle only if current state != target
@@ -71,6 +73,7 @@ while true; do
     echo "  4. Obsidian Keymap       [$obsidian_status]       4v  4s"
     echo "  5. Ranger Keymap         [$ranger_status]       5v  5s"
     echo "  6. Window Switcher       [$ws_status]       6v  6s"
+    echo "  7. Windows Terminal      [$wt_status]       7v  7s"
     echo ""
     echo "OPTIONS:"
     echo "  V - Set ALL to Voyager   S - Set ALL to Standard"
@@ -99,6 +102,9 @@ while true; do
         6)  "$TOGGLE_WS" >/dev/null 2>&1 ;;
         6v) set_if_needed "$ws_status" "Voyager" "$TOGGLE_WS" ;;
         6s) set_if_needed "$ws_status" "Standard" "$TOGGLE_WS" ;;
+        7)  "$TOGGLE_WT" >/dev/null 2>&1 ;;
+        7v) set_if_needed "$wt_status" "Voyager" "$TOGGLE_WT" ;;
+        7s) set_if_needed "$wt_status" "Standard" "$TOGGLE_WT" ;;
         v)
             get_statuses
             echo ""
@@ -112,6 +118,7 @@ while true; do
             set_if_needed "$obsidian_status" "Voyager" "$TOGGLE_OBS"
             set_if_needed "$ranger_status" "Voyager" "$TOGGLE_RANGER"
             set_if_needed "$ws_status" "Voyager" "$TOGGLE_WS"
+            set_if_needed "$wt_status" "Voyager" "$TOGGLE_WT"
             echo "Done."
             ;;
         s)
@@ -125,6 +132,7 @@ while true; do
             set_if_needed "$obsidian_status" "Standard" "$TOGGLE_OBS"
             set_if_needed "$ranger_status" "Standard" "$TOGGLE_RANGER"
             set_if_needed "$ws_status" "Standard" "$TOGGLE_WS"
+            set_if_needed "$wt_status" "Standard" "$TOGGLE_WT"
             echo "Done."
             ;;
         r) continue ;;

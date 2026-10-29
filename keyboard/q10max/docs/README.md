@@ -153,10 +153,28 @@ The switch stays on Mac. The Windows layout (`q10max-win-v2.json`) is the Mac la
 | Left space + `1`–`9` | ⌃⌥⌘ + digit (go to workspace) | Alt + digit (go to workspace) |
 | Left space + Shift + `J` / `K` / `L` / `Ö` | Hyper + key (AeroSpace move) | Alt+Shift + key (GlazeWM move) |
 | Left space + Shift + `1`–`9` | Hyper + digit (send window) | Alt+Shift + digit (send window) |
-| Left space, other keys | ⌃⌥⌘ + key | Meh (⌃⌥⇧) + key, as before |
-| Right big key + key | Meh + key | Hyper + key, as before |
-| M3 (hold) | ⌃⇧⌘, nothing bound | Alt+Shift: M3 + `J` / `K` / `L` / `Ö` moves the window |
-| Middle key + `1`–`9` | ⌥⇧⌘ + digit, nothing bound | Alt+Shift + digit (send window) |
+| Left space + `A C D E F H I O P Q R S T U V W` and `Enter` | ⌃⌥⌘ + key | Alt + key (every GlazeWM key; Shift adds Shift) |
+| Left space, other keys (`M`, `Y`, F-row, symbols) | ⌃⌥⌘ + key | Meh (⌃⌥⇧) + key, as before |
+| Right big key + key | Meh + key | Ctrl+Alt+Win + key, same as the Voyager's layer 7: the slash commands in `hotkeys-and-remaps.ahk` |
+| M3 (hold) + key | ⌃⇧⌘ + key (Hammerspoon app launchers) | Hyper (Ctrl+Alt+Shift+Win) + key: the app launchers in `hotkeys-and-remaps.ahk` |
+| Middle key + `1` / `2` | ⌥⇧⌘ + digit, nothing bound | Ctrl+Alt+Shift+Win + `1` / `2`: audio-tray connects / disconnects the AirPods |
+| Middle key + `3`–`9` | ⌥⇧⌘ + digit, nothing bound | nothing (free) |
+| M5 | ⇧⌘ + `§` (Hammerspoon opens the Convey cheat sheet) | Ctrl+Alt+Shift+`K` (Convey's own hotkey) |
+| Middle key + `U` / `I` / `O` / `P` | ⌘↑, ⌥←, ⌥→, ⌘↓ | Ctrl+Home, Ctrl+Left, Ctrl+Right, Ctrl+End (start of text, word left, word right, end of text) |
+| Middle key + `Q W E R T S D F G Z X C V B M , .` | Cmd shortcuts | Same as the Voyager's Nav layer: Alt+F4, Ctrl+G, Ctrl+E, Ctrl+R, Ctrl+Shift+T, tab back / forward, Ctrl+T, Ctrl+W, undo, redo, previous / next track, play/pause, Home, Page Down, Page Up |
+| Middle key + `A` (hold) + `J` / `K` / `L` / `Ö` | Cmd+R, then arrows | Meh + arrows: focus split or pane left / down / up / right |
+
+What each key sends on Windows, one purpose per chord, so new bindings go in the matching row and never borrow another's:
+
+| Chord | Purpose | Who listens |
+|---|---|---|
+| Alt (+ Shift) + key | Window manager: focus, move, workspaces | GlazeWM, left space |
+| Ctrl+Alt+Win + key | Slash commands typed into Claude Code | `hotkeys-and-remaps.ahk`, right big key and Voyager layer 7 |
+| Ctrl+Alt+Shift+Win + key | App launchers and toggles | `hotkeys-and-remaps.ahk`, M3 |
+| Ctrl+Alt+Shift + arrow | Focus a split or pane inside an app | Windows Terminal; bind other apps' split focus here too |
+| Ctrl+Alt+Shift + `+` / `-` | Split right / split down inside an app | Windows Terminal (middle key + `A` + `+` / `-`) |
+| Ctrl+Alt+Shift + letter | Convey (`K` cheat sheet, `M` memory) and `^!+y` | Convey, `hotkeys-and-remaps.ahk` |
+| Plain arrows, Ctrl/Home/End variants | Moving the text cursor | every app, middle key |
 
 | Command (WSL zsh) | Does |
 |---|---|

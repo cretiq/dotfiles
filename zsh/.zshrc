@@ -205,8 +205,8 @@ function q10 {
   local script="$(wslpath -w "$dir/q10.ps1")"
   local sub="${1:-win}"; shift 2>/dev/null
   case "$sub" in
-    win)     "$ps" -NoProfile -ExecutionPolicy Bypass -File "$script" apply -File "$(wslpath -w "$dir/q10max-win-v2.json")" -Yes "$@" ;;
-    restore) "$ps" -NoProfile -ExecutionPolicy Bypass -File "$script" apply -File "$(wslpath -w "$dir/q10max-mac-restore.json")" -Yes "$@" ;;
+    win)     "$ps" -NoProfile -ExecutionPolicy Bypass -File "$script" apply -File "$(wslpath -w "$dir/q10max-win-v2.json")" -MaxCells 150 -Yes "$@" ;;
+    restore) "$ps" -NoProfile -ExecutionPolicy Bypass -File "$script" apply -File "$(wslpath -w "$dir/q10max-mac-restore.json")" -MaxCells 150 -Yes "$@" ;;
     status)  "$ps" -NoProfile -ExecutionPolicy Bypass -File "$script" dump -File "$(wslpath -w "$dir/q10max-win-v2.json")" "$@" ;;
     probe|install) "$ps" -NoProfile -ExecutionPolicy Bypass -File "$script" "$sub" "$@" ;;
     *)       echo "usage: q10 [win|restore|status|probe|install]" >&2; return 1 ;;

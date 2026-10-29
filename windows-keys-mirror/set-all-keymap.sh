@@ -12,6 +12,7 @@ TOGGLE_HJKL="$SCRIPT_DIR/toggle-scripts/bash-toggle-alt-hjkl.sh"
 TOGGLE_WS="$SCRIPT_DIR/toggle-scripts/bash-toggle-window-switcher.sh"
 TOGGLE_OBS="$SCRIPT_DIR/toggle-scripts/bash-toggle-obsidian.sh"
 TOGGLE_RANGER="$SCRIPT_DIR/toggle-scripts/bash-toggle-ranger.sh"
+TOGGLE_WT="$SCRIPT_DIR/toggle-scripts/bash-toggle-windows-terminal.sh"
 VIM_TOGGLE="$HOME/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh"
 STATUS_ALL="$SCRIPT_DIR/status-scripts/get-all-status.sh"
 
@@ -23,7 +24,7 @@ if [[ "$MODE" != "voyager" && "$MODE" != "standard" ]]; then
     exit 1
 fi
 
-IFS='|' read -r esc hjkl vim nvim obs ranger ws < <("$STATUS_ALL" "$AHK_FILE")
+IFS='|' read -r esc hjkl vim nvim obs ranger ws wt < <("$STATUS_ALL" "$AHK_FILE")
 
 if [[ "$MODE" == "voyager" ]]; then
     FROM="Standard"
@@ -48,7 +49,7 @@ if [[ "$vim" == "$FROM" ]]; then
     ((changed++))
     # vim-keymap-toggle.sh cascades to obs+ranger managers — refresh state
     # so the if-blocks below see post-cascade values (else they double-flip).
-    IFS='|' read -r esc hjkl vim nvim obs ranger ws < <("$STATUS_ALL" "$AHK_FILE")
+    IFS='|' read -r esc hjkl vim nvim obs ranger ws wt < <("$STATUS_ALL" "$AHK_FILE")
 fi
 if [[ "$obs" == "$FROM" ]]; then
     "$TOGGLE_OBS" >/dev/null 2>&1
@@ -62,6 +63,10 @@ if [[ "$ws" == "$FROM" ]]; then
     "$TOGGLE_WS" >/dev/null 2>&1
     ((changed++))
 fi
+if [[ "$wt" == "$FROM" ]]; then
+    "$TOGGLE_WT" >/dev/null 2>&1
+    ((changed++))
+fi
 
 # Single AHK reload after all AHK-related toggles
 if [[ "$ahk_dirty" == true && "$NO_RELOAD" == false ]]; then
@@ -70,7 +75,7 @@ if [[ "$ahk_dirty" == true && "$NO_RELOAD" == false ]]; then
 fi
 
 # Show result
-IFS='|' read -r esc hjkl vim nvim obs ranger ws < <("$STATUS_ALL" "$AHK_FILE")
+IFS='|' read -r esc hjkl vim nvim obs ranger ws wt < <("$STATUS_ALL" "$AHK_FILE")
 echo "All → ${MODE^} ($changed toggled)"
 echo "  ESC/CapsLock     [$esc]"
 echo "  Alt+HJKL         [$hjkl]"
@@ -79,3 +84,4 @@ echo "  Neovim           [$nvim]"
 echo "  Obsidian         [$obs]"
 echo "  Ranger           [$ranger]"
 echo "  Window Switcher  [$ws]"
+echo "  Windows Terminal [$wt]"

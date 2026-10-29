@@ -2,7 +2,7 @@
 
 # Get all status values in one call
 # Usage: ./get-all-status.sh [ahk_file_path]
-# Output: ESC_STATUS|HJKL_STATUS|VIM_STATUS|NVIM_STATUS
+# Output: ESC|HJKL|VIM|NVIM|OBSIDIAN|RANGER|WINDOW_SWITCHER|WINDOWS_TERMINAL
 
 AHK_FILE="${1:-../hotkeys-and-remaps.ahk}"
 
@@ -70,5 +70,12 @@ else
     WS_STATUS="Standard"
 fi
 
+WT_SETTINGS="/mnt/c/Users/FilipM/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"
+if [ -f "$WT_SETTINGS" ] && awk '/"id": "Terminal.MoveFocusLeft"/{getline; print}' "$WT_SETTINGS" | grep -q '"ctrl+j"'; then
+    WT_STATUS="Voyager"
+else
+    WT_STATUS="Standard"
+fi
+
 # Output all statuses separated by pipe
-echo "$ESC_STATUS|$HJKL_STATUS|$VIM_STATUS|$NVIM_STATUS|$OBSIDIAN_STATUS|$RANGER_STATUS|$WS_STATUS"
+echo "$ESC_STATUS|$HJKL_STATUS|$VIM_STATUS|$NVIM_STATUS|$OBSIDIAN_STATUS|$RANGER_STATUS|$WS_STATUS|$WT_STATUS"

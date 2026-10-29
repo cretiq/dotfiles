@@ -5,20 +5,27 @@ Persistent
 ; Background watchers, started at logon (Startup\watchers.lnk). Live copy: C:\Users\FilipM\Desktop\Keys\watchers.ahk.
 ; Keys and remaps live in hotkeys-and-remaps.ahk, which toggle scripts edit and reload; these must not restart with it.
 ; Display and device changes arrive as window messages; the 30 s re-check covers any that are missed.
+; The Q10 check is not in it: its WMI query (Win32_PnPEntity, 0.2-0.6 s) runs at start and on device-change messages only.
 logFile := EnvGet("LOCALAPPDATA") "\watchers.log"
 Log(msg) => FileAppend(FormatTime(, "yyyy-MM-dd HH:mm:ss") "  " msg "`n", logFile)
 #Include arrange-windows.ahk
 #Include focus-border.ahk
 #Include theme-sync.ahk
 
-; Desk mode = the laptop panel is not on the desktop (lid closed, external screen only): GlazeWM on and the
-; Voyager preset, whose remaps are off so Alt+HJKL reaches GlazeWM. Laptop panel on: GlazeWM off, Standard preset.
-; The preset is applied only when the mode changes, so kk/kv/ks overrides last until the next change.
+; Desk mode = the laptop panel is not on the desktop (lid closed, external screen only): GlazeWM on.
+; Laptop panel on: GlazeWM off.
+; The preset follows the keyboard last typed on: Q10 and Voyager get the Voyager preset (JKLÖ), any other
+; keyboard the Standard preset (HJKL). Until a key has been typed, desk mode means Voyager and laptop mode Standard.
+; The preset runs only when it changes, so kk/kv/ks overrides last until the next keyboard switch.
 ; WMI keeps reporting a closed lid's panel as active, so the panel is looked up among the desktop monitors.
 glazewmDir := "C:\Program Files\glzr.io\GlazeWM"
 setAllKeymap := "/home/filip/.dotfiles/windows-keys/set-all-keymap.sh"
 internalPanels := Map()
 appliedMode := ""
+appliedPreset := ""
+pendingPreset := ""
+lastKind := ""
+deviceKinds := Map()
 
 InternalPanelIds() {
     ids := Map()
@@ -86,7 +93,7 @@ ApplyMode() {
         return
     leftDesk := (appliedMode = "desk" && !desk)
     appliedMode := mode
-    preset := desk ? "voyager" : "standard"
+    preset := lastKind != "" ? lastKind : desk ? "voyager" : "standard"
     Log(mode " mode: GlazeWM " (desk ? "on" : "off") ", " preset " preset")
     if leftDesk {
         ; wm-exit is asynchronous; moving windows while GlazeWM still runs makes it re-tile them.
@@ -98,13 +105,71 @@ ApplyMode() {
         Sleep 500
         Log("arranged windows:`n" ArrangeWindows())
     }
-    hotkeysFile := A_ScriptDir "\hotkeys-and-remaps.ahk"
-    before := FileGetTime(hotkeysFile)
-    RunWait A_ComSpec ' /c wsl.exe bash ' setAllKeymap ' ' preset ' --no-reload >> "' logFile '" 2>&1', , "Hide"
-    if (FileGetTime(hotkeysFile) != before)
-        RestartHotkeys(hotkeysFile)
-    TrayTip desk ? "GlazeWM on, Voyager preset." : "GlazeWM off, Standard preset.", desk ? "Desk mode" : "Laptop screen"
+    TrayTip "GlazeWM " (desk ? "on" : "off") ".", desk ? "Desk mode" : "Laptop screen"
+    ApplyPreset(preset)
 }
+
+; Mode changes and keyboard switches both land here; a call made while set-all-keymap.sh runs is picked up
+; by the running call, so two runs never toggle the same files at once.
+ApplyPreset(preset) {
+    global appliedPreset, pendingPreset
+    static busy := false
+    pendingPreset := preset
+    if busy
+        return
+    busy := true
+    try {
+        while (pendingPreset != appliedPreset) {
+            appliedPreset := pendingPreset
+            hotkeysFile := A_ScriptDir "\hotkeys-and-remaps.ahk"
+            before := FileGetTime(hotkeysFile)
+            RunWait A_ComSpec ' /c wsl.exe bash ' setAllKeymap ' ' appliedPreset ' --no-reload >> "' logFile '" 2>&1', , "Hide"
+            if (FileGetTime(hotkeysFile) != before)
+                RestartHotkeys(hotkeysFile)
+            Log(appliedPreset " preset applied")
+            TrayTip appliedPreset = "voyager" ? "JKLÖ navigation (Voyager preset)." : "HJKL navigation (Standard preset).", "Keyboard"
+        }
+    } finally busy := false
+}
+
+; Q10 (Keychron 0x3434, cable, receiver or Bluetooth) and Voyager (ZSA 0x3297) count as JKLÖ keyboards.
+; G HUB's virtual keyboard (mouse-button macros) and the laptop's Fn/hotkey devices say nothing about the hands.
+KeyboardKind(hDevice) {
+    global deviceKinds
+    if deviceKinds.Has(hDevice)
+        return deviceKinds[hDevice]
+    cch := 0
+    DllCall("GetRawInputDeviceInfoW", "Ptr", hDevice, "UInt", 0x20000007, "Ptr", 0, "UInt*", &cch)  ; RIDI_DEVICENAME
+    buf := Buffer(cch * 2 + 2, 0)
+    DllCall("GetRawInputDeviceInfoW", "Ptr", hDevice, "UInt", 0x20000007, "Ptr", buf, "UInt*", &cch)
+    name := StrGet(buf, "UTF-16")
+    kind := RegExMatch(name, "i)LGHUB|VID_046D&PID_C232|INTC816|CONVERTEDDEVICE") ? ""
+        : RegExMatch(name, "i)VID[_&](02)?(3434|3297)") ? "voyager" : "standard"
+    deviceKinds[hDevice] := kind
+    Log("keyboard seen: " (kind = "" ? "ignored" : kind) "  " name)
+    return kind
+}
+
+; WM_INPUT for every key event on any keyboard, also when another window has focus (RIDEV_INPUTSINK).
+; Read-only: keys are not blocked or changed. Injected keys (Send) have no device and are skipped.
+OnRawInput(wParam, lParam, *) {
+    global lastKind
+    static header := Buffer(24)  ; RAWINPUTHEADER on x64; hDevice at offset 8
+    size := 24
+    if (DllCall("GetRawInputData", "Ptr", lParam, "UInt", 0x10000005, "Ptr", header, "UInt*", &size, "UInt", 24, "UInt") = 0xFFFFFFFF)
+        return
+    hDevice := NumGet(header, 8, "Ptr")
+    if !hDevice
+        return
+    kind := KeyboardKind(hDevice)
+    if (kind = "" || kind = lastKind)
+        return
+    lastKind := kind
+    ; Waits out a few keys on the other keyboard; switching back within the delay cancels the change.
+    SetTimer(KeyboardSwitched, -1500)
+}
+
+KeyboardSwitched() => ApplyPreset(lastKind)
 
 ; Restarted from here rather than from the hidden WSL session: a copy launched there did not replace the
 ; running one (two copies ran, the old remap state won).
@@ -151,15 +216,16 @@ SyncQ10() {
     ; The raw-HID interface enumerates a moment after the keyboard itself.
     Sleep 3000
     log := q10Dir "\auto.log"
-    RunWait A_ComSpec ' /c powershell -NoProfile -ExecutionPolicy Bypass -File "' q10Dir '\q10.ps1" apply -File "' q10Dir '\q10max-win-v2.json" -Yes > "' log '" 2>&1', , "Hide"
+    RunWait A_ComSpec ' /c powershell -NoProfile -ExecutionPolicy Bypass -File "' q10Dir '\q10.ps1" apply -File "' q10Dir '\q10max-win-v2.json" -MaxCells 150 -Yes > "' log '" 2>&1', , "Hide"
     out := FileRead(log)
     if InStr(out, "Verified")
         TrayTip "Windows layout applied.", "Q10 Max"
     else if InStr(out, "already matches")
         TrayTip "Windows layout already set.", "Q10 Max"
-    else if (++q10Tries < 3)
+    else if (++q10Tries < 3) {
         q10WasPresent := false
-    else
+        SetTimer(SyncQ10, -30000)
+    } else
         TrayTip "Could not apply the Windows layout. See " log, "Q10 Max", 3
 }
 
@@ -174,22 +240,30 @@ OnDeviceChange(wParam, *) {
 }
 
 ; speaker-guard.ps1 mutes the laptop speaker when the headphones disconnect. It holds a mutex, so a second copy exits at once.
+; Found by the remembered PID: a WMI lookup every 30 s stalled this script for 0.3 s and was sometimes cancelled.
+speakerPid := 0
+
 SyncSpeakerGuard() {
-    for p in ComObjGet("winmgmts:").ExecQuery("SELECT CommandLine FROM Win32_Process WHERE Name = 'powershell.exe'")
-        if InStr(p.CommandLine, "speaker-guard.ps1")
-            return
-    Run 'powershell.exe -MTA -NoProfile -WindowStyle Hidden -File "' A_ScriptDir '\speaker-guard.ps1"', , "Hide"
+    global speakerPid
+    if (speakerPid && ProcessExist(speakerPid) && ProcessGetName(speakerPid) = "powershell.exe")
+        return
+    Run 'powershell.exe -MTA -NoProfile -WindowStyle Hidden -File "' A_ScriptDir '\speaker-guard.ps1"', , "Hide", &speakerPid
 }
 
 SyncAll() {
     SyncMode()
-    SyncQ10()
     SyncSpeakerGuard()
 }
 
+rid := Buffer(8 + A_PtrSize, 0)  ; RAWINPUTDEVICE: generic desktop / keyboard, RIDEV_INPUTSINK, this script's window
+NumPut("UShort", 1, "UShort", 6, "UInt", 0x100, "Ptr", A_ScriptHwnd, rid)
+if !DllCall("RegisterRawInputDevices", "Ptr", rid, "UInt", 1, "UInt", rid.Size)
+    Log("raw keyboard input not registered: preset follows the screen only")
+OnMessage(0x00FF, OnRawInput)       ; WM_INPUT
 OnMessage(0x007E, OnDisplayChange)  ; WM_DISPLAYCHANGE
 OnMessage(0x0219, OnDeviceChange)   ; WM_DEVICECHANGE
 SyncAll()
+SyncQ10()
 SetTimer(SyncAll, 30000)
 SetTimer(FocusFlashTick, 50)
 SetTimer(ThemeSyncTick, 1000)
