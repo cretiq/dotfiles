@@ -265,5 +265,4 @@ OnMessage(0x0219, OnDeviceChange)   ; WM_DEVICECHANGE
 SyncAll()
 SyncQ10()
 SetTimer(SyncAll, 30000)
-SetTimer(FocusFlashTick, 50)
 SetTimer(ThemeSyncTick, 1000)

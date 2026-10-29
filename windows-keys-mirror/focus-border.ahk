@@ -4,10 +4,9 @@
 ; a 7680 px screen. A click-through ring is drawn just outside the focused window
 ; and over its DWM frame. Ring width is per monitor id: the home monitor (Samsung Odyssey, SAM73D0) gets 4 px, any
 ; other monitor (office: Samsung LS49A950U, SAM71CE / SAM71CD) 2 px.
-; Included by watchers.ahk, which starts only FocusFlashTick (the ring, FocusBorderTick, is off); run directly it starts the ring.
+; Included by watchers.ahk, which leaves the ring off; run directly it starts the ring.
 ; The colour follows the Windows light/dark mode: theme-sync.ahk sets focusRingColor.
 focusRingColor := "00c8ff"
-focusFlashColor := "ffffff"
 FocusBorderTick() {
     static g := "", shownKey := "", ringColor := ""
     if !g {
@@ -40,48 +39,6 @@ FocusBorderTick() {
     DllCall("SetWindowRgn", "Ptr", g.Hwnd, "Ptr", outer, "Int", true)
     g.Show("NA x" r.ox1 " y" r.oy1 " w" w " h" h)
     shownKey := key
-}
-
-FocusFlashTick() {
-    static flashHwnd := ""
-    r := FocusBorderRect()
-    if !r {
-        flashHwnd := ""
-        return
-    }
-    if (r.hwnd != flashHwnd) {
-        flashHwnd := r.hwnd
-        FocusFlash(r)
-    }
-}
-
-; A wash over the window that just got focus, 3 % opaque (alpha 8 of 255) fading to 0 in ~60 ms (alpha 2 per 15 ms step). White in dark
-; mode, black in light mode (white on a light window is invisible); theme-sync.ahk sets focusFlashColor. Called with
-; the window rect to start it, and by its own timer with no argument to step the fade.
-FocusFlash(r := "") {
-    global focusFlashColor
-    static g := "", alpha := 0
-    if r {
-        if !g
-            g := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x80020 +E0x08000000 -DPIScale")
-        g.BackColor := focusFlashColor
-        w := r.r - r.l, h := r.b - r.t
-        rgn := DllCall("CreateRoundRectRgn", "Int", 0, "Int", 0, "Int", w + 1, "Int", h + 1
-            , "Int", 2 * r.rad, "Int", 2 * r.rad, "Ptr")
-        DllCall("SetWindowRgn", "Ptr", g.Hwnd, "Ptr", rgn, "Int", true)
-        alpha := 8
-        WinSetTransparent(alpha, g)
-        g.Show("NA x" r.l " y" r.t " w" w " h" h)
-        SetTimer(FocusFlash, 15)
-        return
-    }
-    alpha -= 2
-    if (alpha <= 0) {
-        SetTimer(FocusFlash, 0)
-        g.Hide()
-        return
-    }
-    WinSetTransparent(alpha, g)
 }
 
 ; The focused window's frame and the ring around it (clipped to its monitor), or "" when no ring is wanted.

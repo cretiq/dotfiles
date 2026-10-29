@@ -3,18 +3,16 @@
 ; Windows light/dark mode drives these colours:
 ;   desktop background  light white,     dark black   (only a solid-colour desktop; a picture in Desktop\WallPaper is left alone)
 ;   focus border        light dark blue, dark cyan    (GlazeWM focused_window border in config.yaml, reloaded while GlazeWM runs; Windows Terminal Glaze theme frame)
-;   focus flash         light black,     dark white   (focusFlashColor, drawn by focus-border.ahk)
 ; Switching the mode is a registry write with no window message, so the value is polled.
 ; Included by watchers.ahk, which starts ThemeSyncTick; run directly it starts it itself.
 ThemeSyncTick() {
-    global focusRingColor, focusFlashColor
+    global focusRingColor
     static shown := ""
     light := RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "SystemUsesLightTheme", 1)
     if (light = shown)
         return
     shown := light
     focusRingColor := light ? "0a3d91" : "00c8ff"
-    focusFlashColor := light ? "000000" : "ffffff"
     SetGlazeBorderColor(focusRingColor)
     if (RegRead("HKCU\Control Panel\Desktop", "WallPaper", "") = "")
         SetDesktopColor(light ? 0xFFFFFF : 0x000000)
