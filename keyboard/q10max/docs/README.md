@@ -16,7 +16,7 @@ Key names are the Swedish layout legends, as in Convey. The US `-`, `=` and `/` 
 | M3 | sends ⌃⇧⌘ (modifier only), hold + key launches apps |
 | M4 | sends ⌃⌥ (modifier only), hold + knob = brightness |
 | PgUp | no-op, free |
-| M5 | sends ⇧⌘ + the key above Tab, opens the Convey keyboard cheat sheet |
+| M5 | sends Hyper+F15, Hammerspoon turns it into Convey's keyboard cheat sheet chord |
 
 All Launcher macros were removed in v7.
 
@@ -39,7 +39,9 @@ Hammerspoon and AeroSpace match modifiers exactly, so each combo is its own name
 | M1 + `1` `2` | ⇧⌘ | Hammerspoon: capture, then paste into Lund. `1` focused window, `2` area |
 | M1 + `3` | ⇧⌘ | Hammerspoon + macshot: open macshot's area capture and drag-select the focused window's frame |
 | M1 + `4` | ⇧⌘ | macshot: quick capture of an area (`macshot://quick-capture`) |
-| M1 + `5` `6` | ⇧⌘ | macshot: `5` area capture, `6` history |
+| M1 + `5` | ⇧⌘ | macshot: area capture |
+| M1 + the key above Tab | ⇧⌘ | macshot: history (`macshot://history`) |
+| M1 + `6` | ⇧⌘ | Free |
 | M1 + other key | ⇧⌘ | Free. `E` was CleanShot's pin-last-screenshot |
 | M3 + key | ⌃⇧⌘ | Hammerspoon: app launchers (avoid `3` / `4`, macOS screenshot) |
 
@@ -58,7 +60,7 @@ Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L
 | Left space + `-` and `,` | Tiles layout, accordion layout |
 | Left space + `F` | Toggle floating |
 | Left space + Shift + `F` | Fullscreen |
-| Left space + `+` and `´` | Shrink and grow window |
+| Left space + `+` and `´`, or `U` and `P` | Shrink and grow window |
 | Left space + right big key | Spotlight (Cmd+Space) |
 
 New windows go into the layout you are looking at. Messages, Calendar and Mail open floating instead (`on-window-detected` rules in `aerospace.toml`), so they do not reshuffle it. System Settings, Bitwarden and Convey float too.
@@ -96,7 +98,7 @@ AeroSpace has no border of its own. JankyBorders draws it. AeroSpace starts it (
 | Press | Action |
 |---|---|
 | M1 + `J` | Cheat sheet (searchable) |
-| M1 + the key above Tab, or M5 | Cheat sheet in keyboard view, with the Q10 drawn |
+| M5 | Cheat sheet in keyboard view, with the Q10 drawn |
 | Right space + `T` | Translator (Meh+`T`) |
 | Left space + Shift + `M` | Free mode (Hyper+`M`) |
 
@@ -156,7 +158,7 @@ Close the Keychron Launcher tab before using `q10`: with the Launcher open the k
 macOS keeps its own settings per keyboard connection, and the dongle (Keychron Link) is a different keyboard from the cable.
 
 - **Modifier keys:** the dongle had Control and Command swapped and Caps Lock turned into Escape, left over from an earlier setup. That turned Ctrl+Tab into Cmd+Tab and broke the Meh and ⇧⌘ chords. Fix: System Settings, Keyboard, Keyboard Shortcuts, Modifier Keys, pick Keychron Link, Restore Defaults.
-- **Key above Tab (`§`):** over the dongle macOS reports keycode 50 instead of 10, so `§` and `<` come out swapped when typing. Changing the keyboard type in System Settings and a `hidutil` swap for the dongle both had no effect. Hammerspoon forwards ⇧⌘ + keycode 50 as ⇧⌘ + keycode 10, so M5 and M1 + `§` open Convey's keyboard cheat sheet on both connections. It does the same for Meh + 50, so the VolumeGuard listening-mode cycle (Right big key + `§`) works on both. Side effect: on the cable ⇧⌘ + `<>` opens it too.
+- **Key above Tab (`§`):** over the dongle macOS reports keycode 50 instead of 10, so `§` and `<` come out swapped when typing. Changing the keyboard type in System Settings and a `hidutil` swap for the dongle both had no effect. Hammerspoon forwards Meh + 50 as Meh + 10, so the VolumeGuard listening-mode cycle (Right big key + `§`) works on both connections. An event tap on ⇧⌘ + keycode 10 or 50 opens macshot's history and swallows the chord, so M1 + `§` no longer reaches Convey's keyboard cheat sheet. M5 sends Hyper+F15 and Hammerspoon posts Shift+Cmd+§ itself, which the tap lets through. Side effect: on the cable ⇧⌘ + `<>` opens history too.
 - Typing `§` and `<` over the dongle stays swapped. Not fixed.
 - The keymap cannot be written over the dongle, only over the cable.
 

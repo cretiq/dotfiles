@@ -357,6 +357,13 @@ local function voyagerAttached()
   return false
 end
 
+local function varmiloAttached()
+  for _, d in ipairs(hs.usb.attachedDevices()) do
+    if d.vendorID == 0x19F5 then return true end
+  end
+  return false
+end
+
 local function syncVimKeymap()
   local want = (q10Attached() or voyagerAttached()) and "custom" or "default"
   local f = io.open(keymapStateFile)
@@ -392,7 +399,6 @@ local captureKeys = {
   macshotFocusedWindow,
   function() hs.urlevent.openURL("macshot://quick-capture") end,
   function() hs.urlevent.openURL("macshot://capture") end,
-  function() hs.urlevent.openURL("macshot://history") end,
 }
 for i, capture in ipairs(captureKeys) do
   hs.hotkey.bind({"cmd", "shift"}, tostring(i), capture)
@@ -478,8 +484,8 @@ local fnActions = {
   [hs.keycodes.map.t] = {"flatten-workspace-tree && aerospace layout tiles horizontal && aerospace balance-sizes"},
   [44] = {"layout tiles horizontal vertical"},
   [43] = {"layout accordion horizontal vertical"},
-  [27] = {"resize smart -50"},
-  [24] = {"resize smart +50"},
+  [27] = {"resize smart -100"},
+  [24] = {"resize smart +100"},
 }
 for i = 1, 9 do
   fnActions[hs.keycodes.map[tostring(i)]] = {"workspace " .. i, "move-node-to-workspace " .. i}
@@ -623,8 +629,8 @@ do
   local glaze = {
     [map.j] = {"focus left", "move left"}, [ouml] = {"focus right", "move right"},
     [map.l] = {"focus up", "move up"}, [map.k] = {"focus down", "move down"},
-    [map.u] = {"resize width -50"}, [map.p] = {"resize width +50", "enable toggle"},
-    [map.o] = {"resize height +50"}, [map.i] = {"resize height -50"},
+    [map.u] = {"resize width -100"}, [map.p] = {"resize width +100", "enable toggle"},
+    [map.o] = {"resize height +100"}, [map.i] = {"resize height -100"},
     [map.v] = {"layout tiles horizontal vertical"}, [map.t] = {"layout tiling"}, [map.f] = {"fullscreen"},
     [map.space] = {false, "layout floating tiling"}, [map.q] = {false, "close"}, [map.r] = {false, "reload-config"},
     [map.m] = {minimizeFocused},
@@ -775,13 +781,8 @@ do
 end
 
 local function syncLaptop()
-  if voyagerAttached() and not q10ReceiverAttached() then
-    voyagerKeyTap:start()
-    voyagerScrollTap:start()
-  else
-    voyagerKeyTap:stop()
-    voyagerScrollTap:stop()
-  end
+  if voyagerAttached() and not q10ReceiverAttached() then voyagerKeyTap:start() else voyagerKeyTap:stop() end
+  if varmiloAttached() or (voyagerAttached() and not q10ReceiverAttached()) then voyagerScrollTap:start() else voyagerScrollTap:stop() end
   hs.task.new(aerospaceBin, nil, {"mode", q10Attached() and "main" or "laptop"}):start()
   for _, k in ipairs(laptopKeys) do
     if q10Attached() then k:disable() else k:enable() end
@@ -794,7 +795,7 @@ local function syncLaptop()
 end
 
 keymapWatcher = hs.usb.watcher.new(function(e)
-  if e.vendorID == 0x3434 or e.vendorID == 0x3297 then
+  if e.vendorID == 0x3434 or e.vendorID == 0x3297 or e.vendorID == 0x19F5 then
     hs.timer.doAfter(1, function()
       syncVimKeymap()
       syncLaptop()
@@ -830,12 +831,27 @@ fineStepTap = hs.eventtap.new({hs.eventtap.event.types.systemDefined}, function(
   end
 end):start()
 
--- Over the 2.4 GHz dongle macOS numbers the key above Tab as 50 instead of 10, and Convey Mac and VolumeGuard listen for 10.
-for _, mods in ipairs({{"cmd", "shift"}, meh}) do
-  hs.hotkey.bind(mods, 50, function()
-    hs.eventtap.event.newKeyEvent(mods, 10, true):post()
-    hs.eventtap.event.newKeyEvent(mods, 10, false):post()
-  end)
-end
+-- Over the 2.4 GHz dongle macOS numbers the key above Tab as 50 instead of 10, and VolumeGuard listens for 10.
+hs.hotkey.bind(meh, 50, function()
+  hs.eventtap.event.newKeyEvent(meh, 10, true):post()
+  hs.eventtap.event.newKeyEvent(meh, 10, false):post()
+end)
+
+-- M1 (Shift+Cmd) + the key above Tab opens macshot's history. The tap also swallows the chord before Convey Mac sees it (it listens for Shift+Cmd+§, key code 10).
+-- Events Hammerspoon posts itself, like the Voyager's cheat sheet key, pass through to Convey.
+historyTap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(e)
+  local code = e:getKeyCode()
+  local f = e:getFlags()
+  if (code ~= 10 and code ~= 50) or not (f.cmd and f.shift and not f.alt and not f.ctrl) then return false end
+  if e:getProperty(hs.eventtap.event.properties.eventSourceUnixProcessID) == hs.processInfo.processID then return false end
+  if e:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat) == 0 then hs.urlevent.openURL("macshot://history") end
+  return true
+end):start()
+
+-- Q10 M5 sends Hyper+F15 and opens Convey Mac's keyboard cheat sheet. Convey listens for Shift+Cmd+§ (key code 10), which the tap above keeps for macshot history when typed.
+hs.hotkey.bind({"ctrl", "alt", "shift", "cmd"}, "f15", function()
+  hs.eventtap.event.newKeyEvent({"cmd", "shift"}, 10, true):post()
+  hs.eventtap.event.newKeyEvent({"cmd", "shift"}, 10, false):post()
+end)
 
 hs.alert.show("Hammerspoon config loaded")

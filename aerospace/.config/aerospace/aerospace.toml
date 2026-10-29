@@ -83,8 +83,10 @@ ctrl-alt-cmd-comma = 'layout accordion horizontal vertical'
 ctrl-alt-cmd-f = 'layout floating tiling'
 ctrl-shift-alt-cmd-f = 'fullscreen'
 ctrl-alt-cmd-t = ['flatten-workspace-tree', 'layout tiles horizontal', 'balance-sizes']
-ctrl-alt-cmd-minus = 'resize smart -50'
-ctrl-alt-cmd-equal = 'resize smart +50'
+ctrl-alt-cmd-minus = 'resize smart -100'
+ctrl-alt-cmd-equal = 'resize smart +100'
+ctrl-alt-cmd-u = 'resize smart -100'
+ctrl-alt-cmd-p = 'resize smart +100'
 
 # Laptop keyboard: Hammerspoon switches to this mode while no Q10 is attached
 [mode.laptop.binding]
