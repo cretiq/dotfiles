@@ -32,10 +32,27 @@ local function minimizeFocused()
   local win = hs.window.focusedWindow()
   if win then win:minimize() end
 end
-hs.hotkey.bind({}, "f1", minimizeFocused)
+-- Transport Fever 3 has no bundle ID, so it is matched by name.
+local function inTransportFever() return hs.application.frontmostApplication():name() == "TransportFever3" end
+
+-- Plain F keys that Hammerspoon rebinds, off while Transport Fever 3 is in front so it gets real F1-F12.
+local plainFKeys = {}
+local function bindFKey(key, pressed, repeated)
+  local hotkey = hs.hotkey.new({}, key, pressed, nil, repeated)
+  table.insert(plainFKeys, hotkey)
+  if not inTransportFever() then hotkey:enable() end
+end
+transportFeverFKeyWatcher = hs.application.watcher.new(function(_, event, app)
+  if event ~= hs.application.watcher.activated then return end
+  for _, hotkey in ipairs(plainFKeys) do
+    if app:name() == "TransportFever3" then hotkey:disable() else hotkey:enable() end
+  end
+end):start()
+
+bindFKey("f1", minimizeFocused)
 hs.hotkey.bind({"ctrl", "alt", "cmd"}, "m", minimizeFocused)
 
-hs.hotkey.bind({}, "f2", hs.spaces.toggleMissionControl)
+bindFKey("f2", hs.spaces.toggleMissionControl)
 
 -- Claude Code takes a pasted image on ctrl+v, not cmd+v.
 -- Installed, agent-built and scratch Lunds share one bundle id, so a bundle id lookup can land on a windowless or stale one.
@@ -105,38 +122,106 @@ local function focusLund()
 end
 
 -- Abort when Lund did not come to the front: the space would scroll whatever app is there instead.
-local function pasteToLund()
+local function pasteToLund(sendThenReturnTo)
   focusLund()
-  hs.timer.doAfter(0.3, function()
-    local front = hs.application.frontmostApplication()
-    if not isLund(front) then return end
-    hs.eventtap.keyStroke({"ctrl"}, "v", 0)
-    hs.timer.doAfter(0.3, function() hs.eventtap.keyStrokes(" ") end)
+  local waited = 0
+  local poll
+  poll = hs.timer.doEvery(0.02, function()
+    waited = waited + 0.02
+    local ready = isLund(hs.application.frontmostApplication())
+    if not ready and waited < 1 then return end
+    poll:stop()
+    if not ready then return end
+    hs.timer.doAfter(0.05, function()
+      hs.eventtap.keyStroke({"ctrl"}, "v", 0)
+      if sendThenReturnTo then
+        -- Claude Code reads the clipboard image before it attaches it, so Return needs a longer wait than the space.
+        hs.timer.doAfter(0.4, function()
+          hs.eventtap.keyStroke({}, "return", 0)
+          hs.timer.doAfter(0.1, function() sendThenReturnTo:focus() end)
+        end)
+      else
+        hs.timer.doAfter(0.15, function() hs.eventtap.keyStrokes(" ") end)
+      end
+    end)
   end)
 end
+
+local function pasteToChatGPT(submitThenReturnTo)
+  hs.application.launchOrFocus("ChatGPT")
+  local waited = 0
+  local poll
+  poll = hs.timer.doEvery(0.02, function()
+    waited = waited + 0.02
+    local ready = hs.application.frontmostApplication():name() == "ChatGPT"
+    if not ready and waited < 1 then return end
+    poll:stop()
+    if not ready then return end
+    hs.timer.doAfter(0.05, function()
+      hs.eventtap.keyStroke({"cmd"}, "v", 0)
+      if submitThenReturnTo then
+        hs.timer.doAfter(0.15, function()
+          hs.eventtap.keyStroke({}, "return", 0)
+          hs.timer.doAfter(0.1, function() submitThenReturnTo:activate() end)
+        end)
+      end
+    end)
+  end)
+end
+
+local function pasteScreenshot()
+  if inTransportFever() then pasteToChatGPT() else pasteToLund() end
+end
+
+local function focusedWindowImage()
+  local win = hs.window.focusedWindow()
+  if not win then return nil end
+  local screen, f = win:screen(), win:frame()
+  local origin = screen:fullFrame()
+  return screen:snapshot(hs.geometry.rect(f.x - origin.x, f.y - origin.y, f.w, f.h))
+end
+
+-- writeObjects stores an uncompressed TIFF (4 bytes per pixel), so a large window is tens of MB. A JPEG is about 1/10 of that.
+local function copyJpeg(image, done)
+  local path = os.tmpname()
+  image:saveToFile(path, "JPEG")
+  local file = io.open(path, "rb")
+  local data = file and file:read("*a")
+  if file then file:close() end
+  os.remove(path)
+  if data and hs.pasteboard.writeDataForUTI("public.jpeg", data) and done then done() end
+end
+
+local function captureFocusedWindow(done)
+  local image = focusedWindowImage()
+  if image then copyJpeg(image, done) end
+end
+local function captureFocusedWindowToLund() captureFocusedWindow(pasteScreenshot) end
 
 -- args: screencapture options that end with the image on the clipboard. An abandoned selection leaves the clipboard unchanged, so nothing is pasted.
 local function captureToLund(args)
   local before = hs.pasteboard.changeCount()
   hs.task.new(screencapture, function()
-    if hs.pasteboard.changeCount() ~= before then pasteToLund() end
+    if hs.pasteboard.changeCount() == before then return end
+    local image = hs.pasteboard.readImage()
+    if image then copyJpeg(image, pasteScreenshot) end
   end, args):start()
 end
 
-local function captureFocusedWindow()
-  local win = hs.window.focusedWindow()
-  if not win then return false end
-  local screen, f = win:screen(), win:frame()
-  local origin = screen:fullFrame()
-  local image = screen:snapshot(hs.geometry.rect(f.x - origin.x, f.y - origin.y, f.w, f.h))
-  return image ~= nil and hs.pasteboard.writeObjects(image)
-end
-local function captureFocusedWindowToLund()
-  if captureFocusedWindow() then pasteToLund() end
-end
+-- The key above Tab is keycode 10 on the cable and 50 over the dongle, and the key next to left Shift is the other one, so both trigger.
+transportFeverAskTap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(e)
+  local code = e:getKeyCode()
+  if (code ~= 10 and code ~= 50) or next(e:getFlags()) ~= nil or not inTransportFever() then return false end
+  if e:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat) == 0 then
+    local game = hs.application.frontmostApplication()
+    captureFocusedWindow(function() pasteToChatGPT(game) end)
+  end
+  return true
+end):start()
+
 local function captureAreaToLund() captureToLund({"-x", "-c", "-i"}) end
 local function capturePickedWindowToLund() captureToLund({"-x", "-c", "-i", "-w"}) end
-local function capturePickedWindow() hs.task.new(screencapture, nil, {"-i", "-w"}):start() end
+local function capturePickedWindow() hs.task.new(screencapture, nil, {"-i", "-w", "-t", "jpg"}):start() end
 
 -- macshot has no URL parameter for a window or rect, so drag-select the focused window's frame once its overlay is up.
 local function macshotFocusedWindow()
@@ -169,23 +254,32 @@ hs.hotkey.bind(csMods, "9", capturePickedWindowToLund)
 hs.hotkey.bind(csMods, "0", captureFocusedWindow)
 hs.hotkey.bind(csMods, "2", capturePickedWindow)
 
+-- Q10 L2 + O sends alt+shift+cmd+o. In Lund it opens the quick switcher (cmd+opt+k); elsewhere it stays the word jump to the right (opt+right).
+hs.hotkey.bind(csMods, "o", function()
+  if isLund(hs.application.frontmostApplication()) then
+    hs.eventtap.keyStroke({"cmd", "alt"}, "k", 0)
+  else
+    hs.eventtap.keyStroke({"alt"}, "right", 0)
+  end
+end)
+
 local function mediaKey(name)
   return function()
     hs.eventtap.event.newSystemKeyEvent(name, true):post()
     hs.eventtap.event.newSystemKeyEvent(name, false):post()
   end
 end
-hs.hotkey.bind({}, "f7", mediaKey("PREVIOUS"))
-hs.hotkey.bind({}, "f8", mediaKey("PLAY"))
-hs.hotkey.bind({}, "f9", mediaKey("NEXT"))
-hs.hotkey.bind({}, "f10", mediaKey("MUTE"))
+bindFKey("f7", mediaKey("PREVIOUS"))
+bindFKey("f8", mediaKey("PLAY"))
+bindFKey("f9", mediaKey("NEXT"))
+bindFKey("f10", mediaKey("MUTE"))
 volumeDownTap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(e)
-  if e:getKeyCode() == hs.keycodes.map.f11 and next(e:getFlags()) == nil then
+  if e:getKeyCode() == hs.keycodes.map.f11 and next(e:getFlags()) == nil and not inTransportFever() then
     mediaKey("SOUND_DOWN")()
     return true
   end
 end):start()
-hs.hotkey.bind({}, "f12", mediaKey("SOUND_UP"), nil, mediaKey("SOUND_UP"))
+bindFKey("f12", mediaKey("SOUND_UP"), mediaKey("SOUND_UP"))
 
 local lastDockMinimize = 0
 dockScrollTap = hs.eventtap.new({hs.eventtap.event.types.scrollWheel}, function(e)
@@ -762,19 +856,193 @@ do
     return true, {copy}
   end)
 
-  -- Hold A and D (Option and Cmd on the Mac) and scroll: one volume step per notch, scroll up is louder.
-  -- A smooth-scrolling mouse sends several events per notch (a 0.1 line event, then bursts up to 45 times larger),
-  -- so only the direction counts, and one direction steps at most once per 0.15 s.
-  local scrollStepGap = 0.15
-  local scrollLastStep, scrollLastSign = 0, 0
-  voyagerScrollTap = hs.eventtap.new({hs.eventtap.event.types.scrollWheel}, function(e)
-    if not exactly(e:getFlags(), "alt", "cmd") then return false end
-    local delta = e:getProperty(hs.eventtap.event.properties.scrollWheelEventFixedPtDeltaAxis1)
-    local sign = delta > 0 and 1 or delta < 0 and -1 or 0
+  -- Hold Option and Cmd (the Voyager's A and D) and scroll: scroll up is louder, in quarter steps, faster scrolling steps faster.
+  -- Also holding Ctrl (the Varmilo's three keys left of space, which macOS reads as Cmd, Ctrl and Option) changes the brightness the same way.
+  -- A slow notch is one 0.1 event; a fast notch is that 0.1 event then a burst of about 10 events summing to ~95.
+  -- A lone small event steps once, larger ones add up and step once per scrollStepUnit.
+  -- Bluetooth headphones take 10-25 ms per volume step, so for them the steps add up to one target that is set at most
+  -- every 20 ms. Any key press on them made scrolling feel slow, so macOS's own volume overlay is replaced by volumeHud.
+  -- The target is read from the device only after 0.6 s idle, so a burst builds on its own last target.
+  local scrollStepUnit = 5
+  local volumeQuarterStep = 100 / 64
+  local scrollAcc, scrollLastAt, scrollLastSign = 0, 0, 0
+  local scrollTarget, scrollTargetAt = nil, 0
+  local applyTimer, hudHideTimer
+  local volumeHud
+  -- A canvas cannot blur what is behind it, so the frost is a screenshot of that area, redrawn at half size four times and
+  -- stretched back (hs.image:size only changes the drawn size, not the pixels),
+  -- taken each time the pill pops up, under a light translucent gradient with a bright edge and a soft shadow. The white content has a small dark shadow to stay readable on it.
+  local hudPad, hudWidth, hudHeight = 28, 320, 44
+  local hudBarX, hudBarY, hudBarWidth = hudPad + 62, hudPad + (hudHeight - 8) / 2, hudWidth - 140
+  local hudTextY = hudPad + 12
+  -- Headphone symbols rendered from SF Symbols (airpods.pro and headphones), white like the rest of the pill.
+  local hudAssets = os.getenv("HOME") .. "/.dotfiles/hammerspoon/.hammerspoon/assets/"
+  local hudIcons = {}
+  local function hudIcon(deviceName)
+    local lower = deviceName:lower()
+    local file = (lower:find("airpods") or lower:find("luftkaps")) and "airpods-pro.png" or "headphones.png"
+    hudIcons[file] = hudIcons[file] or hs.image.imageFromPath(hudAssets .. file)
+    return hudIcons[file]
+  end
+  -- The bar follows the volume on a critically damped spring, so it eases in and out and a new target mid-move
+  -- carries on from the current speed. hudStiffness is in rad/s; 35 settles in about 0.12 s.
+  local hudStiffness = 35
+  local hudShown, hudVelocity, hudGoal, hudVisible = 0, 0, 0, false
+  local hudSpring, hudLastTick
+  local function drawHud(volume)
+    local level = math.max(0, math.min(100, volume))
+    volumeHud["bar"].frame = {x = hudBarX, y = hudBarY, w = hudBarWidth * level / 100, h = 8}
+    volumeHud["pct"].text = string.format("%d%%", math.floor(level + 0.5))
+  end
+  local function stepHud()
     local now = hs.timer.secondsSinceEpoch()
-    if sign ~= 0 and (sign ~= scrollLastSign or now - scrollLastStep >= scrollStepGap) then
-      scrollLastStep, scrollLastSign = now, sign
-      mediaKey(sign > 0 and "SOUND_UP" or "SOUND_DOWN")()
+    local dt = math.min(now - hudLastTick, 0.05)
+    hudLastTick = now
+    hudVelocity = hudVelocity + (hudStiffness ^ 2 * (hudGoal - hudShown) - 2 * hudStiffness * hudVelocity) * dt
+    hudShown = hudShown + hudVelocity * dt
+    if math.abs(hudGoal - hudShown) < 0.05 and math.abs(hudVelocity) < 0.5 then
+      hudShown, hudVelocity = hudGoal, 0
+      hudSpring:stop()
+      hudSpring = nil
+    end
+    drawHud(hudShown)
+  end
+  -- The pill pops in with a small overshoot (scale, fade, slide down) and pops out the same way reversed; hudPop runs 0 to 1.
+  local hudPopSeconds, hudPop, hudPopDir = 0.2, 0, 0
+  local hudPopTimer, hudPopLastTick
+  local function drawPop()
+    local overshoot, p = 1.1, hudPop
+    local eased = 1 + (overshoot + 1) * (p - 1) ^ 3 + overshoot * (p - 1) ^ 2
+    local cx, cy = (hudWidth + 2 * hudPad) / 2, (hudHeight + 2 * hudPad) / 2
+    volumeHud:alpha(math.min(1, p / 0.5))
+    volumeHud:transformation(hs.canvas.matrix.translate(cx, cy):scale(0.85 + 0.15 * eased):translate(-cx, -cy):translate(0, -10 * (1 - eased)))
+  end
+  local function stepPop()
+    local now = hs.timer.secondsSinceEpoch()
+    hudPop = math.max(0, math.min(1, hudPop + hudPopDir * (now - hudPopLastTick) / hudPopSeconds))
+    hudPopLastTick = now
+    drawPop()
+    if hudPop == 1 and hudPopDir > 0 or hudPop == 0 and hudPopDir < 0 then
+      hudPopTimer:stop()
+      hudPopTimer = nil
+      if hudPop == 0 then volumeHud:hide() end
+    end
+  end
+  local function startPop(direction)
+    hudPopDir = direction
+    if not hudPopTimer then
+      hudPopLastTick = hs.timer.secondsSinceEpoch()
+      hudPopTimer = hs.timer.doEvery(1 / 60, stepPop)
+    end
+  end
+  local function blurred(image)
+    local w, h = hudWidth, hudHeight
+    for _ = 1, 4 do
+      w, h = math.max(1, math.floor(w / 2)), math.max(2, math.floor(h / 2))
+      local c = hs.canvas.new({x = 0, y = 0, w = w, h = h})
+      c:appendElements({type = "image", image = image, imageScaling = "scaleToFit", frame = {x = 0, y = 0, w = w, h = h}})
+      image = c:imageFromCanvas()
+      c:delete()
+    end
+    return image
+  end
+  local function showVolumeHud(volume, deviceName)
+    if not volumeHud then
+      local bar = {xRadius = 4, yRadius = 4}
+      volumeHud = hs.canvas.new({x = 0, y = 0, w = hudWidth + 2 * hudPad, h = hudHeight + 2 * hudPad})
+        :level(hs.canvas.windowLevels.overlay)
+        :behavior(hs.canvas.windowBehaviors.canJoinAllSpaces)
+      local pill = {x = hudPad, y = hudPad, w = hudWidth, h = hudHeight}
+      local pillRadii = {xRadius = hudHeight / 2, yRadius = hudHeight / 2}
+      volumeHud:appendElements(
+        {id = "base", type = "rectangle", action = "fill", frame = pill, roundedRectRadii = pillRadii, fillColor = {white = 1, alpha = 1},
+          withShadow = true, shadow = {blurRadius = 26, color = {white = 0, alpha = 0.28}, offset = {h = -8, w = 0}}},
+        {type = "rectangle", action = "clip", frame = pill, roundedRectRadii = pillRadii},
+        {id = "frost", type = "image", imageScaling = "scaleToFit", frame = pill},
+        {type = "resetClip"},
+        {type = "rectangle", action = "strokeAndFill", frame = pill, roundedRectRadii = pillRadii, strokeWidth = 1,
+          strokeColor = {white = 1, alpha = 0.85}, fillGradient = "linear", fillGradientAngle = 90,
+          fillGradientColors = {{white = 1, alpha = 0.34}, {white = 0.95, alpha = 0.2}}},
+        {type = "rectangle", action = "fill", frame = {x = hudBarX, y = hudBarY, w = hudBarWidth, h = 8},
+          roundedRectRadii = bar, fillColor = {white = 0, alpha = 0.14}},
+        {id = "bar", type = "rectangle", action = "fill", frame = {x = hudBarX, y = hudBarY, w = 0, h = 8},
+          roundedRectRadii = bar, fillColor = {white = 1, alpha = 1},
+          withShadow = true, shadow = {blurRadius = 3, color = {white = 0, alpha = 0.4}, offset = {h = -1, w = 0}}},
+        {id = "pct", type = "text", text = "", frame = {x = hudPad + hudWidth - 22 - 48, y = hudTextY, w = 48, h = 20},
+          textFont = ".AppleSystemUIFontDemi", textSize = 15, textColor = {white = 1, alpha = 0.96}, textAlignment = "right",
+          withShadow = true, shadow = {blurRadius = 3, color = {white = 0, alpha = 0.4}, offset = {h = -1, w = 0}}},
+        {type = "rectangle", action = "fill", frame = {x = hudPad + 2, y = hudPad + 2, w = hudWidth - 4, h = hudHeight / 2 - 1},
+          roundedRectRadii = {xRadius = hudHeight / 2 - 2, yRadius = hudHeight / 2 - 2},
+          fillGradient = "linear", fillGradientAngle = 90,
+          fillGradientColors = {{white = 1, alpha = 0.3}, {white = 1, alpha = 0.02}}},
+        {id = "icon", type = "image", imageScaling = "scaleProportionally",
+          frame = {x = hudPad + 20, y = hudPad + (hudHeight - 24) / 2, w = 34, h = 24},
+          withShadow = true, shadow = {blurRadius = 3, color = {white = 0, alpha = 0.4}, offset = {h = -1, w = 0}}}
+      )
+    end
+    volumeHud["icon"].image = hudIcon(deviceName)
+    local screen = hs.screen.mainScreen():frame()
+    volumeHud:topLeft({x = screen.x + (screen.w - hudWidth) / 2 - hudPad, y = screen.y + 16})
+    if not volumeHud:isShowing() then
+      local full = hs.screen.mainScreen():fullFrame()
+      local shot = hs.screen.mainScreen():snapshot(hs.geometry.rect(screen.x - full.x + (screen.w - hudWidth) / 2, screen.y - full.y + 16 + hudPad, hudWidth, hudHeight))
+      if shot then volumeHud["frost"].image = blurred(shot) end
+    end
+    hudGoal = volume
+    if hudVisible then
+      if not hudSpring then
+        hudLastTick = hs.timer.secondsSinceEpoch()
+        hudSpring = hs.timer.doEvery(1 / 60, stepHud)
+      end
+    else
+      hudShown, hudVelocity, hudVisible = volume, 0, true
+      drawHud(volume)
+    end
+    drawPop()
+    volumeHud:show()
+    startPop(1)
+    if hudHideTimer then hudHideTimer:stop() end
+    hudHideTimer = hs.timer.doAfter(1, function()
+      hudVisible = false
+      if hudSpring then hudSpring:stop() hudSpring = nil end
+      startPop(-1)
+    end)
+  end
+  voyagerScrollTap = hs.eventtap.new({hs.eventtap.event.types.scrollWheel}, function(e)
+    local flags = e:getFlags()
+    local brightness = exactly(flags, "ctrl", "alt", "cmd")
+    if not (brightness or exactly(flags, "alt", "cmd")) then return false end
+    local delta = e:getProperty(hs.eventtap.event.properties.scrollWheelEventFixedPtDeltaAxis1)
+    if delta == 0 then return true end
+    local sign = delta > 0 and 1 or -1
+    local now = hs.timer.secondsSinceEpoch()
+    if sign ~= scrollLastSign or now - scrollLastAt > 0.3 then scrollAcc = 0 end
+    scrollLastSign, scrollLastAt = sign, now
+    local steps = 1
+    if math.abs(delta) >= 0.5 then
+      scrollAcc = scrollAcc + math.abs(delta)
+      steps = math.floor(scrollAcc / scrollStepUnit)
+      scrollAcc = scrollAcc - steps * scrollStepUnit
+    end
+    if brightness then
+      for _ = 1, steps do fineVolumeKey(sign > 0 and "BRIGHTNESS_UP" or "BRIGHTNESS_DOWN") end
+      return true
+    end
+    local out = hs.audiodevice.defaultOutputDevice()
+    if out:transportType() == "Bluetooth" and out:volume() then
+      if not scrollTarget or now - scrollTargetAt > 0.6 then scrollTarget = out:volume() end
+      scrollTarget = math.max(0, math.min(100, scrollTarget + sign * steps * volumeQuarterStep))
+      scrollTargetAt = now
+      if not applyTimer then
+        applyTimer = hs.timer.doAfter(0.02, function()
+          applyTimer = nil
+          local target = hs.audiodevice.defaultOutputDevice()
+          target:setVolume(scrollTarget)
+          showVolumeHud(scrollTarget, target:name())
+        end)
+      end
+    else
+      for _ = 1, steps do fineVolumeKey(sign > 0 and "SOUND_UP" or "SOUND_DOWN") end
     end
     return true
   end)
@@ -853,5 +1121,16 @@ hs.hotkey.bind({"ctrl", "alt", "shift", "cmd"}, "f15", function()
   hs.eventtap.event.newKeyEvent({"cmd", "shift"}, 10, true):post()
   hs.eventtap.event.newKeyEvent({"cmd", "shift"}, 10, false):post()
 end)
+
+-- Q10 L1 (Ctrl+Alt+Cmd) + the key above Tab: screenshot the focused window, send it to Claude in Lund, then focus the window it was taken from.
+lundShotTap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(e)
+  local f = e:getFlags()
+  if e:getKeyCode() ~= 10 or not (f.ctrl and f.alt and f.cmd and not f.shift) then return false end
+  if e:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat) == 0 then
+    local back = hs.window.focusedWindow()
+    captureFocusedWindow(function() pasteToLund(back) end)
+  end
+  return true
+end):start()
 
 hs.alert.show("Hammerspoon config loaded")
