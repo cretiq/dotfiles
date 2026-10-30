@@ -123,6 +123,9 @@ local function focusLund()
   if target then target:activate() else hs.application.launchOrFocus(lundPath) end
 end
 
+-- Claude Code reads the clipboard image before it attaches it, so a key sent sooner than this lands before the image.
+local lundImageSettle = 0.4
+
 -- Abort when Lund did not come to the front: the space would scroll whatever app is there instead.
 local function pasteToLund(sendThenReturnTo)
   focusLund()
@@ -137,13 +140,12 @@ local function pasteToLund(sendThenReturnTo)
     hs.timer.doAfter(0.05, function()
       hs.eventtap.keyStroke({"ctrl"}, "v", 0)
       if sendThenReturnTo then
-        -- Claude Code reads the clipboard image before it attaches it, so Return needs a longer wait than the space.
-        hs.timer.doAfter(0.4, function()
+        hs.timer.doAfter(lundImageSettle, function()
           hs.eventtap.keyStroke({}, "return", 0)
           hs.timer.doAfter(0.1, function() sendThenReturnTo:focus() end)
         end)
       else
-        hs.timer.doAfter(0.15, function() hs.eventtap.keyStrokes(" ") end)
+        hs.timer.doAfter(lundImageSettle, function() hs.eventtap.keyStrokes(" ") end)
       end
     end)
   end)
