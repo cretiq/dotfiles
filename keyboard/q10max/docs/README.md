@@ -12,9 +12,9 @@ Key names are the Swedish layout legends, as in Convey. The US `-`, `=` and `/` 
 | Middle key | hold = L2 (no tap) |
 | Right big key | tap = Enter, hold = L3 |
 | M1 | sends ⇧⌘ (modifier only) |
-| M2 | sends Hyper+F14, nothing bound |
+| M2 | sends ⌃⌥ (modifier only), hold + knob = brightness |
 | M3 | sends ⌃⇧⌘ (modifier only), hold + key launches apps |
-| M4 | sends ⌃⌥ (modifier only), hold + knob = brightness |
+| M4 | sends ⌃⇧Space (VoxFlow hotkey; VoxFlow tells tap from hold itself) |
 | PgUp | no-op, free |
 | M5 | sends Hyper+F15, Hammerspoon turns it into Convey's keyboard cheat sheet chord |
 
@@ -141,7 +141,7 @@ macshot's hotkeys live in its Settings → Shortcuts. Not replaced: CleanShot's 
 ## L0 and knob
 
 - Esc and Caps are swapped. F1–F12 are plain F-keys.
-- Knob: volume on L0, L2 and L3, backlight on L1. Hold M4 (⌃⌥) and Hammerspoon turns the knob's volume into brightness. Holding Shift makes volume and brightness (knob and F-row media keys) change in small steps: Hammerspoon turns Shift+key into Shift+Option+key. `q10 knob` shows the knob map on all layers, and `q10 knob copy --from 0 --to 3 --yes` copies one layer's knob keycodes to another (the only knob write `q10` does).
+- Knob: volume on L0, L2 and L3, backlight on L1. Hold M2 (⌃⌥) and Hammerspoon turns the knob's volume into brightness. Holding Shift makes volume and brightness (knob and F-row media keys) change in small steps: Hammerspoon turns Shift+key into Shift+Option+key. `q10 knob` shows the knob map on all layers, and `q10 knob copy --from 0 --to 3 --yes` copies one layer's knob keycodes to another (the only knob write `q10` does).
 
 ## Mac automation
 

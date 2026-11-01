@@ -1091,7 +1091,7 @@ end):start()
 
 -- macOS steps volume and brightness in quarters when Option is held with Shift; the knob cannot send that conditionally.
 local fineKeys = {SOUND_UP = true, SOUND_DOWN = true, BRIGHTNESS_UP = true, BRIGHTNESS_DOWN = true}
--- Q10 M4 sends ctrl+alt; held with the volume knob it turns the knob into brightness.
+-- Q10 M2 sends ctrl+alt; held with the volume knob it turns the knob into brightness.
 local brightnessOf = {SOUND_UP = "BRIGHTNESS_UP", SOUND_DOWN = "BRIGHTNESS_DOWN"}
 fineStepTap = hs.eventtap.new({hs.eventtap.event.types.systemDefined}, function(e)
   local k = e:systemKey()
