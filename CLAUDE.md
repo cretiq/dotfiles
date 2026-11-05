@@ -54,7 +54,7 @@ Config: `/mnt/c/Users/FilipM/AppData/Local/Packages/Microsoft.WindowsTerminal_8w
 
 Config: `windows-keys/` (symlink to `C:\Users\FilipM\Desktop\Keys\`)
 
-- **`hotkeys-and-remaps.ahk`** — App launcher hotkeys (Ctrl+Alt+Shift+Win combinations) and `LCtrl+LAlt+1–6` (`<^<!`, left keys only: AltGr = Ctrl+Alt would swallow `@ £ $ €` on the Swedish layout) → Firefox `https://localhost:5171–5176`. Supports left/right modifier distinction via `<^<#<!<+` (left) / `>^>#>!>+` (right) prefixes.
+- **`hotkeys-and-remaps.ahk`** — App launcher hotkeys (Ctrl+Alt+Shift+Win combinations) and `LCtrl+LAlt+1–9` (`<^<!`, left keys only: AltGr = Ctrl+Alt would swallow `@ £ $ €` on the Swedish layout) → Edge (profile Filip • Work, `Default`) `https://localhost:5171–5179`. Supports left/right modifier distinction via `<^<#<!<+` (left) / `>^>#>!>+` (right) prefixes.
 - **`watchers.ahk`** — Background watchers, Startup shortcut `watchers.lnk`, versioned copy `windows-keys-mirror/watchers.ahk`, log `%LOCALAPPDATA%\watchers.log`. Kept out of `hotkeys-and-remaps.ahk` because toggle scripts edit and reload that file.
   - **Desk mode** (laptop panel not on the desktop, i.e. lid closed on the dock — Voyager at the office, Q10 at home): GlazeWM on + `set-all-keymap.sh voyager`. **Laptop screen on** (laptop alone, or laptop keyboard at a desk): GlazeWM off + `set-all-keymap.sh standard`. GlazeWM never runs with the laptop screen on, so the Standard Alt+HJKL arrows never clash with it. The preset runs only when the mode changes; `kk`/`kv`/`ks` overrides hold until the next change.
   - Blocks Win+arrows while GlazeWM runs, forwards Win+Space, applies the Q10 Max Windows keymap on cable connect.
@@ -71,7 +71,7 @@ Windows app. Registers its own global hotkeys (`hotkeys.rs`; a key already taken
 - **Global hotkeys in use:** `Ctrl+Alt+Shift+M` capture memory, `Ctrl+Alt+Shift+J` cheat sheet, `Ctrl+Alt+Shift+Win+I` Translate, `Ctrl+Alt+Shift+Win+W` What word?, macros `Ctrl+Alt+Shift+Z` (Rename) / `Ctrl+Alt+Shift+A` (Next). Main toggle, command bar, Free mode unset. Check this list before binding any new `Ctrl+Alt+Shift(+Win)` combo in AHK, GlazeWM or Terminal.
 - **Cheat sheets:** one `.md` per app in `…/Convey/cheatsheets/` (43 apps; entries are `` - `keys` — description ``). Re-read each time the window opens. Only verified shortcuts go in.
 - **Keep in sync:** after changing aliases, keymaps or hotkeys here (zsh, GlazeWM, AHK, Terminal, nvim…), run `/cheatsheet --changed --light` (`~/.claude/commands/cheatsheet.md`). It finds the sheets by their `source:` line and patches only the changed entries; `--changed` alone re-verifies those sheets in full. Do not hand-edit around it. A config no sheet lists (e.g. `hotkeys-and-remaps.ahk`) is reported as `unowned`; create its sheet with `/cheatsheet <app>`.
-- **Currently stale:** `zsh.md` and `claude-code.md` still list removed aliases (`ch`, `csh`, `csm`, `coh`, `com`, `ccca`, `cccu`, `cwt`) and lack `cdot`; `glazewm.md` lacks `alt+h`. The AHK Edge keys (`LCtrl+LAlt+1–6`, `Ctrl+Alt+Shift+Win+C`) live in `edge.md`; the other AHK launchers are in no sheet.
+- **Currently stale:** `zsh.md` and `claude-code.md` still list removed aliases (`ch`, `csh`, `csm`, `coh`, `com`, `ccca`, `cccu`, `cwt`) and lack `cdot`; `glazewm.md` lacks `alt+h`. The AHK Edge keys (`LCtrl+LAlt+1–9`, `Ctrl+Alt+Shift+Win+C`) live in `edge.md`; the other AHK launchers are in no sheet.
 
 ## Keyboard: Keychron Q10 Max
 

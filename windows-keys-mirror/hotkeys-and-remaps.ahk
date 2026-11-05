@@ -6,7 +6,7 @@ InstallKeybdHook()
 ; Reset CapsLock to off on startup/reload
 SetCapsLockState "Off"
 
-OpenLocalhost(port, *) => Run('msedge.exe --profile-directory="Profile 1" "https://localhost:' port '"')
+OpenLocalhost(port, *) => Run('msedge.exe --profile-directory="Default" "https://localhost:' port '"')
 ; Left-only: AltGr is seen as Ctrl+Alt, so plain ^! would swallow @ £ $ € (AltGr+2..5) on the Swedish layout.
 Loop 9
     Hotkey "<^<!" A_Index, OpenLocalhost.Bind(5170 + A_Index)
@@ -243,6 +243,8 @@ SlashCommand(name, submit := true)
 
 ^!#d::SlashCommand "/restart"
 
+^!#e::SlashCommand "/eli3"
+
 ^!#n::SlashCommand "/next"
 
 ^!#x::SlashCommand "/cut"
@@ -279,6 +281,8 @@ SlashCommand(name, submit := true)
 ^+5::ShareX "-OpenImageHistory"
 
 <!+d::SlashCommand "/restart"
+
+<!+e::SlashCommand "/eli3"
 
 <!+n::SlashCommand "/next"
 

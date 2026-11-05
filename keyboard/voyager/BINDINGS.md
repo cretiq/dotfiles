@@ -105,6 +105,7 @@ thumbs  · | SPACE || · | ·
 
 ## AutoHotkey slash-command chords (`hotkeys-and-remaps.ahk`)
 - Ctrl+Alt+Win+D → types /restart
+- Ctrl+Alt+Win+E → types /eli3
 - Ctrl+Alt+Win+N → types /next
 - Ctrl+Alt+Win+X → types /cut
 - Ctrl+Alt+Win+R → types /restart
