@@ -107,7 +107,7 @@ thumbs  · | SPACE || · | ·
 - Ctrl+Alt+Win+D → types /restart
 - Ctrl+Alt+Win+N → types /next
 - Ctrl+Alt+Win+X → types /cut
-- Ctrl+Alt+Win+R → types /rebuild
+- Ctrl+Alt+Win+R → types /restart
 - Ctrl+Alt+Win+C → types /copy
 - Ctrl+Alt+Win+O → types /git:commit-detailed-push
 - Ctrl+Alt+Win+H → types /how-to-test

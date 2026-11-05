@@ -6,9 +6,9 @@ InstallKeybdHook()
 ; Reset CapsLock to off on startup/reload
 SetCapsLockState "Off"
 
-OpenLocalhost(port, *) => Run('firefox.exe "https://localhost:' port '"')
+OpenLocalhost(port, *) => Run('msedge.exe --profile-directory="Profile 1" "https://localhost:' port '"')
 ; Left-only: AltGr is seen as Ctrl+Alt, so plain ^! would swallow @ £ $ € (AltGr+2..5) on the Swedish layout.
-Loop 6
+Loop 9
     Hotkey "<^<!" A_Index, OpenLocalhost.Bind(5170 + A_Index)
 
 ToggleTheme() {
@@ -247,7 +247,7 @@ SlashCommand(name, submit := true)
 
 ^!#x::SlashCommand "/cut"
 
-^!#r::SlashCommand "/rebuild"
+^!#r::SlashCommand "/restart"
 
 ^!#c::SlashCommand "/copy"
 
@@ -284,7 +284,7 @@ SlashCommand(name, submit := true)
 
 <!+x::SlashCommand "/cut"
 
-<!+r::SlashCommand "/rebuild"
+<!+r::SlashCommand "/restart"
 
 <!+c::SlashCommand "/copy"
 
