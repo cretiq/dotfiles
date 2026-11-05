@@ -81,8 +81,8 @@ thumbs  · | · || · | ·
 r0  · | · | · | · | · | · || · | · | · | · | · | ·
 r1  · | Q | W | E | R | T || Y | U | I | O | · | ·
 r2  · | A | S | D | F | G || H | J | K | L | · | ·
-r3  · | Z | X | C | V | B || N | M | · | · | · | go to L0
-thumbs  · | SPACE || · | ·
+r3  Ctrl | Z | X | C | V | B || N | M | · | · | · | go to L0
+thumbs  Alt | SPACE || · | ·
 ```
 
 ## Combos (Main only)

@@ -17,9 +17,7 @@ if [ -d /Applications/Convey.app ] && ! pgrep -x Convey >/dev/null; then
   d=com.example.Convey
   defaults write $d cheatsheet_hotkey_keyCode -int 38
   defaults write $d cheatsheet_hotkey_modifiers -int 768
-  defaults write $d keyboard_hotkey_keyCode -int 10
-  defaults write $d keyboard_hotkey_modifiers -int 768
-  defaults write $d keyboard_hotkey_disabled -bool false
+  defaults write $d cheatsheet_hotkey_disabled -bool false
   defaults write $d hotkey_keyCode -int 17
   defaults write $d hotkey_modifiers -int 6656
   echo "Convey Mac hotkeys restored"

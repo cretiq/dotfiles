@@ -35,7 +35,7 @@ lua require("oceanic_material").setup() vim.cmd.colorscheme("oceanic_material")
 hi Normal guibg=NONE ctermbg=NONE
 
 " Ghostty config syntax highlighting
-autocmd BufRead,BufNewFile */ghostty/config set filetype=conf
+autocmd BufRead,BufNewFile */ghostty/config,*/lund/config set filetype=conf
 autocmd BufRead,BufNewFile *.ghostty set filetype=conf
 
 " Set startup flag to suppress keymap messages during initialization

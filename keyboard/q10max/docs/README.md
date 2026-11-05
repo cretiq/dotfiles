@@ -1,8 +1,17 @@
 # Keychron Q10 Max cheat sheet
 
-Current keymap: `q10max-v30.json` (import in https://launcher.keychron.com, USB cable).
+Current keymap: `q10max-v43.json` (import in https://launcher.keychron.com, USB cable).
 The original export `Keymap-Q10 Max ISO knob-8-17-26.json` is never overwritten. Older intermediates live in `history/`.
 Key names are the Swedish layout legends, as in Convey. The US `-`, `=` and `/` keys are `+`, `´` and `-` here.
+
+## Design rules
+
+- The firmware keymap is the foundation: set it once, keep it solid and logical, with little to no redundancy and no illogical mappings.
+- Every layer has one modifier set, and each key sends that set plus its own key. L2 digit row: key `N` sends ⌥⇧⌘ + `N`, never a shuffled digit.
+- Apps and Hammerspoon bind their shortcuts on top of these fixed chords. The firmware is never bent to fit an app's existing hotkey (the old L2 row sent ⌥⇧⌘ + `7` on key `1` to match a CleanShot/macshot binding: that is the mistake to avoid).
+- When an app wants a different chord, change the binding in the app or let Hammerspoon translate the fixed chord. Do not change the keymap.
+- A key with no binding yet still sends its chord (free slot). That is fine and cheaper than reshuffling later.
+- Strive for this even where it is not fully possible (L2 still mixes ⌘ editing keys with the ⌥⇧⌘ slot rows, see the L2 section). No drastic redesign, fix exceptions when a layer is touched anyway.
 
 ## Layer keys
 
@@ -16,7 +25,8 @@ Key names are the Swedish layout legends, as in Convey. The US `-`, `=` and `/` 
 | M3 | sends ⌃⇧⌘ (modifier only), hold + key launches apps |
 | M4 | sends ⌃⇧Space (VoxFlow hotkey; VoxFlow tells tap from hold itself) |
 | PgUp | no-op, free |
-| M5 | sends Hyper+F15, Hammerspoon turns it into Convey's keyboard cheat sheet chord |
+| Home (L0, bottom of the three keys right of Enter) | same as M4: sends ⌃⇧Space |
+| M5 | sends Hyper+F15, Hammerspoon turns it into Convey's cheat sheet chord (Shift+Cmd+J) |
 
 All Launcher macros were removed in v7.
 
@@ -31,22 +41,16 @@ Hammerspoon and AeroSpace match modifiers exactly, so each combo is its own name
 | Cmd + `O` | ⌘ | Hammerspoon, only while Lund is in front, any keyboard: open the quick switcher (⌘⌥K) |
 | Middle key (L2) + `R` | ⌃⌥⌘ + F16 | Hammerspoon: Ctrl+R in Lund, Cmd+R in every other app. No Shift in the chord, because Shift+Option held turns Lund's cursor into a crosshair |
 | Left space + physical Shift + key | Hyper (⌃⌥⇧⌘) | AeroSpace: move, send to workspace, join, fullscreen |
-| Right big key (L3) + key | Meh (⌃⌥⇧) | Hammerspoon: `/next`, `/cut`, `/git:commit-detailed-push`, `/compact`, `/copy`, `/rebuild`, title-and-rename text. Convey: Meh+`T` |
+| Right big key (L3) + key | Meh (⌃⌥⇧) | Hammerspoon: `/next`, `/cut`, `/git:commit-detailed-push`, `/compact`, `/copy`, `/rebuild`, title-and-rename text |
 | Right big key (L3) + `-` / `+` | Meh (⌃⌥⇧) | Lund: split down / split right (`keybind` lines in `lund/.config/lund/config`). Middle key (L2) + `N` (Cmd+N) also splits right |
-| Middle key (L2) `1` `2` `3` | ⌥⇧⌘ | Hammerspoon: capture, then paste into Lund. `1` focused window (sends ⌥⇧⌘+7), `2` picked window (⌥⇧⌘+9), `3` area (⌥⇧⌘+8) |
-| Middle key (L2) `4` | ⌥⇧⌘ | Hammerspoon: screenshot the focused window without pasting. Sends ⌥⇧⌘+0 |
-| Middle key (L2) `5` | ⌥⇧⌘ | Hammerspoon: pick a window, save it as a file. Sends ⌥⇧⌘+2 |
-| Middle key (L2) `6` `7` `8` `9` | ⌥⇧⌘ | macshot's own hotkeys: `6` area (⌥⇧⌘+4), `7` history (⌥⇧⌘ and the `+` key), `8` OCR (⌥⇧⌘+3), `9` whole screen (⌥⇧⌘+5) |
-| Middle key (L2) F1 / F2 / F3 | ⌥⇧⌘ | Hammerspoon, wide monitor: `F1` nudge all windows left, `F2` nudge all windows right (240 px each), `F3` cycle the side gap (1920 / 960 / 16) |
-| Middle key (L2) `0` and other number row, F4–F12 | ⌥⇧⌘ | Free slots. `0` still sends ⌥⇧⌘+1, which was CleanShot's close-all-popups and has no replacement |
-| M1 + `1` `2` | ⇧⌘ | Hammerspoon: capture, then paste into Lund. `1` focused window, `2` area |
-| M1 + `3` | ⇧⌘ | Hammerspoon + macshot: open macshot's area capture and drag-select the focused window's frame |
-| M1 + `4` | ⇧⌘ | macshot: quick capture of an area (`macshot://quick-capture`) |
-| M1 + `5` | ⇧⌘ | macshot: area capture |
-| M1 + the key above Tab | ⇧⌘ | macshot: history (`macshot://history`) |
+| Middle key (L2) + `§` `1` `2` `3` `4` `5` | ⌥⇧⌘ | Each key sends ⌥⇧⌘ + its own key. Actions are assigned in Hammerspoon (and macshot): `§` macshot history, `1` capture the focused window then paste into Lund, `2` capture an area then paste into Lund, `3` macshot area capture framed on the focused window, `4` macshot quick capture, `5` macshot area capture |
+| Middle key (L2) + `6` `7` `8` `9` `0` | ⌥⇧⌘ | ⌥⇧⌘ + the same key. Unbound, free slots |
+| Middle key (L2) F1 / F2 | ⌥⇧⌘ | Hammerspoon, wide monitor: `F1` nudge all windows left, `F2` nudge all windows right (240 px each) |
+| Left space + `C` | ⌃⌥⌘ | Hammerspoon, wide monitor: cycle the side gap (1920 / 960 / 16), so the usable width goes 50% / 75% / 100% |
+| M1 + `§` `1` `2` `3` `4` `5` | ⇧⌘ | Same actions as L2 + the same key, on the chords the laptop keyboard's bindings use (⇧⌘ + `n`) |
 | M1 + `6` | ⇧⌘ | Free |
 | M1 + other key | ⇧⌘ | Free. `E` was CleanShot's pin-last-screenshot |
-| M3 + key | ⌃⇧⌘ | Hammerspoon: app launchers (avoid `3` / `4`, macOS screenshot) |
+| M3 + key | ⌃⇧⌘ | Hammerspoon: app launchers (`3` / `4` are macOS's screenshot-to-clipboard keys, disabled on this Mac) |
 
 Covered keys on L1 and L3: letters, digits, `; , . /` and similar punctuation. L3 keeps the media F-row.
 
@@ -84,14 +88,14 @@ AeroSpace has no border of its own. JankyBorders draws it. AeroSpace starts it (
 |---|---|
 | M3 + `Q F A H Z J E X B S M C` | Obsidian, Finder, Spotify, Claude, Bitwarden, ChatGPT, X Pro, Xcode, BetterTouchTool, Simulator, Mail, Microsoft Edge |
 | M3 + `W` | Wallpaper settings |
-| Right big key + `T` | Convey translator (Meh+`T`, set in Convey's settings) |
-| Right big key + `N` / `C` / `O` / `K` / `X` / `R` | Type `/next ` / `/cut ` / `/git:commit-detailed-push ` / `/compact ` / `/copy ` / `/rebuild ` then Enter |
-| Right big key + `D` | Type `done` then Enter |
+| Left space + Shift + `T` | Convey translator (Hyper+`T`, set in Convey's settings) |
+| Right big key + `N` / `C` / `O` / `K` / `X` / `R` | Type `/next ` / `/copy ` / `/git:commit-detailed-push ` / `/compact ` / `/cut ` / `/rebuild ` then Enter |
+| Right big key + `D` | Type `/decisions ` then Enter |
 | Right big key + `Z` | Type `/generate:short-title ` + Enter, `/copy ` + Enter, then `/rename ` and stop |
 | F1, or left space + `M` | Minimize window |
 | F2 | Mission Control |
 | Middle key + F1 / F2 | Nudge all windows left / right on the wide monitor, 240 px |
-| Middle key + F3 | Cycle the wide monitor's side gap (1920 / 960 / 16) |
+| Left space + `C` | Cycle the wide monitor's side gap (1920 / 960 / 16) |
 | F7 / F8 / F9 / F10 | Previous / play-pause / next / mute |
 | F11 / F12 | Volume down / up |
 | Scroll down over a Dock icon | Minimize that app's windows |
@@ -101,26 +105,26 @@ AeroSpace has no border of its own. JankyBorders draws it. AeroSpace starts it (
 | Press | Action |
 |---|---|
 | M1 + `J` | Cheat sheet (searchable) |
-| M5 | Cheat sheet in keyboard view, with the Q10 drawn |
-| Right space + `T` | Translator (Meh+`T`) |
-| Left space + Shift + `M` | Free mode (Hyper+`M`) |
+| M5 | Cheat sheet, with the Q10 drawn |
+| Left space + Shift + `T` | Translator (Hyper+`T`) |
 
 ## Screenshots (hold middle key)
 
 | Press | Action |
 |---|---|
-| Middle key + `1` / `2` / `3` | Screenshot the focused window / a window you pick / an area, then focus Lund, press Ctrl+V and type a space. The picked window and the area wait for your selection, Esc pastes nothing |
-| Middle key + `4` | Focused window to the clipboard, no paste |
-| Middle key + `5` | Pick a window, save it as a file |
-| Middle key + `6` / `8` / `9` | macshot: area (opens its editor) / OCR text / whole screen |
-| Middle key + `7` | macshot history |
+| Middle key + `1` / `2` | Screenshot the focused window / an area, then focus Lund, press Ctrl+V and type a space. The area waits for your selection, Esc pastes nothing |
+| Middle key + `3` | macshot area capture, framed on the focused window |
+| Middle key + `4` | macshot quick capture |
+| Middle key + `5` | macshot area capture |
+| Middle key + `§` | macshot history |
+| M1 + the same keys | Same actions on ⇧⌘ + `§` / `1`–`5` (the laptop keyboard's chords) |
 | Focused-window capture | Hammerspoon snapshots the window's rectangle from the screen, so anything overlapping it is included. Hammerspoon needs Screen Recording permission, without it the image is blank |
 
 ## Replaced paid apps (Setapp ends 2026-10-22)
 
 | Was | Now | Install | Keys |
 |---|---|---|---|
-| CleanShot X | macshot (GPL-3) plus Hammerspoon | `brew install --cask macshot` | The L2 number row above. On the laptop Cmd+Shift+`1`–`3` capture to Lund, `4` focused window, `5` picked window, `6` macshot area, `7` macshot history |
+| CleanShot X | macshot (GPL-3) plus Hammerspoon | `brew install --cask macshot` | Middle key + `§` / `1`–`5` above (⌥⇧⌘ + `§` / `1`–`5`; M1 and the laptop send ⇧⌘ + the same keys). Not replaced: picked-window and OCR captures |
 | Paste | Maccy (MIT, use the Homebrew build) | `brew install --cask maccy` | Shift+Cmd+V, set in Maccy's settings |
 | CleanMyMac | Mole (GPL-3, terminal) | `brew install mole` | `mo clean --dry-run` first, then `mo clean` |
 
@@ -129,10 +133,13 @@ macshot's hotkeys live in its Settings → Shortcuts. Not replaced: CleanShot's 
 ## L2 (hold middle key)
 
 - Left hand: Cmd+letter. Exceptions below.
-- `A` Cmd+R, `B` Shift+Cmd+V (opens Maccy, the clipboard history; both B keys), `X` Cmd+Shift+Z (redo), `T` Cmd+Shift+T, `F` Cmd+T, `G` and `W` Cmd+W, `Q` Cmd+Q (quits the app)
+- F-row, `§` and the digit row: ⌥⇧⌘ + the same key (free slots, bound in Hammerspoon). This is the layer's own namespace, the ⌘ editing and navigation keys below are the exception to the one-modifier-set rule.
+- `A` (hold) holds Meh (⌃⌥⇧): with `J` / `K` / `L` / `Ö` (arrows on this layer) it sends Meh + arrows, focus split left / down / up / right (Lund config, same chord as Windows Terminal)
+- `B` Shift+Cmd+V (opens Maccy, the clipboard history; both B keys), `X` Cmd+Shift+Z (redo), `T` Cmd+Shift+T, `F` Cmd+T, `G` and `W` Cmd+W, `Q` Cmd+Q (quits the app)
 - `S` / `D`: previous / next tab (Ctrl+Shift+Tab / Ctrl+Tab)
 - `U` / `P`: Cmd+Up / Cmd+Down
-- `I` / `O`: Opt+Left / Opt+Right (word jump)
+- `I`: Opt+Left (word jump left)
+- `O`: sends Alt+Shift+Cmd+O; Hammerspoon turns it into Cmd+Opt+K (the quick switcher) in Lund and Opt+Right (word jump right) in every other app
 - `H` / `Ä`: Cmd+Left / Cmd+Right (line start / end)
 - `J` / `K` / `L` / `Ö`: Left / Down / Up / Right
 - Enter: Cmd+Enter. Backspace: right Opt+Backspace (delete word). Right Option worked where left Option only deleted one letter.
@@ -141,7 +148,7 @@ macshot's hotkeys live in its Settings → Shortcuts. Not replaced: CleanShot's 
 ## L0 and knob
 
 - Esc and Caps are swapped. F1–F12 are plain F-keys.
-- Knob: volume on L0, L2 and L3, backlight on L1. Hold M2 (⌃⌥) and Hammerspoon turns the knob's volume into brightness. Holding Shift makes volume and brightness (knob and F-row media keys) change in small steps: Hammerspoon turns Shift+key into Shift+Option+key. `q10 knob` shows the knob map on all layers, and `q10 knob copy --from 0 --to 3 --yes` copies one layer's knob keycodes to another (the only knob write `q10` does).
+- Knob: volume on L0, L2 and L3, backlight on L1. Hold M2 (⌃⌥) or Cmd and Hammerspoon turns the knob's volume into brightness. Holding Shift makes volume and brightness (knob and F-row media keys) change in small steps: Hammerspoon turns Shift+key into Shift+Option+key. `q10 knob` shows the knob map on all layers, and `q10 knob copy --from 0 --to 3 --yes` copies one layer's knob keycodes to another (the only knob write `q10` does).
 
 ## Mac automation
 
@@ -161,14 +168,14 @@ Close the Keychron Launcher tab before using `q10`: with the Launcher open the k
 macOS keeps its own settings per keyboard connection, and the dongle (Keychron Link) is a different keyboard from the cable.
 
 - **Modifier keys:** the dongle had Control and Command swapped and Caps Lock turned into Escape, left over from an earlier setup. That turned Ctrl+Tab into Cmd+Tab and broke the Meh and ⇧⌘ chords. Fix: System Settings, Keyboard, Keyboard Shortcuts, Modifier Keys, pick Keychron Link, Restore Defaults.
-- **Key above Tab (`§`):** over the dongle macOS reports keycode 50 instead of 10, so `§` and `<` come out swapped when typing. Changing the keyboard type in System Settings and a `hidutil` swap for the dongle both had no effect. Hammerspoon forwards Meh + 50 as Meh + 10, so the VolumeGuard listening-mode cycle (Right big key + `§`) works on both connections. An event tap on ⇧⌘ + keycode 10 or 50 opens macshot's history and swallows the chord, so M1 + `§` no longer reaches Convey's keyboard cheat sheet. M5 sends Hyper+F15 and Hammerspoon posts Shift+Cmd+§ itself, which the tap lets through. Side effect: on the cable ⇧⌘ + `<>` opens history too.
+- **Key above Tab (`§`):** over the dongle macOS reports keycode 50 instead of 10, so `§` and `<` come out swapped when typing. Changing the keyboard type in System Settings and a `hidutil` swap for the dongle both had no effect. Hammerspoon forwards Meh + 50 as Meh + 10, so the VolumeGuard listening-mode cycle (Right big key + `§`) works on both connections. An event tap on ⇧⌘ + keycode 10 or 50 opens macshot's history and swallows the chord, so M1 + `§` opens history and nothing else. M5 sends Hyper+F15 and Hammerspoon posts Shift+Cmd+J, Convey's cheat sheet hotkey. Side effect: on the cable ⇧⌘ + `<>` opens history too.
 - Typing `§` and `<` over the dongle stays swapped. Not fixed.
 - The keymap cannot be written over the dongle, only over the cable.
 
 ## Notes
 
 - v5 and later overwrite Keychron's L1 RGB, Bluetooth and battery keys, and v13 does the same to the L3 digits `1`–`4` (Bluetooth / 2.4G switching, `0x7e0b`–`0x7e0e`, which I never verified). v4 still has them.
-- ⌃⇧⌘ + `3` / `4` is macOS's screenshot-to-clipboard shortcut, so M3 + `3` / `4` takes a screenshot.
+- ⌃⇧⌘ + `3` / `4` is macOS's screenshot-to-clipboard shortcut. It is disabled on this Mac (System Settings, Keyboard Shortcuts, Screenshots), so M3 + `3` / `4` is free here, but it would take a screenshot on a Mac where it is on.
 - Keyboard firmware V1.1.0 is available but not applied.
 - Receiver (Keychron Link Type A, V0.3.1) shows only as "Bootloader device" after a failed flash. Contact Keychron support before re-flashing.
 
@@ -186,7 +193,7 @@ The switch stays on Mac. The Windows layout (`q10max-win-v2.json`) is the Mac la
 | Left space, other keys | ⌃⌥⌘ + key | Meh (⌃⌥⇧) + key, as before |
 | Right big key + key | Meh + key | Hyper + key, as before |
 | M3 (hold) | ⌃⇧⌘, nothing bound | Alt+Shift: M3 + `J` / `K` / `L` / `Ö` moves the window |
-| Middle key + `1`–`9` | ⌥⇧⌘ + digit, nothing bound | Alt+Shift + digit (send window) |
+| Middle key + digit row | ⌥⇧⌘ + `§` / `1`–`0` (v38) | `make-win.py` turns `1`–`9` into Alt+Shift + digit (GlazeWM send window to workspace, same as left space + Shift + digit), `§` and `0` stay ⌥⇧⌘ with nothing bound. `q10max-win-v2.json` is not regenerated from v38 yet |
 
 | Command (WSL zsh) | Does |
 |---|---|

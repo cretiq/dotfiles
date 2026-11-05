@@ -73,8 +73,6 @@ alias ch='claude --model haiku --effort xhigh'
 alias cs='claude --model sonnet --effort xhigh'
 alias co='claude --model opus --effort xhigh'
 alias ccc='cd ~/claude-scratch && claude --model claude-sonnet-5-5 --effort high'
-alias cor='claude --agent orchestrator'
-alias corc='claude --agent orchestrator --continue'
 alias csc='cd ~/CursorProjects/scarry && c'
 alias ccca='cd ~/claude-scratch && claude --model haiku --effort xhigh /analysis:analyze-processes'
 alias cccu='cd ~/claude-scratch && claude --model claude-sonnet-5-5 --effort high /usage'
@@ -233,3 +231,5 @@ if [[ -n $CLAUDE_PID ]] && ! kill -0 $CLAUDE_PID 2>/dev/null; then
   unset CLAUDECODE CLAUDE_CODE_CHILD_SESSION CLAUDE_CODE_SESSION_ID \
         CLAUDE_CODE_ENTRYPOINT CLAUDE_CODE_EXECPATH CLAUDE_PID CLAUDE_EFFORT AI_AGENT
 fi
+
+export NOTION_API_KEY="$(security find-generic-password -s notion-api-key -w)"

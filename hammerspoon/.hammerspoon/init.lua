@@ -52,6 +52,10 @@ end):start()
 bindFKey("f1", minimizeFocused)
 hs.hotkey.bind({"ctrl", "alt", "cmd"}, "m", minimizeFocused)
 
+hs.hotkey.bind({"cmd", "shift"}, "d", function()
+  hs.osascript.applescript('tell application "System Events" to tell appearance preferences to set dark mode to not dark mode')
+end)
+
 bindFKey("f2", hs.spaces.toggleMissionControl)
 
 -- Claude Code takes a pasted image on ctrl+v, not cmd+v.
@@ -123,8 +127,12 @@ local function focusLund()
   if target then target:activate() else hs.application.launchOrFocus(lundPath) end
 end
 
+hs.hotkey.bind(m3, "d", focusLund)
+
 -- Claude Code reads the clipboard image before it attaches it, so a key sent sooner than this lands before the image.
 local lundImageSettle = 0.4
+-- Reading a large clipboard image varies from well under to over 0.4 s; Return sent before the attach is a newline in the prompt, not a submit.
+local lundSendSettle = 0.6
 
 -- Abort when Lund did not come to the front: the space would scroll whatever app is there instead.
 local function pasteToLund(sendThenReturnTo)
@@ -140,7 +148,7 @@ local function pasteToLund(sendThenReturnTo)
     hs.timer.doAfter(0.05, function()
       hs.eventtap.keyStroke({"ctrl"}, "v", 0)
       if sendThenReturnTo then
-        hs.timer.doAfter(lundImageSettle, function()
+        hs.timer.doAfter(lundSendSettle, function()
           hs.eventtap.keyStroke({}, "return", 0)
           hs.timer.doAfter(0.1, function() sendThenReturnTo:focus() end)
         end)
@@ -225,7 +233,6 @@ end):start()
 
 local function captureAreaToLund() captureToLund({"-x", "-c", "-i"}) end
 local function capturePickedWindowToLund() captureToLund({"-x", "-c", "-i", "-w"}) end
-local function capturePickedWindow() hs.task.new(screencapture, nil, {"-i", "-w", "-t", "jpg"}):start() end
 
 -- macshot has no URL parameter for a window or rect, so drag-select the focused window's frame once its overlay is up.
 local function macshotFocusedWindow()
@@ -249,14 +256,7 @@ if not hs.application.get("macshot") then
   hs.task.new("/usr/bin/open", nil, {"-g", "-a", "macshot"}):start()
 end
 
--- Q10 middle key (L2) number row, all alt+shift+cmd+: 1 sends 7 (focused window), 2 sends 9 (picked window), 3 sends 8 (area), each pasted into Lund.
--- 4 sends 0 (focused window, no paste), 5 sends 2 (picked window, saved as a file). 6, 7, 8 and 9 are macshot's own hotkeys: 4 (area), the + key (history), 3 (OCR text) and 5 (whole screen).
 local csMods = {"alt", "shift", "cmd"}
-hs.hotkey.bind(csMods, "7", captureFocusedWindowToLund)
-hs.hotkey.bind(csMods, "8", captureAreaToLund)
-hs.hotkey.bind(csMods, "9", capturePickedWindowToLund)
-hs.hotkey.bind(csMods, "0", captureFocusedWindow)
-hs.hotkey.bind(csMods, "2", capturePickedWindow)
 
 -- Q10 L2 + O sends alt+shift+cmd+o and stays the word jump to the right (opt+right) in every app.
 hs.hotkey.bind(csMods, "o", function()
@@ -322,12 +322,12 @@ end
 
 local commands = {
   n = "/next ",
-  c = "/cut ",
+  c = "/copy ",
   o = "/git:commit-detailed-push ",
   k = "/compact ",
-  x = "/copy ",
+  x = "/cut ",
   r = "/rebuild ",
-  d = "done",
+  d = "/decisions ",
 }
 for key, text in pairs(commands) do
   hs.hotkey.bind(meh, key, function() typeCommand(text, true) end)
@@ -507,6 +507,7 @@ local captureKeys = {
 }
 for i, capture in ipairs(captureKeys) do
   hs.hotkey.bind({"cmd", "shift"}, tostring(i), capture)
+  hs.hotkey.bind(csMods, tostring(i), capture)
 end
 
 for key, text in pairs(commands) do
@@ -569,10 +570,10 @@ local function nudgeWindows(direction)
   end, {"list-windows", "--workspace", "visible", "--format", "%{window-id}|%{window-layout}|%{monitor-name}"}):start()
 end
 
--- Q10 middle key (L2) F1 and F2 nudge the windows left and right, F3 cycles the wide monitor's side gap (all alt+shift+cmd+).
+-- Q10 middle key (L2) F1 and F2 nudge the windows left and right (alt+shift+cmd+), left space (L1) + C cycles the wide monitor's side gap (ctrl+alt+cmd+c).
 hs.hotkey.bind(csMods, "f1", function() nudgeWindows(-1) end)
 hs.hotkey.bind(csMods, "f2", function() nudgeWindows(1) end)
-hs.hotkey.bind(csMods, "f3", cycleWideGap)
+hs.hotkey.bind({"ctrl", "alt", "cmd"}, "c", cycleWideGap)
 
 -- Fn + key runs an AeroSpace command, Fn + Shift + key the second one. Keycodes 43, 44, 27 and 24 are the keys
 -- AeroSpace calls comma, slash, minus and equal: , - + ´ on the Swedish layout.
@@ -695,9 +696,9 @@ do
     end, {"-x", "-c", "-i", "-w", "-o"}):start()
   end
 
-  -- Hold Space + the far-left Ctrl key: Q W E R T A send Alt+Ctrl+key, read as Alt+Cmd+key. Q W E send the key the Q10's L2 number row 1, 2, 3 sends for the same screenshot action (Alt+Shift+Cmd+key), R and A are macshot's area capture, S sends the + key (key code 27, macshot history). T is W with rounded corners and a background.
+  -- Hold Space + the far-left Ctrl key: Q W E R T A send Alt+Ctrl+key, read as Alt+Cmd+key. Q is the focused window, W a picked window and E an area, each pasted into Lund, R and A are macshot's area capture, S opens macshot's history. T is W with rounded corners and a background.
   local keyToCapture = {
-    [map.q] = map["7"], [map.w] = map["9"], [map.e] = map["8"], [map.r] = captureAreaMacshot, [map.t] = framedPickedToLund, [map.a] = captureAreaMacshot, [map.s] = 27,
+    [map.q] = captureFocusedWindowToLund, [map.w] = capturePickedWindowToLund, [map.e] = captureAreaToLund, [map.r] = captureAreaMacshot, [map.t] = framedPickedToLund, [map.a] = captureAreaMacshot, [map.s] = function() hs.urlevent.openURL("macshot://history") end,
   }
   local watched = {}
   for _, code in ipairs({map["delete"], map.f4, map.k, map.tab, map.space, map.j, map.l, map.z, ouml, map.left, map.right, map.down, map.up, map.d, 44, 27}) do watched[code] = true end
@@ -758,6 +759,7 @@ do
   appByCode[map.b] = "Bitwarden"
   appByCode[map.w] = openWallpaperSettings
   watched[map.w] = true
+  appByCode[map.d] = focusLund
 
   -- An action either replaces the key (code and flags) or runs once and swallows it.
   -- Windows Terminal moves between panes with A + Space + J K L Ö, which arrives as Alt + arrow. Lund's keys are Cmd+H J K L.
@@ -797,10 +799,7 @@ do
     -- Option+Shift+Cmd+Q logs out at once, with no confirmation and no chance to save.
     if code == map.q and exactly(f, "alt", "shift", "cmd") then return {run = function() end} end
     if keyToCapture[code] and exactly(f, "alt", "cmd") then
-      return {run = function()
-        local capture = keyToCapture[code]
-        if type(capture) == "function" then capture() else post({"alt", "shift", "cmd"}, capture) end
-      end}
+      return {run = keyToCapture[code]}
     end
     if (code == map.j or code == ouml) and exactly(f, "ctrl", "alt", "cmd") then
       return {run = function() nudgeWindows(code == map.j and -1 or 1) end}
@@ -812,9 +811,9 @@ do
         end)
       end}
     end
-    -- The top-right key sends Ctrl+Alt+Shift+K and opens Convey Mac's keyboard cheat sheet (Cmd+Shift+§, key code 10).
+    -- The top-right key sends Ctrl+Alt+Shift+K and opens Convey Mac's cheat sheet (Cmd+Shift+J, key code 38).
     if code == map.k and exactly(f, "cmd", "alt", "shift") then
-      return {run = function() post({"cmd", "shift"}, 10) end}
+      return {run = function() post({"cmd", "shift"}, 38) end}
     end
     -- Layer 7 + 1 cycles VolumeGuard's headphone listening mode (Ctrl+Alt+Shift+§, key code 10).
     if code == map["1"] and exactly(f, "ctrl", "alt", "cmd") then
@@ -1091,12 +1090,13 @@ end):start()
 
 -- macOS steps volume and brightness in quarters when Option is held with Shift; the knob cannot send that conditionally.
 local fineKeys = {SOUND_UP = true, SOUND_DOWN = true, BRIGHTNESS_UP = true, BRIGHTNESS_DOWN = true}
--- Q10 M2 sends ctrl+alt; held with the volume knob it turns the knob into brightness.
+-- Q10 M2 sends ctrl+alt, the bottom-left Cmd key sends cmd; held with the volume knob either turns it into brightness.
+-- The event is reposted without cmd because Cmd+brightness-down toggles display mirroring.
 local brightnessOf = {SOUND_UP = "BRIGHTNESS_UP", SOUND_DOWN = "BRIGHTNESS_DOWN"}
 fineStepTap = hs.eventtap.new({hs.eventtap.event.types.systemDefined}, function(e)
   local k = e:systemKey()
   local f = e:getFlags()
-  if k and brightnessOf[k.key] and f.ctrl and f.alt and not f.cmd then
+  if k and brightnessOf[k.key] and ((f.ctrl and f.alt and not f.cmd) or (f.cmd and not f.ctrl and not f.alt)) then
     local ev = hs.eventtap.event.newSystemKeyEvent(brightnessOf[k.key], k.down)
     ev:setFlags(f.shift and {shift = true, alt = true} or {})
     ev:post()
@@ -1116,21 +1116,21 @@ hs.hotkey.bind(meh, 50, function()
   hs.eventtap.event.newKeyEvent(meh, 10, false):post()
 end)
 
--- M1 (Shift+Cmd) + the key above Tab opens macshot's history. The tap also swallows the chord before Convey Mac sees it (it listens for Shift+Cmd+§, key code 10).
--- Events Hammerspoon posts itself, like the Voyager's cheat sheet key, pass through to Convey.
+-- M1 (Shift+Cmd) or L2 (Alt+Shift+Cmd) + the key above Tab opens macshot's history.
+-- Events Hammerspoon posts itself pass through the tap.
 historyTap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(e)
   local code = e:getKeyCode()
   local f = e:getFlags()
-  if (code ~= 10 and code ~= 50) or not (f.cmd and f.shift and not f.alt and not f.ctrl) then return false end
+  if (code ~= 10 and code ~= 50) or not (f.cmd and f.shift and not f.ctrl) then return false end
   if e:getProperty(hs.eventtap.event.properties.eventSourceUnixProcessID) == hs.processInfo.processID then return false end
   if e:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat) == 0 then hs.urlevent.openURL("macshot://history") end
   return true
 end):start()
 
--- Q10 M5 sends Hyper+F15 and opens Convey Mac's keyboard cheat sheet. Convey listens for Shift+Cmd+§ (key code 10), which the tap above keeps for macshot history when typed.
+-- Q10 M5 sends Hyper+F15 and opens Convey Mac's cheat sheet (Shift+Cmd+J, key code 38).
 hs.hotkey.bind({"ctrl", "alt", "shift", "cmd"}, "f15", function()
-  hs.eventtap.event.newKeyEvent({"cmd", "shift"}, 10, true):post()
-  hs.eventtap.event.newKeyEvent({"cmd", "shift"}, 10, false):post()
+  hs.eventtap.event.newKeyEvent({"cmd", "shift"}, 38, true):post()
+  hs.eventtap.event.newKeyEvent({"cmd", "shift"}, 38, false):post()
 end)
 
 -- Q10 L1 (Ctrl+Alt+Cmd) + the key above Tab: screenshot the focused window, send it to Claude in Lund, then focus the window it was taken from.

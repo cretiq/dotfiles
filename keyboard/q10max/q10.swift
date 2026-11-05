@@ -1,5 +1,6 @@
-// Only VIA reads (0x01, 0x11, 0x12) and keymap writes (0x13, inside the 768-byte keymap, apply --yes only) are ever sent.
-// Knob, macros, RGB, settings and firmware stay untouched. Wired USB only: the 2.4 GHz receiver is a different PID.
+// Only VIA reads (0x01, 0x11, 0x12, 0x14) and two kinds of write are ever sent, each only with --yes:
+// keymap writes (0x13, inside the 768-byte keymap) and knob writes (0x15, knob 0, a layer's keycode copied from another layer).
+// Macros, RGB, settings and firmware stay untouched. Wired USB only: the 2.4 GHz receiver is a different PID.
 import Foundation
 import IOKit.hid
 
@@ -16,9 +17,21 @@ struct Q10Error: Error, CustomStringConvertible {
 
 func say(_ s: String) { print(s) }
 
+var knobAllowed: Set<Int> = []
+
 func validate(_ req: [UInt8], allowWrite: Bool) throws {
     guard let c = req.first else { throw Q10Error("empty request") }
     if c == 0x01 || c == 0x11 { return }
+    if c == 0x14 || c == 0x15 {
+        guard req.count >= 4 else { throw Q10Error("request too short") }
+        guard Int(req[1]) < layerCount, req[2] == 0, req[3] <= 1 else { throw Q10Error("knob layer, index or direction out of range") }
+        if c == 0x15 {
+            guard allowWrite else { throw Q10Error("write not allowed") }
+            guard req.count == 6 else { throw Q10Error("knob write must be 6 bytes") }
+            guard knobAllowed.contains((Int(req[4]) << 8) | Int(req[5])) else { throw Q10Error("keycode was not read from the source layer") }
+        }
+        return
+    }
     if c == 0x12 || c == 0x13 {
         guard req.count >= 4 else { throw Q10Error("request too short") }
         let off = (Int(req[1]) << 8) | Int(req[2])
@@ -67,7 +80,7 @@ final class Device {
         box.data = nil
         let r = IOHIDDeviceSetReport(dev, kIOHIDReportTypeOutput, 0, out, 32)
         guard r == kIOReturnSuccess else { throw Q10Error(String(format: "write failed, IOReturn 0x%08X", r)) }
-        let echo = req[0] == 0x12 || req[0] == 0x13 ? 4 : 1
+        let echo = [0x12, 0x13, 0x14, 0x15].contains(Int(req[0])) ? 4 : 1
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
             CFRunLoopRunInMode(.defaultMode, 0.005, false)
@@ -124,6 +137,15 @@ func readKeymap(_ dev: Device) throws -> [UInt8] {
     return buf
 }
 
+func readKnob(_ dev: Device) throws -> [[Int]] {
+    try (0..<layerCount).map { l in
+        try (0...1).map { dir in
+            let r = try dev.xfer([0x14, UInt8(l), 0, UInt8(dir)])
+            return (Int(r[4]) << 8) | Int(r[5])
+        }
+    }
+}
+
 func cellOffset(_ l: Int, _ r: Int, _ c: Int) -> Int { ((l * rowCount + r) * colCount + c) * 2 }
 
 func readJSONCells(_ path: String) throws -> [Int: Int] {
@@ -172,6 +194,11 @@ func selftest() throws {
         Case(name: "set keyboard value 0x03", req: [0x03, 0, 0, 0], write: true),
         Case(name: "set keycode 0x05", req: [0x05, 0, 0, 0, 0], write: true),
         Case(name: "set encoder 0x15", req: [0x15, 0, 0, 0, 0, 0], write: true),
+        Case(name: "knob write, keycode not read from the source layer", req: [0x15, 3, 0, 0, 0, 0xBB], write: true),
+        Case(name: "knob write layer 4", req: [0x15, 4, 0, 0, 0, 0xAA], write: true),
+        Case(name: "knob write encoder 1", req: [0x15, 3, 1, 0, 0, 0xAA], write: true),
+        Case(name: "knob write without allow flag", req: [0x15, 3, 0, 0, 0, 0xAA], write: false),
+        Case(name: "knob read layer 4", req: [0x14, 4, 0, 0], write: false),
         Case(name: "keymap write without allow flag", req: [0x13, 0, 0, 2, 0, 0], write: false),
         Case(name: "keymap write size 29", req: [0x13, 0, 0, 29] + [UInt8](repeating: 0, count: 29), write: true),
         Case(name: "keymap write size 0", req: [0x13, 0, 0, 0], write: true),
@@ -184,7 +211,11 @@ func selftest() throws {
         Case(name: "layer count 0x11", req: [0x11], write: false),
         Case(name: "keymap read 0..28", req: [0x12, 0, 0, 28], write: false),
         Case(name: "keymap write 140..168 (with flag)", req: [0x13, 0, 140, 28] + [UInt8](repeating: 0, count: 28), write: true),
+        Case(name: "knob read layer 3 clockwise", req: [0x14, 3, 0, 1], write: false),
+        Case(name: "knob write layer 3 with a keycode from the source layer (with flag)", req: [0x15, 3, 0, 1, 0, 0xAA], write: true),
     ]
+    knobAllowed = [0xAA]
+    defer { knobAllowed = [] }
     var ok = true
     for c in blocked {
         do { try validate(c.req, allowWrite: c.write); say("ALLOWED (BAD)  \(c.name)"); ok = false }
@@ -228,6 +259,40 @@ func run() throws {
         let d = diffKeymap(buf, cells)
         say("\(cells.count) cells compared, \(d.count) differ")
         for x in d.prefix(40) { say(String(format: "%@  device 0x%04x  file 0x%04x", describe(x.off), x.dev, x.want)) }
+    case "knob":
+        let dev = try openKeyboard()
+        defer { dev.close() }
+        let keymapBefore = try readKeymap(dev)
+        let before = try readKnob(dev)
+        for (l, p) in before.enumerated() { say(String(format: "L%d knob  ccw 0x%04x  cw 0x%04x", l, p[0], p[1])) }
+        guard args.dropFirst().first == "copy" else { return }
+        guard let from = Int(arg("--from", in: args) ?? ""), let to = Int(arg("--to", in: args) ?? ""),
+              (0..<layerCount).contains(from), (0..<layerCount).contains(to), from != to else { throw Q10Error("copy needs --from N --to M, two different layers 0..3") }
+        let plan = (0...1).filter { before[to][$0] != before[from][$0] }
+        if plan.isEmpty { say("L\(to) already matches L\(from). Nothing to write."); return }
+        for dir in plan { say(String(format: "L%d %@ would change 0x%04x -> 0x%04x", to, dir == 0 ? "ccw" : "cw", before[to][dir], before[from][dir])) }
+        if !args.contains("--yes") { say("Dry run only. Re-run with --yes to write."); return }
+        try FileManager.default.createDirectory(at: supportDir, withIntermediateDirectories: true)
+        let stamp = DateFormatter(); stamp.dateFormat = "yyyyMMdd-HHmmss"
+        let bak = supportDir.appendingPathComponent("backup-knob-\(stamp.string(from: Date())).txt")
+        try before.enumerated().map { String(format: "L%d ccw 0x%04x cw 0x%04x", $0.offset, $0.element[0], $0.element[1]) }.joined(separator: "\n").write(to: bak, atomically: true, encoding: .utf8)
+        say("Backup of the current knob map: \(bak.path)")
+        knobAllowed = Set(before[from])
+        dev.allowWrite = true
+        for dir in plan {
+            let code = before[from][dir]
+            _ = try dev.xfer([0x15, UInt8(to), 0, UInt8(dir), UInt8(code >> 8), UInt8(code & 0xFF)])
+        }
+        dev.allowWrite = false
+        let after = try readKnob(dev)
+        var want = before
+        for dir in plan { want[to][dir] = before[from][dir] }
+        let keymapAfter = try readKeymap(dev)
+        if after != want || keymapAfter != keymapBefore {
+            say("VERIFY FAILED. Restore with the Launcher import, or the values in \(bak.path).")
+            exit(2)
+        }
+        say("Verified: only L\(to)'s knob changed, the keymap is untouched.")
     case "apply":
         guard let file = arg("-f", in: args) else { throw Q10Error("-f is required") }
         let yes = args.contains("--yes")
@@ -275,7 +340,7 @@ func run() throws {
         }
         say("Verified: only the planned bytes changed and the keyboard matches the file.")
     default:
-        throw Q10Error("unknown command '\(mode)'. Use probe, selftest, dump -f x.json, apply -f x.json [--yes].")
+        throw Q10Error("unknown command '\(mode)'. Use probe, selftest, dump -f x.json, apply -f x.json [--yes], knob [copy --from N --to M [--yes]].")
     }
 }
 
