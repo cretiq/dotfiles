@@ -196,6 +196,7 @@ alias ch='claude --model claude-haiku-5-5 --effort high'
 alias ccc='cd ~/claude-scratch && claude --model claude-sonnet-5-5 --effort high'
 alias cdot='cd ~/.dotfiles && claude --model claude-sonnet-5-5 --effort high'
 alias ccv='cd /mnt/c/Dev/Own/Convey && claude --model claude-sonnet-5-5 --effort high'
+alias cdmntdev='cd /mnt/c/Dev/Own'
 alias ctb='cd ~/Dev/treeboard-ratatui && claude --model claude-sonnet-5-5 --effort high'
 
 # Needs the keyboard on a USB cable: the 2.4 GHz receiver cannot write the keymap.
@@ -219,6 +220,16 @@ wt() {
 
 alias cco='node ~/Dev/cco-tui/bin/cli.mjs'
 alias tb='cargo run --release --manifest-path ~/Dev/treeboard-ratatui/Cargo.toml'
+# Pixel office game (Godot on Windows), fed by a running tb. `office -- --fake` = demo.
+# Started by Windows (Start-Process), not as a child of this shell, so closing the
+# terminal leaves the game running and it never reads this terminal's keys.
+office() {
+  local godot=(/mnt/c/Users/*/AppData/Local/Microsoft/WinGet/Packages/GodotEngine.GodotEngine_*/Godot_v4.7.2-stable_win64.exe)
+  local args="'--path','\"$(wslpath -w ~/Dev/treeboard-office)\"'" a
+  for a in "$@"; do args+=",'$a'"; done
+  /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -NoProfile -NonInteractive -Command \
+    "Start-Process -FilePath '$(wslpath -w "$godot[1]")' -ArgumentList $args" </dev/null >/dev/null 2>&1
+}
 alias w='worktree -w'
 alias cdwt='cd ~/.local/src/wt'
 
@@ -239,3 +250,6 @@ fi
 
 # Claude Code gateway auth (gitignored secret)
 [ -f ~/.claude/.env.secret ] && source ~/.claude/.env.secret
+
+# WSL: keep cargo build output on the Linux disk (NTFS via /mnt/c is ~10-20x slower)
+[[ -n "$WSL_DISTRO_NAME" ]] && export CARGO_TARGET_DIR="$HOME/.cache/cargo-target"

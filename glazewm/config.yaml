@@ -107,7 +107,7 @@ window_behavior:
   state_defaults:
     floating:
       # Whether to center floating windows by default.
-      centered: true
+      centered: false
 
       # Whether to show floating windows as always on top.
       shown_on_top: false
@@ -148,10 +148,16 @@ window_rules:
         window_class: { equals: 'MozillaDialogClass' }
         window_title: { not_regex: '[Pp]icture.in.[Pp]icture' }
 
+  # Treeboard office frame captures (tools/capture.sh) go to a workspace never looked at.
+  # No ^ anchor: Movie Maker prefixes the title with "MovieWriter: Frame N ... - ".
+  - commands: ['move --workspace 9']
+    match:
+      - window_title: { regex: 'TBO Capture' }
+
   - commands: ['set-floating']
     match:
       - window_process: { equals: 'ShareX' }
-        window_title: { regex: '^ShareX - Image Editor' }
+        window_title: { regex: '^ShareX - Image (Editor|history)' }
 
   - commands: ['ignore']
     match:
@@ -233,11 +239,6 @@ keybindings:
   # the name 'resize'.
   - commands: ['wm-enable-binding-mode --name resize']
     bindings: ['alt+r']
-
-  # Disables window management and all other keybindings until alt+shift+p
-  # is pressed again.
-  - commands: ['wm-toggle-pause']
-    bindings: ['alt+shift+p']
 
   # Change tiling direction. This determines where new tiling windows will
   # be inserted.

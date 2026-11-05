@@ -7,7 +7,10 @@ Persistent
 ; Display and device changes arrive as window messages; the 30 s re-check covers any that are missed.
 ; The Q10 check is not in it: its WMI query (Win32_PnPEntity, 0.2-0.6 s) runs at start and on device-change messages only.
 logFile := EnvGet("LOCALAPPDATA") "\watchers.log"
-Log(msg) => FileAppend(FormatTime(, "yyyy-MM-dd HH:mm:ss") "  " msg "`n", logFile)
+Log(msg) {
+    ; A reader (tail, editor, antivirus) can hold the file open: error 32 must not kill the watcher.
+    try FileAppend(FormatTime(, "yyyy-MM-dd HH:mm:ss") "  " msg "`n", logFile)
+}
 #Include arrange-windows.ahk
 #Include focus-border.ahk
 #Include theme-sync.ahk
@@ -38,7 +41,8 @@ InternalPanelIds() {
     return ids
 }
 
-PanelOnDesktop() {
+ActiveDisplayDevices() {
+    ids := []
     dd := Buffer(840)  ; DISPLAY_DEVICEW: StateFlags at 324, DeviceID at 328
     Loop MonitorGetCount() {
         adapter := MonitorGetName(A_Index)
@@ -48,9 +52,49 @@ PanelOnDesktop() {
             if !DllCall("EnumDisplayDevicesW", "Str", adapter, "UInt", i++, "Ptr", dd, "UInt", 1)
                 break
             if (NumGet(dd, 324, "UInt") & 1)
-                && RegExMatch(StrGet(dd.Ptr + 328, 128, "UTF-16"), "i)DISPLAY#([^#]+#[^#]+)#", &m)
-                && internalPanels.Has(StrUpper(StrReplace(m[1], "#", "\")))
-                return true
+                ids.Push(StrGet(dd.Ptr + 328, 128, "UTF-16"))
+        }
+    }
+    return ids
+}
+
+PanelOnDesktop() {
+    for id in ActiveDisplayDevices() {
+        if RegExMatch(id, "i)DISPLAY#([^#]+#[^#]+)#", &m) && internalPanels.Has(StrUpper(StrReplace(m[1], "#", "\")))
+            return true
+    }
+    return false
+}
+
+; GlazeWM skips every monitor without an active display device and, with none left, dies at start with the modal
+; "Failed to get container to focus." (the process stays alive until OK is clicked, so no re-check ever restarts it).
+; Windows is in that state for a while after a dock or lid change: wait for an active device, and dismiss that
+; dialog and retry if it still appears.
+StartGlazeWM() {
+    Loop 3 {
+        attempt := A_Index
+        Sleep 5000
+        if (PanelOnDesktop() || !ActiveDisplayDevices().Length) {
+            Log("desk mode not held after settle: GlazeWM start skipped")
+            return false
+        }
+        state := MonitorGetCount() " monitors, " ActiveDisplayDevices().Length " active display devices"
+        Run '"' glazewmDir '\glazewm.exe"'
+        if !DismissStartFailure()
+            return true
+        Log("GlazeWM died at start, attempt " attempt " (" state ")")
+    }
+    return false
+}
+
+DismissStartFailure() {
+    dialog := "Fatal error ahk_exe glazewm.exe"
+    Loop 20 {
+        Sleep 250
+        if WinExist(dialog) && InStr(WinGetText(dialog), "container to focus") {
+            WinClose(dialog)
+            ProcessWaitClose("glazewm.exe", 5)
+            return true
         }
     }
     return false
@@ -78,14 +122,8 @@ ApplyMode() {
     desk := !PanelOnDesktop()
     running := ProcessExist("glazewm.exe")
     if (desk && !running) {
-        ; Waking the laptop briefly drops the panel from the desktop; GlazeWM started then dies with
-        ; "Failed to get container to focus". Start it only if desk mode still holds after the monitors settle.
-        Sleep 5000
-        if (PanelOnDesktop() || !MonitorGetCount()) {
-            Log("desk mode not held after settle: GlazeWM start skipped")
+        if !StartGlazeWM()
             return
-        }
-        Run '"' glazewmDir '\glazewm.exe"'
     } else if (!desk && running)
         Run '"' glazewmDir '\cli\glazewm.exe" command wm-exit', , "Hide"
     mode := desk ? "desk" : "laptop"
@@ -93,8 +131,7 @@ ApplyMode() {
         return
     leftDesk := (appliedMode = "desk" && !desk)
     appliedMode := mode
-    preset := lastKind != "" ? lastKind : desk ? "voyager" : "standard"
-    Log(mode " mode: GlazeWM " (desk ? "on" : "off") ", " preset " preset")
+    Log(mode " mode: GlazeWM " (desk ? "on" : "off") ", " WantedPreset(desk) " preset")
     if leftDesk {
         ; wm-exit is asynchronous; moving windows while GlazeWM still runs makes it re-tile them.
         Loop 30 {
@@ -106,8 +143,11 @@ ApplyMode() {
         Log("arranged windows:`n" ArrangeWindows())
     }
     TrayTip "GlazeWM " (desk ? "on" : "off") ".", desk ? "Desk mode" : "Laptop screen"
-    ApplyPreset(preset)
+    ; Read now, not before the wait above: a keyboard switch during it must not be overwritten.
+    ApplyPreset(WantedPreset(desk))
 }
+
+WantedPreset(desk) => lastKind != "" ? lastKind : desk ? "voyager" : "standard"
 
 ; Mode changes and keyboard switches both land here; a call made while set-all-keymap.sh runs is picked up
 ; by the running call, so two runs never toggle the same files at once.
@@ -251,6 +291,9 @@ SyncSpeakerGuard() {
 }
 
 SyncAll() {
+    ; OnRawInput ignores the keyboard already in lastKind, so a preset that drifted from it is never re-triggered by typing.
+    if (lastKind != "" && lastKind != appliedPreset)
+        ApplyPreset(lastKind)
     SyncMode()
     SyncSpeakerGuard()
 }
