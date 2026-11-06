@@ -334,10 +334,32 @@ for key, text in pairs(commands) do
 end
 
 -- Claude Code queues a command sent mid-turn and runs it after the turn, so /copy picks up the generated title.
+-- /rename stays typed in the prompt while the title is generated; once /copy puts a one-line title on the clipboard it is pasted and submitted.
+-- A clipboard change from anything else (a long or multi-line copy) is ignored, and nothing is pasted if Lund is not in front or its window changed.
+local titlePasteTimeoutSeconds = 180
+-- A timer held only by a local is garbage collected and never fires, so this one is a global.
+local function pasteTitleWhenCopied(before, window)
+  local waited = 0
+  if titlePasteTimer then titlePasteTimer:stop() end
+  titlePasteTimer = hs.timer.doEvery(0.25, function()
+    waited = waited + 0.25
+    if waited > titlePasteTimeoutSeconds then return titlePasteTimer:stop() end
+    if hs.pasteboard.changeCount() == before then return end
+    local text = hs.pasteboard.readString() or ""
+    if #text == 0 or #text > 60 or text:find("\n") then return end
+    titlePasteTimer:stop()
+    local win = hs.window.focusedWindow()
+    if not isLund(hs.application.frontmostApplication()) or not (win and window and win:id() == window:id()) then return end
+    hs.eventtap.keyStroke({"cmd"}, "v", 0)
+    hs.timer.doAfter(0.15, function() hs.eventtap.keyStroke({}, "return", 0) end)
+  end)
+end
+
 local function titleCopyRename(titleCommand)
+  local before, window = hs.pasteboard.changeCount(), hs.window.focusedWindow()
   typeCommand(titleCommand, true, function()
     typeCommand("/copy ", true, function()
-      typeCommand("/rename ", false)
+      typeCommand("/rename ", false, function() pasteTitleWhenCopied(before, window) end)
     end)
   end)
 end
@@ -1058,10 +1080,20 @@ do
   end)
 end
 
+local function externalScreenAttached()
+  for _, s in ipairs(hs.screen.allScreens()) do
+    if not s:name():find("^Built%-in") then return true end
+  end
+  return false
+end
+
 local function syncLaptop()
   if voyagerAttached() and not q10ReceiverAttached() then voyagerKeyTap:start() else voyagerKeyTap:stop() end
   if varmiloAttached() or (voyagerAttached() and not q10ReceiverAttached()) then voyagerScrollTap:start() else voyagerScrollTap:stop() end
-  hs.task.new(aerospaceBin, nil, {"mode", q10Attached() and "main" or "laptop"}):start()
+  local tiling = externalScreenAttached()
+  hs.task.new(aerospaceBin, function()
+    if tiling then hs.task.new(aerospaceBin, nil, {"mode", q10Attached() and "main" or "laptop"}):start() end
+  end, {"enable", tiling and "on" or "off"}):start()
   for _, k in ipairs(laptopKeys) do
     if q10Attached() then k:disable() else k:enable() end
   end
@@ -1082,6 +1114,9 @@ keymapWatcher = hs.usb.watcher.new(function(e)
 end):start()
 syncVimKeymap()
 syncLaptop()
+
+-- AeroSpace tiles only while an external screen is attached; the built-in screen alone is left to macOS.
+screenWatcher = hs.screen.watcher.new(function() hs.timer.doAfter(1, syncLaptop) end):start()
 
 -- AeroSpace starts in main mode, so set the mode again when it launches.
 aerospaceWatcher = hs.application.watcher.new(function(name, event)
