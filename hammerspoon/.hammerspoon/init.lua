@@ -1141,6 +1141,7 @@ screenWatcher = hs.screen.watcher.new(function() hs.timer.doAfter(1, syncLaptop)
 -- which stay off while the Q10's dongle is plugged in. Shift selects on the arrow keys.
 -- J K L Ö: arrows. U I O P: Cmd+Up, Option+Left, Option+Right, Cmd+Down. S D: previous and next tab.
 -- A bare § is VoxFlow dictation, so the § character is not typeable on this keyboard; Shift+§ still types ½.
+-- Command key + § screenshots the focused window, sends it to Claude in Lund and focuses the window it was taken from, like left space + § on the Q10.
 -- The Option key is fn: fn + key runs the AeroSpace chords of fnActions (JKLÖ for focus).
 -- Key-up must map to the same key even if Option is released first, so the target is remembered per key code.
 local keymap = hs.keycodes.map
@@ -1194,6 +1195,14 @@ magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp}, funct
       return true
     end
     if not (f.alt and not (f.cmd or f.ctrl or f.fn)) then return false end
+    if code == magicDictationCode then
+      if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then
+        local back = hs.window.focusedWindow()
+        captureFocusedWindow(function() pasteToLund(back) end)
+      end
+      magicPending[code] = "swallow"
+      return true
+    end
     if f.shift and magicCommands[code] then
       if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then magicCommands[code]() end
       magicPending[code] = "swallow"
