@@ -37,8 +37,8 @@ local function inTransportFever() return hs.application.frontmostApplication():n
 
 -- Plain F keys that Hammerspoon rebinds, off while Transport Fever 3 is in front so it gets real F1-F12.
 local plainFKeys = {}
-local function bindFKey(key, pressed, repeated)
-  local hotkey = hs.hotkey.new({}, key, pressed, nil, repeated)
+local function bindFKey(key, pressed, repeated, released)
+  local hotkey = hs.hotkey.new({}, key, pressed, released, repeated)
   table.insert(plainFKeys, hotkey)
   if not inTransportFever() then hotkey:enable() end
 end
@@ -274,7 +274,8 @@ bindFKey("f8", mediaKey("PLAY"))
 bindFKey("f9", mediaKey("NEXT"))
 bindFKey("f10", mediaKey("MUTE"))
 volumeDownTap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(e)
-  if e:getKeyCode() == hs.keycodes.map.f11 and next(e:getFlags()) == nil and not inTransportFever() then
+  local f = e:getFlags()
+  if e:getKeyCode() == hs.keycodes.map.f11 and not (f.cmd or f.alt or f.ctrl or f.shift) and not inTransportFever() then
     mediaKey("SOUND_DOWN")()
     return true
   end
@@ -319,6 +320,13 @@ local function typeCommand(text, submit, done)
     end)
   end)
 end
+
+-- VoxFlow's hotkey is Ctrl+Shift+Space, sent as down on press and up on release so its smart hotkey toggles on a tap and does push-to-talk on a hold.
+local function postDictationKey(isDown)
+  hs.eventtap.event.newKeyEvent({"ctrl", "shift"}, "space", isDown):post()
+end
+-- F5 is the dictation key on every keyboard; the Magic Keyboard's F5 arrives as a plain F5 with the fn flag.
+bindFKey("f5", function() postDictationKey(true) end, nil, function() postDictationKey(false) end)
 
 local commands = {
   n = "/next ",
@@ -491,8 +499,12 @@ local function varmiloAttached()
   return false
 end
 
+-- The Magic Keyboard with Touch ID is Bluetooth, so hs.usb never lists it. macOS reports its keyboard type as 107, and typing on it counts as desk use.
+local magicKeyboardType = 107
+local magicKeyboardInUse = false
+
 local function syncVimKeymap()
-  local want = (q10Attached() or voyagerAttached()) and "custom" or "default"
+  local want = (q10Attached() or voyagerAttached() or magicKeyboardInUse) and "custom" or "default"
   local f = io.open(keymapStateFile)
   local have = f and f:read("*l")
   if f then f:close() end
@@ -747,10 +759,7 @@ do
   -- VoxFlow's hotkey is Ctrl+Shift+Space. The firmware combo Space + E sends Ctrl+E, read as Cmd+E, and it becomes that hotkey:
   -- down on press, up on release, so VoxFlow's smart hotkey toggles on a tap and does push-to-talk on a hold.
   -- The homerow D (Cmd) held with E makes the same Cmd+E, so that chord starts dictation too.
-  local function postDictationKey(isDown)
-    hs.eventtap.event.newKeyEvent({"ctrl", "shift"}, map.space, isDown):post()
-  end
-  local dictation = {run = function() postDictationKey(true) end, up = function() postDictationKey(false) end}
+  local dictation = {run =function() postDictationKey(true) end, up = function() postDictationKey(false) end}
 
   -- GlazeWM's keys from the Windows machine as AeroSpace commands: Option + key runs the first, Option+Control (A+S held) + key the second.
   -- Left out: resize mode, cycle focus, centered floating and moving a workspace between monitors (no AeroSpace match, or no Voyager key).
@@ -1117,6 +1126,95 @@ syncLaptop()
 
 -- AeroSpace tiles only while an external screen is attached; the built-in screen alone is left to macOS.
 screenWatcher = hs.screen.watcher.new(function() hs.timer.doAfter(1, syncLaptop) end):start()
+
+-- Magic Keyboard keys on the Command key (macOS sends Option for it), the same as the Q10's L2 layer. They live in this tap instead of laptopKeys,
+-- which stay off while the Q10's dongle is plugged in. Shift selects on the arrow keys.
+-- J K L Ö: arrows. U I O P: Cmd+Up, Option+Left, Option+Right, Cmd+Down. S D: previous and next tab. §: VoxFlow dictation.
+-- Key-up must map to the same key even if Option is released first, so the target is remembered per key code.
+local keymap = hs.keycodes.map
+local magicKeys = {
+  [keymap.j] = {code = keymap.left, shift = true},
+  [keymap.k] = {code = keymap.down, shift = true},
+  [keymap.l] = {code = keymap.up, shift = true},
+  [41] = {code = keymap.right, shift = true},
+  [keymap.u] = {code = keymap.up, flags = {cmd = true}, shift = true},
+  [keymap.i] = {code = keymap.left, flags = {alt = true}, shift = true},
+  [keymap.o] = {code = keymap.right, flags = {alt = true}, shift = true},
+  [keymap.p] = {code = keymap.down, flags = {cmd = true}, shift = true},
+  [keymap.s] = {code = keymap.tab, flags = {ctrl = true, shift = true}},
+  [keymap.d] = {code = keymap.tab, flags = {ctrl = true}},
+}
+local magicDictationCode = 10
+-- Command key + Shift + letter types the same slash commands as the Q10's right big key. They win over the Shift-selecting arrows on O and D.
+local magicCommands = {}
+for key, text in pairs(commands) do
+  magicCommands[keymap[key]] = function() whenModifiersReleased(function() typeCommand(text, true) end) end
+end
+magicCommands[keymap.z] = function() whenModifiersReleased(function() titleCopyRename("/generate:short-title ") end) end
+-- Command key + F1 and F2 are brightness down and up; plain F1 and F2 stay minimize and Mission Control.
+local magicBrightness = {[keymap.f1] = mediaKey("BRIGHTNESS_DOWN"), [keymap.f2] = mediaKey("BRIGHTNESS_UP")}
+local magicPending = {}
+local eventTypes = hs.eventtap.event.types
+local eventProps = hs.eventtap.event.properties
+-- The Magic Keyboard's Option key sends Globe (fn): a modifier press, not a key, so it is VoxFlow dictation from the flags event (down on press, up on release).
+local magicFnHeld = false
+magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp, eventTypes.flagsChanged}, function(e)
+  if e:getProperty(eventProps.eventSourceUnixProcessID) == hs.processInfo.processID then return false end
+  local isMagic = e:getProperty(eventProps.keyboardEventKeyboardType) == magicKeyboardType
+  if e:getType() == eventTypes.flagsChanged then
+    if not (isMagic and e:getKeyCode() == keymap.fn) then return false end
+    local down = e:getFlags().fn == true
+    if down ~= magicFnHeld then
+      magicFnHeld = down
+      postDictationKey(down)
+    end
+    return true
+  end
+  local isDown = e:getType() == eventTypes.keyDown
+  if isDown and isMagic ~= magicKeyboardInUse then
+    magicKeyboardInUse = isMagic
+    syncVimKeymap()
+  end
+  if not isMagic then return false end
+  local code = e:getKeyCode()
+  if isDown then
+    local f = e:getFlags()
+    -- F-keys carry the fn flag, so this comes before the check below that rejects it. Held, they repeat.
+    local brightness = f.alt and not (f.cmd or f.ctrl) and magicBrightness[code]
+    if brightness then
+      brightness()
+      magicPending[code] = "swallow"
+      return true
+    end
+    if not (f.alt and not (f.cmd or f.ctrl or f.fn)) then return false end
+    if f.shift and magicCommands[code] then
+      if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then magicCommands[code]() end
+      magicPending[code] = "swallow"
+      return true
+    end
+    if code == magicDictationCode then
+      if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then postDictationKey(true) end
+      magicPending[code] = "dictation"
+      return true
+    end
+    local spec = magicKeys[code]
+    if not spec then return false end
+    local flags = {}
+    for name, on in pairs(spec.flags or {}) do flags[name] = on end
+    if spec.shift and f.shift then flags.shift = true end
+    magicPending[code] = spec
+    return true, {e:copy():setKeyCode(spec.code):setFlags(flags)}
+  end
+  local pending = magicPending[code]
+  magicPending[code] = nil
+  if not pending then return false end
+  if pending == "dictation" then
+    postDictationKey(false)
+    return true
+  end
+  if pending == "swallow" then return true end
+  return true, {e:copy():setKeyCode(pending.code):setFlags({})}
+end):start()
 
 -- AeroSpace starts in main mode, so set the mode again when it launches.
 aerospaceWatcher = hs.application.watcher.new(function(name, event)
