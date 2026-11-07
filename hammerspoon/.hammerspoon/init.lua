@@ -1165,9 +1165,10 @@ for key, text in pairs(commands) do
 end
 magicCommands[keymap.z] = function() whenModifiersReleased(function() titleCopyRename("/generate:short-title ") end) end
 -- Command key + F1 and F2 are brightness down and up; plain F1 and F2 stay minimize and Mission Control.
--- Adding Shift steps F1, F2, F11 and F12 in quarters, the Option+Shift fine step of macOS.
+-- Shift + F11 and F12 step the volume in quarters, and Command key + Shift + F1 and F2 step the brightness in quarters, the Option+Shift fine step of macOS.
 local magicSteps = {[keymap.f1] = "BRIGHTNESS_DOWN", [keymap.f2] = "BRIGHTNESS_UP", [keymap.f11] = "SOUND_DOWN", [keymap.f12] = "SOUND_UP"}
 -- Option key (fn) + S and D send Lund's previous and next waiting-agent tab, the same chords as left space + S and D on the Q10.
+-- Option key (fn) + Shift + T sends Convey's translator hotkey (Ctrl+Alt+Shift+Cmd+T), like left space + Shift + T on the Q10.
 local magicWaitingTab = {[keymap.s] = "s", [keymap.d] = "d"}
 local magicPending = {}
 local eventTypes = hs.eventtap.event.types
@@ -1189,6 +1190,11 @@ magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp}, funct
       magicPending[code] = "dictation"
       return true
     end
+    if code == keymap.t and f.fn and f.shift and not (f.cmd or f.alt or f.ctrl) then
+      if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then hs.eventtap.keyStroke({"ctrl", "alt", "shift", "cmd"}, "t", 0) end
+      magicPending[code] = "swallow"
+      return true
+    end
     local waitingTab = f.fn and not (f.cmd or f.alt or f.ctrl or f.shift) and magicWaitingTab[code]
     if waitingTab then
       if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then hs.eventtap.keyStroke({"ctrl", "alt", "cmd"}, waitingTab, 0) end
@@ -1197,11 +1203,16 @@ magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp}, funct
     end
     if f.fn and fnChord(e, magicFnActions) then return true end
     -- F-keys carry the fn flag, so this comes before the check below that rejects it. Held, they repeat.
-    local step = f.alt and not (f.cmd or f.ctrl) and magicSteps[code]
-    if step and (f.shift or code == keymap.f1 or code == keymap.f2) then
-      if f.shift then fineVolumeKey(step) else mediaKey(step)() end
-      magicPending[code] = "swallow"
-      return true
+    local step = magicSteps[code]
+    if step and not (f.cmd or f.ctrl) then
+      local volume = code == keymap.f11 or code == keymap.f12
+      local fine = f.shift and (volume or f.alt)
+      local normal = f.alt and not f.shift and not volume
+      if fine or normal then
+        if fine then fineVolumeKey(step) else mediaKey(step)() end
+        magicPending[code] = "swallow"
+        return true
+      end
     end
     if not (f.alt and not (f.cmd or f.ctrl or f.fn)) then return false end
     if code == magicDictationCode then
