@@ -1167,6 +1167,8 @@ magicCommands[keymap.z] = function() whenModifiersReleased(function() titleCopyR
 -- Command key + F1 and F2 are brightness down and up; plain F1 and F2 stay minimize and Mission Control.
 -- Adding Shift steps F1, F2, F11 and F12 in quarters, the Option+Shift fine step of macOS.
 local magicSteps = {[keymap.f1] = "BRIGHTNESS_DOWN", [keymap.f2] = "BRIGHTNESS_UP", [keymap.f11] = "SOUND_DOWN", [keymap.f12] = "SOUND_UP"}
+-- Option key (fn) + S and D send Lund's previous and next waiting-agent tab, the same chords as left space + S and D on the Q10.
+local magicWaitingTab = {[keymap.s] = "s", [keymap.d] = "d"}
 local magicPending = {}
 local eventTypes = hs.eventtap.event.types
 local eventProps = hs.eventtap.event.properties
@@ -1185,6 +1187,12 @@ magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp}, funct
     if code == magicDictationCode and not (f.cmd or f.alt or f.ctrl or f.shift or f.fn) then
       if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then postDictationKey(true) end
       magicPending[code] = "dictation"
+      return true
+    end
+    local waitingTab = f.fn and not (f.cmd or f.alt or f.ctrl or f.shift) and magicWaitingTab[code]
+    if waitingTab then
+      if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then hs.eventtap.keyStroke({"ctrl", "alt", "cmd"}, waitingTab, 0) end
+      magicPending[code] = "swallow"
       return true
     end
     if f.fn and fnChord(e, magicFnActions) then return true end
