@@ -1165,7 +1165,8 @@ for key, text in pairs(commands) do
 end
 magicCommands[keymap.z] = function() whenModifiersReleased(function() titleCopyRename("/generate:short-title ") end) end
 -- Command key + F1 and F2 are brightness down and up; plain F1 and F2 stay minimize and Mission Control.
-local magicBrightness = {[keymap.f1] = mediaKey("BRIGHTNESS_DOWN"), [keymap.f2] = mediaKey("BRIGHTNESS_UP")}
+-- Adding Shift steps F1, F2, F11 and F12 in quarters, the Option+Shift fine step of macOS.
+local magicSteps = {[keymap.f1] = "BRIGHTNESS_DOWN", [keymap.f2] = "BRIGHTNESS_UP", [keymap.f11] = "SOUND_DOWN", [keymap.f12] = "SOUND_UP"}
 local magicPending = {}
 local eventTypes = hs.eventtap.event.types
 local eventProps = hs.eventtap.event.properties
@@ -1188,9 +1189,9 @@ magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp}, funct
     end
     if f.fn and fnChord(e, magicFnActions) then return true end
     -- F-keys carry the fn flag, so this comes before the check below that rejects it. Held, they repeat.
-    local brightness = f.alt and not (f.cmd or f.ctrl) and magicBrightness[code]
-    if brightness then
-      brightness()
+    local step = f.alt and not (f.cmd or f.ctrl) and magicSteps[code]
+    if step and (f.shift or code == keymap.f1 or code == keymap.f2) then
+      if f.shift then fineVolumeKey(step) else mediaKey(step)() end
       magicPending[code] = "swallow"
       return true
     end
