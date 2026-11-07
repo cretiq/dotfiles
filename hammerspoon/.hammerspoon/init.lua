@@ -630,11 +630,11 @@ local fnActions = {
 for i = 1, 9 do
   fnActions[hs.keycodes.map[tostring(i)]] = {"workspace " .. i, "move-node-to-workspace " .. i}
 end
-fnTap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(e)
+local function fnChord(e, actions)
   local f = e:getFlags()
   if not f.fn or f.cmd or f.alt or f.ctrl then return false end
   local code = e:getKeyCode()
-  local command = fnActions[code] and fnActions[code][f.shift and 2 or 1]
+  local command = actions[code] and actions[code][f.shift and 2 or 1]
   if code == hs.keycodes.map.m and not f.shift then
     if e:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat) == 0 then minimizeFocused() end
     return true
@@ -644,7 +644,17 @@ fnTap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(e)
     hs.task.new("/bin/sh", nil, {"-c", "export PATH=/opt/homebrew/bin:$PATH; aerospace " .. command}):start()
   end
   return true
-end)
+end
+fnTap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(e) return fnChord(e, fnActions) end)
+
+-- The Magic Keyboard's Option key is fn, and its focus keys are J K L Ö like the Q10 and Voyager instead of H J K L.
+local magicFnActions = {}
+for code, spec in pairs(fnActions) do magicFnActions[code] = spec end
+magicFnActions[hs.keycodes.map.h] = nil
+magicFnActions[hs.keycodes.map.j] = {"focus left", "move left"}
+magicFnActions[hs.keycodes.map.k] = {"focus down", "move down"}
+magicFnActions[hs.keycodes.map.l] = {"focus up", "move up"}
+magicFnActions[41] = {"focus right", "move right"}
 
 local rotateDegreesPerStep = 2.6
 local rotateDeadZone = 6
@@ -1129,7 +1139,9 @@ screenWatcher = hs.screen.watcher.new(function() hs.timer.doAfter(1, syncLaptop)
 
 -- Magic Keyboard keys on the Command key (macOS sends Option for it), the same as the Q10's L2 layer. They live in this tap instead of laptopKeys,
 -- which stay off while the Q10's dongle is plugged in. Shift selects on the arrow keys.
--- J K L Ö: arrows. U I O P: Cmd+Up, Option+Left, Option+Right, Cmd+Down. S D: previous and next tab. §: VoxFlow dictation.
+-- J K L Ö: arrows. U I O P: Cmd+Up, Option+Left, Option+Right, Cmd+Down. S D: previous and next tab.
+-- A bare § is VoxFlow dictation, so the § character is not typeable on this keyboard; Shift+§ still types ½.
+-- The Option key is fn: fn + key runs the AeroSpace chords of fnActions (JKLÖ for focus).
 -- Key-up must map to the same key even if Option is released first, so the target is remembered per key code.
 local keymap = hs.keycodes.map
 local magicKeys = {
@@ -1156,20 +1168,9 @@ local magicBrightness = {[keymap.f1] = mediaKey("BRIGHTNESS_DOWN"), [keymap.f2] 
 local magicPending = {}
 local eventTypes = hs.eventtap.event.types
 local eventProps = hs.eventtap.event.properties
--- The Magic Keyboard's Option key sends Globe (fn): a modifier press, not a key, so it is VoxFlow dictation from the flags event (down on press, up on release).
-local magicFnHeld = false
-magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp, eventTypes.flagsChanged}, function(e)
+magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp}, function(e)
   if e:getProperty(eventProps.eventSourceUnixProcessID) == hs.processInfo.processID then return false end
   local isMagic = e:getProperty(eventProps.keyboardEventKeyboardType) == magicKeyboardType
-  if e:getType() == eventTypes.flagsChanged then
-    if not (isMagic and e:getKeyCode() == keymap.fn) then return false end
-    local down = e:getFlags().fn == true
-    if down ~= magicFnHeld then
-      magicFnHeld = down
-      postDictationKey(down)
-    end
-    return true
-  end
   local isDown = e:getType() == eventTypes.keyDown
   if isDown and isMagic ~= magicKeyboardInUse then
     magicKeyboardInUse = isMagic
@@ -1179,6 +1180,12 @@ magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp, eventT
   local code = e:getKeyCode()
   if isDown then
     local f = e:getFlags()
+    if code == magicDictationCode and not (f.cmd or f.alt or f.ctrl or f.shift or f.fn) then
+      if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then postDictationKey(true) end
+      magicPending[code] = "dictation"
+      return true
+    end
+    if f.fn and fnChord(e, magicFnActions) then return true end
     -- F-keys carry the fn flag, so this comes before the check below that rejects it. Held, they repeat.
     local brightness = f.alt and not (f.cmd or f.ctrl) and magicBrightness[code]
     if brightness then
@@ -1190,11 +1197,6 @@ magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp, eventT
     if f.shift and magicCommands[code] then
       if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then magicCommands[code]() end
       magicPending[code] = "swallow"
-      return true
-    end
-    if code == magicDictationCode then
-      if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then postDictationKey(true) end
-      magicPending[code] = "dictation"
       return true
     end
     local spec = magicKeys[code]
