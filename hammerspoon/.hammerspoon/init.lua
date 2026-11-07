@@ -1215,6 +1215,11 @@ magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp}, funct
       end
     end
     if not (f.alt and not (f.cmd or f.ctrl or f.fn)) then return false end
+    -- Lund reads only the right Option key as Alt, so the word delete is sent as Ctrl+W there; other apps delete a word on Option+Backspace themselves.
+    if code == keymap["delete"] and not f.shift and isLund(hs.application.frontmostApplication()) then
+      magicPending[code] = {code = keymap.w}
+      return true, {e:copy():setKeyCode(keymap.w):setFlags({ctrl = true})}
+    end
     if code == magicDictationCode then
       if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then
         local back = hs.window.focusedWindow()
