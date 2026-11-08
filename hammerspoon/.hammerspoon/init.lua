@@ -207,7 +207,28 @@ local function captureFocusedWindow(done)
   local image = focusedWindowImage()
   if image then copyJpeg(image, done) end
 end
-local function captureFocusedWindowToLund() captureFocusedWindow(pasteScreenshot) end
+-- macshot stays the frontmost app after its overlay closes, so only a visible overlay window means the editor is open.
+local function macshotEditorOpen()
+  local app = hs.application.frontmostApplication()
+  return app ~= nil and app:bundleID() == "com.sw33tlie.macshot.macshot" and #app:visibleWindows() > 0
+end
+
+local function macshotCopyToLund()
+  local before = hs.pasteboard.changeCount()
+  hs.eventtap.keyStroke({"cmd"}, "c", 0)
+  local waited = 0
+  local poll
+  poll = hs.timer.doEvery(0.02, function()
+    waited = waited + 0.02
+    if hs.pasteboard.changeCount() == before and waited < 1 then return end
+    poll:stop()
+    if hs.pasteboard.changeCount() ~= before then pasteScreenshot() end
+  end)
+end
+
+local function captureFocusedWindowToLund()
+  if macshotEditorOpen() then macshotCopyToLund() else captureFocusedWindow(pasteScreenshot) end
+end
 
 -- args: screencapture options that end with the image on the clipboard. An abandoned selection leaves the clipboard unchanged, so nothing is pasted.
 local function captureToLund(args)
@@ -1145,7 +1166,7 @@ screenWatcher = hs.screen.watcher.new(function() hs.timer.doAfter(1, syncLaptop)
 
 -- Magic Keyboard keys on the Command key (macOS sends Option for it), the same as the Q10's L2 layer. They live in this tap instead of laptopKeys,
 -- which stay off while the Q10's dongle is plugged in. Shift selects on the arrow keys.
--- J K L Ö: arrows. U I O P: Cmd+Up, Option+Left, Option+Right, Cmd+Down. S D: previous and next tab. Z C V: Cmd+Z, Cmd+C, Cmd+V (with Shift, Z and C are slash commands).
+-- J K L Ö: arrows. U I O P: Cmd+Up, Option+Left, Option+Right, Cmd+Down. S D: previous and next tab. Z C V: Cmd+Z, Cmd+C, Cmd+V (with Shift, Z and C are slash commands). F: Return, Shift+F is Shift+Return.
 -- A bare § is VoxFlow dictation, so the § character is not typeable on this keyboard; Shift+§ still types ½.
 -- Command key + § screenshots the focused window, sends it to Claude in Lund and focuses the window it was taken from, like left space + § on the Q10.
 -- The Option key is fn: fn + key runs the AeroSpace chords of fnActions (JKLÖ for focus).
@@ -1162,6 +1183,7 @@ local magicKeys = {
   [keymap.p] = {code = keymap.down, flags = {cmd = true}, shift = true},
   [keymap.s] = {code = keymap.tab, flags = {ctrl = true, shift = true}},
   [keymap.d] = {code = keymap.tab, flags = {ctrl = true}},
+  [keymap.f] = {code = keymap["return"], shift = true},
   [keymap.z] = {code = keymap.z, flags = {cmd = true}},
   [keymap.c] = {code = keymap.c, flags = {cmd = true}},
   [keymap.v] = {code = keymap.v, flags = {cmd = true}},
