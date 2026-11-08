@@ -98,95 +98,27 @@ get_vimium_options_file() {
 get_default_keybindings() {
     cat << 'EOF'
 # Default Vim navigation (HJKL)
-# These are the standard Vimium bindings - no custom mappings needed
-# h/j/k/l work as expected: left/down/up/right
-
-# Remove any custom mappings to restore defaults
-unmapAll
+# Leave the "Custom key mappings" box empty: Vimium C then uses its built-in defaults.
+# A box containing only "unmapAll" would remove every binding.
 EOF
 }
 
 # Function to get custom JKLÖ navigation mappings for Vimium
+# No "unmapAll": it drops every default not listed here, and one unknown command name after it leaves keys like f unbound.
 get_custom_keybindings() {
     cat << 'EOF'
-# Custom JKLÖ navigation mappings
-# Remaps j/k/l/ö to match your custom vim layout
-
-# Clear all default mappings first
-unmapAll
-
-# Custom navigation mappings (JKLÖ style)
+unmap h
 map j scrollLeft
 map k scrollDown
 map l scrollUp
 map ö scrollRight
 
-# Remap shifted versions for larger movements
+# L is page up here, so forward is on gö.
 map J previousTab
+map Ö nextTab
 map K scrollPageDown
 map L scrollPageUp
-map Ö nextTab
-
-# Essential Vimium commands with new keys
-map f LinkHints.activateMode
-map F LinkHints.activateModeToOpenInNewTab
-map r reload
-map R reloadGrayscale
-map t createTab
-map x removeTab
-map X restoreTab
-map d scrollPageDown
-map u scrollPageUp
-map gg scrollToTop
-map G scrollToBottom
-map H goBack
-map yy copyCurrentUrl
-map p openCopiedUrlInCurrentTab
-map P openCopiedUrlInNewTab
-map o Vomnibar.activate
-map O Vomnibar.activateInNewTab
-map b Vomnibar.activateBookmarks
-map B Vomnibar.activateBookmarksInNewTab
-map T Vomnibar.activateTabSelection
-map / enterFindMode
-map n performFind
-map N performBackwardsFind
-map i enterInsertMode
-map v enterVisualMode
-map V enterVisualLineMode
-map <c-e> scrollDown
-map <c-y> scrollUp
-map <c-d> scrollPageDown
-map <c-u> scrollPageUp
-map <c-f> scrollFullPageDown
-map <c-b> scrollFullPageUp
-map yt duplicateTab
-map <a-p> togglePinTab
-map <a-m> toggleMuteTab
-map ? showHelp
-map ge nextFrame
-map gf selectFirstFrame
-map gF selectMainFrame
-
-# Keep standard commands that don't conflict
-map 0 scrollToLeft
-map $ scrollToRight
-map ^ scrollToLeft
-map gT previousTab
-map gt nextTab
-map g0 firstTab
-map g$ lastTab
-map W moveTabToNewWindow
-map < moveTabLeft
-map > moveTabRight
-map zh scrollLeft
-map zl scrollRight
-map z<CR> scrollToCenter
-map zt scrollToTop
-map zz scrollToCenter
-map zb scrollToBottom
-map m Marks.activateCreateMode
-map ` Marks.activateGotoMode
+map gö goForward
 EOF
 }
 

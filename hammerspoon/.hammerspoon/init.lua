@@ -129,9 +129,8 @@ end
 
 hs.hotkey.bind(m3, "d", focusLund)
 
--- Claude Code reads the clipboard image before it attaches it, so a key sent sooner than this lands before the image.
-local lundImageSettle = 0.4
--- Reading a large clipboard image varies from well under to over 0.4 s; Return sent before the attach is a newline in the prompt, not a submit.
+-- Claude Code reads the clipboard image before it attaches it, so a key sent sooner than this lands before the image: Return is a newline instead of a submit, the space goes in front of the image.
+-- Reading a large clipboard image varies from well under to over 0.4 s.
 local lundSendSettle = 0.6
 
 -- Abort when Lund did not come to the front: the space would scroll whatever app is there instead.
@@ -153,7 +152,7 @@ local function pasteToLund(sendThenReturnTo)
           hs.timer.doAfter(0.1, function() sendThenReturnTo:focus() end)
         end)
       else
-        hs.timer.doAfter(lundImageSettle, function() hs.eventtap.keyStrokes(" ") end)
+        hs.timer.doAfter(lundSendSettle, function() hs.eventtap.keyStrokes(" ") end)
       end
     end)
   end)
@@ -242,12 +241,14 @@ local function macshotFocusedWindow()
   local from = hs.geometry.point(f.x, f.y)
   local to = hs.geometry.point(f.x + f.w - 1, f.y + f.h - 1)
   local types = hs.eventtap.event.types
+  local cursor = hs.mouse.absolutePosition()
   hs.urlevent.openURL("macshot://capture")
   hs.timer.doAfter(0.4, function()
     hs.mouse.absolutePosition(from)
     hs.eventtap.event.newMouseEvent(types.leftMouseDown, from):post()
     hs.eventtap.event.newMouseEvent(types.leftMouseDragged, to):post()
     hs.eventtap.event.newMouseEvent(types.leftMouseUp, to):post()
+    hs.timer.doAfter(0.05, function() hs.mouse.absolutePosition(cursor) end)
   end)
 end
 
@@ -1106,9 +1107,14 @@ local function externalScreenAttached()
   return false
 end
 
+-- Option+Cmd + scroll is volume and Ctrl+Option+Cmd + scroll is brightness; on the Magic Keyboard that is the Command key + Globe key (+ Control).
+local function syncScrollTap()
+  if varmiloAttached() or (voyagerAttached() and not q10ReceiverAttached()) or magicKeyboardInUse then voyagerScrollTap:start() else voyagerScrollTap:stop() end
+end
+
 local function syncLaptop()
   if voyagerAttached() and not q10ReceiverAttached() then voyagerKeyTap:start() else voyagerKeyTap:stop() end
-  if varmiloAttached() or (voyagerAttached() and not q10ReceiverAttached()) then voyagerScrollTap:start() else voyagerScrollTap:stop() end
+  syncScrollTap()
   local tiling = externalScreenAttached()
   hs.task.new(aerospaceBin, function()
     if tiling then hs.task.new(aerospaceBin, nil, {"mode", q10Attached() and "main" or "laptop"}):start() end
@@ -1139,7 +1145,7 @@ screenWatcher = hs.screen.watcher.new(function() hs.timer.doAfter(1, syncLaptop)
 
 -- Magic Keyboard keys on the Command key (macOS sends Option for it), the same as the Q10's L2 layer. They live in this tap instead of laptopKeys,
 -- which stay off while the Q10's dongle is plugged in. Shift selects on the arrow keys.
--- J K L Ö: arrows. U I O P: Cmd+Up, Option+Left, Option+Right, Cmd+Down. S D: previous and next tab.
+-- J K L Ö: arrows. U I O P: Cmd+Up, Option+Left, Option+Right, Cmd+Down. S D: previous and next tab. Z C V: Cmd+Z, Cmd+C, Cmd+V (with Shift, Z and C are slash commands).
 -- A bare § is VoxFlow dictation, so the § character is not typeable on this keyboard; Shift+§ still types ½.
 -- Command key + § screenshots the focused window, sends it to Claude in Lund and focuses the window it was taken from, like left space + § on the Q10.
 -- The Option key is fn: fn + key runs the AeroSpace chords of fnActions (JKLÖ for focus).
@@ -1156,6 +1162,9 @@ local magicKeys = {
   [keymap.p] = {code = keymap.down, flags = {cmd = true}, shift = true},
   [keymap.s] = {code = keymap.tab, flags = {ctrl = true, shift = true}},
   [keymap.d] = {code = keymap.tab, flags = {ctrl = true}},
+  [keymap.z] = {code = keymap.z, flags = {cmd = true}},
+  [keymap.c] = {code = keymap.c, flags = {cmd = true}},
+  [keymap.v] = {code = keymap.v, flags = {cmd = true}},
 }
 local magicDictationCode = 10
 -- Command key + Shift + letter types the same slash commands as the Q10's right big key. They win over the Shift-selecting arrows on O and D.
@@ -1169,7 +1178,16 @@ magicCommands[keymap.z] = function() whenModifiersReleased(function() titleCopyR
 local magicSteps = {[keymap.f1] = "BRIGHTNESS_DOWN", [keymap.f2] = "BRIGHTNESS_UP", [keymap.f11] = "SOUND_DOWN", [keymap.f12] = "SOUND_UP"}
 -- Option key (fn) + S and D send Lund's previous and next waiting-agent tab, the same chords as left space + S and D on the Q10.
 -- Option key (fn) + Shift + T sends Convey's translator hotkey (Ctrl+Alt+Shift+Cmd+T), like left space + Shift + T on the Q10.
+-- Command key + 1 does the same screenshot but stays in Lund with the image pasted and nothing sent. 3, 4 and 5 send Cmd+Shift+3, 4 and 5, the same as the Globe key + Shift + the digit. 2 stays free for the @ sign.
+-- Option key (fn) + Esc opens Convey Mac's cheat sheet (Cmd+Shift+J, key code 38).
+-- Command key + Esc cycles VolumeGuard's headphone listening mode (Ctrl+Alt+Shift+§).
 local magicWaitingTab = {[keymap.s] = "s", [keymap.d] = "d"}
+local magicShots = {
+  [keymap["1"]] = captureFocusedWindowToLund,
+}
+for _, digit in ipairs({"3", "4", "5"}) do
+  magicShots[keymap[digit]] = function() hs.eventtap.keyStroke({"cmd", "shift"}, digit, 0) end
+end
 local magicPending = {}
 local eventTypes = hs.eventtap.event.types
 local eventProps = hs.eventtap.event.properties
@@ -1180,6 +1198,7 @@ magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp}, funct
   if isDown and isMagic ~= magicKeyboardInUse then
     magicKeyboardInUse = isMagic
     syncVimKeymap()
+    syncScrollTap()
   end
   if not isMagic then return false end
   local code = e:getKeyCode()
@@ -1201,6 +1220,11 @@ magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp}, funct
       magicPending[code] = "swallow"
       return true
     end
+    if code == keymap.escape and f.fn and not (f.cmd or f.alt or f.ctrl or f.shift) then
+      if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then hs.eventtap.keyStroke({"cmd", "shift"}, 38, 0) end
+      magicPending[code] = "swallow"
+      return true
+    end
     if f.fn and fnChord(e, magicFnActions) then return true end
     -- F-keys carry the fn flag, so this comes before the check below that rejects it. Held, they repeat.
     local step = magicSteps[code]
@@ -1219,6 +1243,20 @@ magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp}, funct
     if code == keymap["delete"] and not f.shift and isLund(hs.application.frontmostApplication()) then
       magicPending[code] = {code = keymap.w}
       return true, {e:copy():setKeyCode(keymap.w):setFlags({ctrl = true})}
+    end
+    if code == keymap.escape then
+      if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then
+        hs.eventtap.event.newKeyEvent({"ctrl", "alt", "shift"}, magicDictationCode, true):post()
+        hs.eventtap.event.newKeyEvent({"ctrl", "alt", "shift"}, magicDictationCode, false):post()
+      end
+      magicPending[code] = "swallow"
+      return true
+    end
+    local shot = not f.shift and magicShots[code]
+    if shot then
+      if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then shot() end
+      magicPending[code] = "swallow"
+      return true
     end
     if code == magicDictationCode then
       if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then
@@ -1250,6 +1288,18 @@ magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp}, funct
   end
   if pending == "swallow" then return true end
   return true, {e:copy():setKeyCode(pending.code):setFlags({})}
+end):start()
+
+-- Holding only modifiers while scrolling sends no key, so a modifier press also tells which keyboard is in use.
+magicModifierTap = hs.eventtap.new({eventTypes.flagsChanged}, function(e)
+  if e:getProperty(eventProps.eventSourceUnixProcessID) == hs.processInfo.processID then return false end
+  local isMagic = e:getProperty(eventProps.keyboardEventKeyboardType) == magicKeyboardType
+  if isMagic ~= magicKeyboardInUse then
+    magicKeyboardInUse = isMagic
+    syncVimKeymap()
+    syncScrollTap()
+  end
+  return false
 end):start()
 
 -- AeroSpace starts in main mode, so set the mode again when it launches.
