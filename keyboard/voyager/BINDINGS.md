@@ -2,12 +2,12 @@
 
 Generated from the firmware repo by `scripts/bindings.py`. Do not edit. Oryx source revision: `5L3pB/pjMyob`.
 Each grid is one layer: rows r0 (top) to r3, left half `||` right half, then the thumb keys (left outer, left inner `||` right inner, right outer).
-`·` falls through to Main. `X / hold Y` taps X, holds Y. Layer 7, the Nav boot key, the cleared Meh R and Z keys and the top-right cheat sheet key come from `patch_layout.py`, not Oryx.
+`·` falls through to Main. `X / hold Y` taps X, holds Y. Layer 7, the Nav boot key, the Nav brightness keys, the cleared Meh Q, R and Z keys and the top-right cheat sheet key come from `patch_layout.py`, not Oryx.
 
 ## L0 Main
 ```
 r0  BSPC | 1 | 2 | 3 | 4 | 5 || 6 | 7 | 8 | 9 | 0 | Ctrl+Alt+Shift+K
-r1  Ctrl | Q | W | E | R | T || Y | U | I | O | P | Å
+r1  TAB | Q | W | E | R | T || Y | U | I | O | P | Å
 r2  ESCAPE / hold Shift | A / hold Alt | S / hold Win | D / hold Ctrl | F | G || H | J | K | L | Ö | Ä
 r3  A / hold L6 | Z | X | C | V | B || N | M | , | . | - | TAB
 thumbs  hold L1 | SPACE / hold L2 || ENTER / hold Ctrl | BSPC / hold Shift
@@ -24,7 +24,7 @@ thumbs  · | · || · | ·
 
 ## L2 Nav  (~ = Ctrl+ the key)
 ```
-r0  BOOTLOADER | · | · | AUDIO_VOL_DOWN | AUDIO_VOL_UP | RAlt+Ctrl+5 || CAPS | NUM | MS_WH_DOWN | MS_WH_UP | · | DELETE
+r0  BOOTLOADER | BRIGHTNESS_DOWN | BRIGHTNESS_UP | AUDIO_VOL_DOWN | AUDIO_VOL_UP | RAlt+Ctrl+5 || CAPS | NUM | MS_WH_DOWN | MS_WH_UP | · | DELETE
 r1  · | Alt+F4 | ~G | ~E | ~R | Ctrl+Shift+T || · | Alt+LEFT | ~LEFT | ~RIGHT | Alt+RIGHT | ·
 r2  · | ~R | Ctrl+Shift+TAB | ~TAB | ~T | ~W || · | LEFT | DOWN | UP | RIGHT | ·
 r3  · | ~Z | Ctrl+Shift+Z | MEDIA_PREV_TRACK | MEDIA_NEXT_TRACK | MEDIA_PLAY_PAUSE || · | HOME | PGDN | PAGE_UP | END | go to L8
@@ -61,7 +61,7 @@ thumbs  · | · || · | ·
 ## L6 Meh+Pad  (~ = Alt+Ctrl+Shift+ the key)
 ```
 r0  · | ~1 | ~2 | ~3 | ~4 | ~5 || · | · | · | · | · | ·
-r1  · | ~Q | ~W | ~E | · | ~T || KP_PLUS | KP_7 | KP_8 | KP_9 | , | KP_EQUAL
+r1  · | · | ~W | ~E | · | ~T || KP_PLUS | KP_7 | KP_8 | KP_9 | , | KP_EQUAL
 r2  · | ~A | ~S | ~D | ~F | ~G || KP_MINUS | KP_4 | KP_5 | KP_6 | . | *
 r3  · | · | ~X | ~C | ~V | ~B || KP_0 | KP_1 | KP_2 | KP_3 | / | ·
 thumbs  · | · || KP_ENTER | ·
@@ -81,8 +81,8 @@ thumbs  · | · || · | ·
 r0  · | · | · | · | · | · || · | · | · | · | · | ·
 r1  · | Q | W | E | R | T || Y | U | I | O | · | ·
 r2  · | A | S | D | F | G || H | J | K | L | · | ·
-r3  · | Z | X | C | V | B || N | M | · | · | · | go to L0
-thumbs  · | SPACE || · | ·
+r3  LCTL | Z | X | C | V | B || N | M | · | · | · | go to L0
+thumbs  LALT | SPACE || · | ·
 ```
 
 ## Combos (Main only)
@@ -91,12 +91,10 @@ thumbs  · | SPACE || · | ·
 - , + M → '
 - SPACE / hold L2 + A / hold L6 → tap-toggle L4
 - , + . → "
-- L + J + K → Win+Ctrl+Shift+F12
 - SPACE / hold L2 + C → Ctrl+C
 - SPACE / hold L2 + B + V → Ctrl+Shift+V
 - SPACE / hold L2 + B → Ctrl+V
 - R + E + W → ENTER
-- S / hold Win + F + D / hold Ctrl → ENTER
 - SPACE / hold L2 + Ctrl → tap-toggle L3
 - SPACE / hold L2 + X → Ctrl+X
 - SPACE / hold L2 + E → Ctrl+E

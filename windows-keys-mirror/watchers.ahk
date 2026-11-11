@@ -21,6 +21,7 @@ Log(msg) {
 ; keyboard the Standard preset (HJKL). Until a key has been typed, desk mode means Voyager and laptop mode Standard.
 ; The preset runs only when it changes, so kk/kv/ks overrides last until the next keyboard switch.
 ; WMI keeps reporting a closed lid's panel as active, so the panel is looked up among the desktop monitors.
+; Booted docked with the lid closed, WMI never lists the panel: an empty set means the panel is not on the desktop.
 glazewmDir := "C:\Program Files\glzr.io\GlazeWM"
 setAllKeymap := "/home/filip/.dotfiles/windows-keys/set-all-keymap.sh"
 internalPanels := Map()
@@ -117,7 +118,7 @@ ApplyMode() {
     global internalPanels, appliedMode
     if !internalPanels.Count
         internalPanels := InternalPanelIds()
-    if (!internalPanels.Count || !MonitorGetCount())
+    if !MonitorGetCount()
         return
     desk := !PanelOnDesktop()
     running := ProcessExist("glazewm.exe")
@@ -279,15 +280,16 @@ OnDeviceChange(wParam, *) {
         SetTimer(SyncQ10, -2000)
 }
 
-; speaker-guard.ps1 mutes the laptop speaker when the headphones disconnect. It holds a mutex, so a second copy exits at once.
-; Found by the remembered PID: a WMI lookup every 30 s stalled this script for 0.3 s and was sometimes cancelled.
-speakerPid := 0
-
+; speaker-guard.ps1 mutes the laptop speaker when the headphones disconnect. It holds the mutex Local\SpeakerGuard.
+; Found by opening that mutex, not by a remembered PID: after a reload of this script the PID points at a second copy that exits at once,
+; and a WMI lookup every 30 s stalled this script for 0.3 s and was sometimes cancelled.
 SyncSpeakerGuard() {
-    global speakerPid
-    if (speakerPid && ProcessExist(speakerPid) && ProcessGetName(speakerPid) = "powershell.exe")
+    h := DllCall("OpenMutexW", "UInt", 0x100000, "Int", 0, "Str", "Local\SpeakerGuard", "Ptr")  ; SYNCHRONIZE
+    if h {
+        DllCall("CloseHandle", "Ptr", h)
         return
-    Run 'powershell.exe -MTA -NoProfile -WindowStyle Hidden -File "' A_ScriptDir '\speaker-guard.ps1"', , "Hide", &speakerPid
+    }
+    Run 'powershell.exe -MTA -NoProfile -WindowStyle Hidden -File "' A_ScriptDir '\speaker-guard.ps1"', , "Hide"
 }
 
 SyncAll() {
