@@ -677,6 +677,11 @@ magicFnActions[hs.keycodes.map.j] = {"focus left", "move left"}
 magicFnActions[hs.keycodes.map.k] = {"focus down", "move down"}
 magicFnActions[hs.keycodes.map.l] = {"focus up", "move up"}
 magicFnActions[41] = {"focus right", "move right"}
+-- I puts the focused window over its side-by-side neighbour, O under it. Joining with the left neighbour leaves the focused window on top and with the right one at the bottom, so the other side needs a move.
+magicFnActions[hs.keycodes.map.i] = {"join-with left || { aerospace join-with right && aerospace move up; }"}
+magicFnActions[hs.keycodes.map.o] = {"join-with right || { aerospace join-with left && aerospace move down; }"}
+magicFnActions[hs.keycodes.map.u] = nil
+magicFnActions[hs.keycodes.map.p] = nil
 
 local rotateDegreesPerStep = 2.6
 local rotateDeadZone = 6
@@ -1201,6 +1206,7 @@ local magicSteps = {[keymap.f1] = "BRIGHTNESS_DOWN", [keymap.f2] = "BRIGHTNESS_U
 -- Option key (fn) + S and D send Lund's previous and next waiting-agent tab, the same chords as left space + S and D on the Q10.
 -- Option key (fn) + Shift + T sends Convey's translator hotkey (Ctrl+Alt+Shift+Cmd+T), like left space + Shift + T on the Q10.
 -- Command key + 1 does the same screenshot but stays in Lund with the image pasted and nothing sent. 3, 4 and 5 send Cmd+Shift+3, 4 and 5, the same as the Globe key + Shift + the digit. 2 stays free for the @ sign.
+-- Option key (fn) + C cycles the wide monitor's side gap, like left space + C on the Q10.
 -- Option key (fn) + Esc opens Convey Mac's cheat sheet (Cmd+Shift+J, key code 38).
 -- Command key + Esc cycles VolumeGuard's headphone listening mode (Ctrl+Alt+Shift+§).
 local magicWaitingTab = {[keymap.s] = "s", [keymap.d] = "d"}
@@ -1244,6 +1250,11 @@ magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp}, funct
     end
     if code == keymap.escape and f.fn and not (f.cmd or f.alt or f.ctrl or f.shift) then
       if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then hs.eventtap.keyStroke({"cmd", "shift"}, 38, 0) end
+      magicPending[code] = "swallow"
+      return true
+    end
+    if code == keymap.c and f.fn and not (f.cmd or f.alt or f.ctrl or f.shift) then
+      if e:getProperty(eventProps.keyboardEventAutorepeat) == 0 then cycleWideGap() end
       magicPending[code] = "swallow"
       return true
     end
