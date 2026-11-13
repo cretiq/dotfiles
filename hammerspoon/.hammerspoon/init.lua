@@ -1193,6 +1193,14 @@ local magicKeys = {
   [keymap.c] = {code = keymap.c, flags = {cmd = true}},
   [keymap.v] = {code = keymap.v, flags = {cmd = true}},
 }
+-- setFlags would wipe the secondary-fn and numeric-pad bits that real arrow keys carry, and apps like TextPal ignore arrows without them, so modifiers are or-ed onto the new event's own bits.
+local modifierBits = {shift = 0x20000, ctrl = 0x40000, alt = 0x80000, cmd = 0x100000}
+local function magicKeyEvent(code, isDown, flags)
+  local event = hs.eventtap.event.newKeyEvent(code, isDown)
+  local bits = event:rawFlags()
+  for name in pairs(flags) do bits = bits | modifierBits[name] end
+  return event:rawFlags(bits)
+end
 local magicDictationCode = 10
 -- Command key + Shift + letter types the same slash commands as the Q10's right big key. They win over the Shift-selecting arrows on O and D.
 local magicCommands = {}
@@ -1310,7 +1318,7 @@ magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp}, funct
     for name, on in pairs(spec.flags or {}) do flags[name] = on end
     if spec.shift and f.shift then flags.shift = true end
     magicPending[code] = spec
-    return true, {e:copy():setKeyCode(spec.code):setFlags(flags)}
+    return true, {magicKeyEvent(spec.code, true, flags)}
   end
   local pending = magicPending[code]
   magicPending[code] = nil
@@ -1320,7 +1328,7 @@ magicKeyboardTap = hs.eventtap.new({eventTypes.keyDown, eventTypes.keyUp}, funct
     return true
   end
   if pending == "swallow" then return true end
-  return true, {e:copy():setKeyCode(pending.code):setFlags({})}
+  return true, {magicKeyEvent(pending.code, false, {})}
 end):start()
 
 -- Holding only modifiers while scrolling sends no key, so a modifier press also tells which keyboard is in use.
