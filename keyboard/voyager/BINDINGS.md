@@ -110,5 +110,6 @@ thumbs  LALT | SPACE || · | ·
 - Ctrl+Alt+Win+C → types /copy
 - Ctrl+Alt+Win+O → types /git:commit-detailed-push
 - Ctrl+Alt+Win+H → types /how-to-test
+- Ctrl+Alt+Win+L → types /look
 - Ctrl+Alt+Win+Z → types /generate:shorter-title, then /copy, then /rename
 
