@@ -259,6 +259,8 @@ SlashCommand(name, submit := true)
 
 ^!#l::SlashCommand "/look"
 
+^!#w::SlashCommand "/wip"
+
 ^!#z::
 {
     SlashCommand "/generate:shorter-title"
@@ -293,6 +295,8 @@ SlashCommand(name, submit := true)
 <!+r::SlashCommand "/restart"
 
 <!+l::SlashCommand "/look"
+
+<!+w::SlashCommand "/wip"
 
 <!+c::SlashCommand "/copy"
 
