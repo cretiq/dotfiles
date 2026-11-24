@@ -1,5 +1,10 @@
 . "$HOME/.cargo/env"
 
+# `ssh host cmd` runs non-login, non-interactive zsh with sshd's bare PATH;
+# only .zshenv is read, and claude/zmx live here.
+typeset -U path
+path=("$HOME/.local/bin" $path)
+
 # Claude Code cross-session messaging needs a private 0700 runtime dir. WSLg sets
 # XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir, which is 0777 with no sticky bit, and
 # Claude refuses to bind sockets under it:

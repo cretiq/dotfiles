@@ -37,6 +37,7 @@ alias dev='cd ~/Dev/'
 alias kk='~/.dotfiles/windows-keys/interactive-menu-toggle-remaps.sh'
 alias kv='~/.dotfiles/windows-keys/set-all-keymap.sh voyager'
 alias ks='~/.dotfiles/windows-keys/set-all-keymap.sh standard'
+alias vk='~/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh'
 
 # glab wrapper for phoenix worktrees
 # --repo needed because worktree .git pointer files confuse repo detection.
@@ -161,8 +162,8 @@ _show_help() {
   ch            haiku 5.5 high
   ccc           claude-scratch       mw       macrowhisper
   cdot          dotfiles + claude    obs      ranger in Obsidian
-                                     todo     vim Obsidian TODO
   cph           phoenix + claude
+                                     todo     vim Obsidian TODO
   SHELL                             WORKTREE DASHBOARD
   ─────────────────────────────      ─────────────────────────────
   sz            source ~/.zshrc      w        worktree -w (live dashboard)
@@ -198,10 +199,11 @@ alias ccc='cd ~/claude-scratch && claude --model claude-sonnet-5-5 --effort high
 alias cdot='cd ~/.dotfiles && claude --model claude-sonnet-5-5 --effort high'
 alias ccv='cd /mnt/c/Dev/Own/Convey && claude --model claude-sonnet-5-5 --effort high'
 alias cdmntdev='cd /mnt/c/Dev/Own'
+alias cconvey='cd /mnt/c/Dev/Own/Convey/ && claude'
 alias ctb='cd ~/Dev/treeboard-ratatui && claude --model claude-sonnet-5-5 --effort high'
+alias cph='cd ~/Dev/phoenix && claude --model claude-sonnet-5-5 --effort high'
 
 # Needs the keyboard on a USB cable: the 2.4 GHz receiver cannot write the keymap.
-alias cph='cd ~/Dev/phoenix && claude --model claude-sonnet-5-5 --effort high'
 function q10 {
   local dir="$HOME/.dotfiles/keyboard/q10max"
   local ps=/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe
