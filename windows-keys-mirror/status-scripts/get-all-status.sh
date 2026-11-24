@@ -14,7 +14,7 @@ else
 fi
 
 # Check HJKL status
-if [ -f "$AHK_FILE" ] && grep -q "^!h::Left$" "$AHK_FILE"; then
+if [ -f "$AHK_FILE" ] && grep -q "^!j::Left$" "$AHK_FILE"; then
     HJKL_STATUS="Standard"
 else
     HJKL_STATUS="Voyager"

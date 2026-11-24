@@ -95,11 +95,12 @@ thumbs  LALT | SPACE || · | ·
 - SPACE / hold L2 + B + V → Ctrl+Shift+V
 - SPACE / hold L2 + B → Ctrl+V
 - R + E + W → ENTER
-- SPACE / hold L2 + Ctrl → tap-toggle L3
+- SPACE / hold L2 + TAB → tap-toggle L3
 - SPACE / hold L2 + X → Ctrl+X
 - SPACE / hold L2 + E → Ctrl+E
 - ENTER / hold Ctrl + SPACE / hold L2 → tap-toggle L7
 - A / hold Alt + SPACE / hold L2 → Ctrl+A
+- ENTER / hold Ctrl + TAB → tap-toggle L4
 
 ## AutoHotkey slash-command chords (`hotkeys-and-remaps.ahk`)
 - Ctrl+Alt+Win+D → types /restart

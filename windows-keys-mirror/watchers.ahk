@@ -17,7 +17,7 @@ Log(msg) {
 
 ; Desk mode = the laptop panel is not on the desktop (lid closed, external screen only): GlazeWM on.
 ; Laptop panel on: GlazeWM off.
-; The preset follows the keyboard last typed on: Q10 and Voyager get the Voyager preset (JKLÖ), any other
+; The preset follows the keyboard last typed on: Q10, Voyager and Magic Keyboard get the Voyager preset (JKLÖ), any other
 ; keyboard the Standard preset (HJKL). Until a key has been typed, desk mode means Voyager and laptop mode Standard.
 ; The preset runs only when it changes, so kk/kv/ks overrides last until the next keyboard switch.
 ; WMI keeps reporting a closed lid's panel as active, so the panel is looked up among the desktop monitors.
@@ -30,6 +30,10 @@ appliedPreset := ""
 pendingPreset := ""
 lastKind := ""
 deviceKinds := Map()
+magicDevices := Map()
+magicActive := false
+varmiloDevices := Map()
+varmiloActive := false
 
 InternalPanelIds() {
     ids := Map()
@@ -114,6 +118,26 @@ SyncMode() {
     finally busy := false
 }
 
+; Startup shortcuts start these at logon; this covers a dock after boot and an app closed since.
+; Teams starts hidden in the tray, as its own Run entry does (msteams:system-initiated).
+EnsureApps() {
+    static apps := [
+        ["Convey.exe", 'C:\Dev\Own\Convey\publish\Convey.exe', 'C:\Dev\Own\Convey\publish'],
+        ["SmoothWheel.exe", 'C:\Dev\Own\smoothwheel\target\x86_64-pc-windows-gnu\release\SmoothWheel.exe', 'C:\Dev\Own\smoothwheel\target\x86_64-pc-windows-gnu\release'],
+        ["lghub_system_tray.exe", 'C:\Program Files\LGHUB\system_tray\lghub_system_tray.exe --minimized', 'C:\Program Files\LGHUB\system_tray'],
+        ["ms-teams.exe", EnvGet("LOCALAPPDATA") '\Microsoft\WindowsApps\MSTeams_8wekyb3d8bbwe\ms-teams.exe msteams:system-initiated', '']
+    ]
+    for app in apps {
+        if ProcessExist(app[1])
+            continue
+        try {
+            Run app[2], app[3]
+            Log("started " app[1])
+        } catch as e
+            Log("could not start " app[1] ": " e.Message)
+    }
+}
+
 ApplyMode() {
     global internalPanels, appliedMode
     if !internalPanels.Count
@@ -132,6 +156,8 @@ ApplyMode() {
         return
     leftDesk := (appliedMode = "desk" && !desk)
     appliedMode := mode
+    if desk
+        EnsureApps()
     Log(mode " mode: GlazeWM " (desk ? "on" : "off") ", " WantedPreset(desk) " preset")
     if leftDesk {
         ; wm-exit is asynchronous; moving windows while GlazeWM still runs makes it re-tile them.
@@ -176,7 +202,7 @@ ApplyPreset(preset) {
 ; Q10 (Keychron 0x3434, cable, receiver or Bluetooth) and Voyager (ZSA 0x3297) count as JKLÖ keyboards.
 ; G HUB's virtual keyboard (mouse-button macros) and the laptop's Fn/hotkey devices say nothing about the hands.
 KeyboardKind(hDevice) {
-    global deviceKinds
+    global deviceKinds, magicDevices, varmiloDevices
     if deviceKinds.Has(hDevice)
         return deviceKinds[hDevice]
     cch := 0
@@ -185,8 +211,10 @@ KeyboardKind(hDevice) {
     DllCall("GetRawInputDeviceInfoW", "Ptr", hDevice, "UInt", 0x20000007, "Ptr", buf, "UInt*", &cch)
     name := StrGet(buf, "UTF-16")
     kind := RegExMatch(name, "i)LGHUB|VID_046D&PID_C232|INTC816|CONVERTEDDEVICE") ? ""
-        : RegExMatch(name, "i)VID[_&](02)?(3434|3297)") ? "voyager" : "standard"
+        : RegExMatch(name, "i)VID[_&](02)?(3434|3297)|VID_05AC&PID_0321") ? "voyager" : "standard"
     deviceKinds[hDevice] := kind
+    magicDevices[hDevice] := RegExMatch(name, "i)VID_05AC&PID_0321") > 0
+    varmiloDevices[hDevice] := RegExMatch(name, "i)VID_19F5") > 0
     Log("keyboard seen: " (kind = "" ? "ignored" : kind) "  " name)
     return kind
 }
@@ -194,7 +222,7 @@ KeyboardKind(hDevice) {
 ; WM_INPUT for every key event on any keyboard, also when another window has focus (RIDEV_INPUTSINK).
 ; Read-only: keys are not blocked or changed. Injected keys (Send) have no device and are skipped.
 OnRawInput(wParam, lParam, *) {
-    global lastKind
+    global lastKind, magicActive, varmiloActive
     static header := Buffer(24)  ; RAWINPUTHEADER on x64; hDevice at offset 8
     size := 24
     if (DllCall("GetRawInputData", "Ptr", lParam, "UInt", 0x10000005, "Ptr", header, "UInt*", &size, "UInt", 24, "UInt") = 0xFFFFFFFF)
@@ -203,7 +231,12 @@ OnRawInput(wParam, lParam, *) {
     if !hDevice
         return
     kind := KeyboardKind(hDevice)
-    if (kind = "" || kind = lastKind)
+    if (kind = "")
+        return
+    magicActive := magicDevices[hDevice]
+    if (varmiloDevices[hDevice] != varmiloActive)
+        SetVarmiloMarker(varmiloDevices[hDevice])
+    if (kind = lastKind)
         return
     lastKind := kind
     ; Waits out a few keys on the other keyboard; switching back within the delay cancels the change.
@@ -211,6 +244,45 @@ OnRawInput(wParam, lParam, *) {
 }
 
 KeyboardSwitched() => ApplyPreset(lastKind)
+
+; The Varmilo swaps Caps Lock and Esc in its firmware, so the swap in hotkeys-and-remaps.ahk must not apply to it.
+; That script is a separate process; it sees this hidden window (VarmiloActive() there) while the Varmilo is the keyboard last typed on.
+SetVarmiloMarker(on) {
+    global varmiloActive, varmiloMarker
+    varmiloActive := on
+    if on {
+        varmiloMarker := Gui(, "VarmiloActive")
+        varmiloMarker.Show("Hide")
+    } else
+        varmiloMarker.Destroy()
+}
+
+; Windows reads the Magic Keyboard's ISO § and < keys with swapped scancodes; its Caps Lock key is Esc and Command key + S / D are previous / next tab, as on the Mac.
+; Hotkeys cannot tell keyboards apart, so this follows the keyboard last typed on; the first press after a switch
+; can still come out unremapped (Caps Lock then toggles).
+#HotIf magicActive
+SC029::Send "{Blind}{SC056}"
+SC056::Send "{Blind}{SC029}"
+CapsLock::Esc
+#s::Send "^+{Tab}"
+#d::Send "^{Tab}"
+#+d::SlashChord("d")
+#+e::SlashChord("e")
+#+n::SlashChord("n")
+#+x::SlashChord("x")
+#+r::SlashChord("r")
+#+c::SlashChord("c")
+#+o::SlashChord("o")
+#+h::SlashChord("h")
+#+z::SlashChord("z")
+#HotIf
+
+; Command key + Shift + letter fires the Ctrl+Alt+Win chord of that letter, which hotkeys-and-remaps.ahk types as a slash command.
+; Level 1 so the other script's level-0 hotkey sees keys sent from this one.
+SlashChord(letter) {
+    SendLevel 1
+    Send "{Blind}{Shift up}^!" letter
+}
 
 ; Restarted from here rather than from the hidden WSL session: a copy launched there did not replace the
 ; running one (two copies ran, the old remap state won).

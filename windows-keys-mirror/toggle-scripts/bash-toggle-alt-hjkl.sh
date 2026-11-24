@@ -18,12 +18,12 @@ fi
 TEMP_FILE="${FILE_PATH}.tmp"
 
 # Check if Alt+HJKL bindings are currently active (uncommented)
-if grep -q "^!h::Left$" "$FILE_PATH"; then
+if grep -q "^!j::Left$" "$FILE_PATH"; then
     # Currently enabled, disable it by commenting out the bindings
     awk '
-    /---REMAP ALT\+HJKL---/ { in_section = 1; print; next }
+    /---REMAP ALT\+JKL.---/ { in_section = 1; print; next }
     /^;?---------------------$/ && in_section { in_section = 0; print; next }
-    in_section && /^!h::Left$|^!j::Down$|^!k::Up$|^!l::Right$|^!u::\^Left$|^!i::\^Right$/ { print ";" $0; next }
+    in_section && /^!j::Left$|^!k::Down$|^!l::Up$|^!ö::Right$|^!i::\^Left$|^!o::\^Right$/ { print ";" $0; next }
     { print }
     ' "$FILE_PATH" > "$TEMP_FILE"
 
@@ -32,9 +32,9 @@ if grep -q "^!h::Left$" "$FILE_PATH"; then
 else
     # Currently disabled, enable it by uncommenting the bindings
     awk '
-    /---REMAP ALT\+HJKL---/ { in_section = 1; print; next }
+    /---REMAP ALT\+JKL.---/ { in_section = 1; print; next }
     /^;?---------------------$/ && in_section { in_section = 0; print; next }
-    in_section && /^;!h::Left$|^;!j::Down$|^;!k::Up$|^;!l::Right$|^;!u::\^Left$|^;!i::\^Right$/ { print substr($0, 2); next }
+    in_section && /^;!j::Left$|^;!k::Down$|^;!l::Up$|^;!ö::Right$|^;!i::\^Left$|^;!o::\^Right$/ { print substr($0, 2); next }
     { print }
     ' "$FILE_PATH" > "$TEMP_FILE"
 

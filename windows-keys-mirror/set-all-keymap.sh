@@ -31,6 +31,8 @@ if [[ "$MODE" == "voyager" ]]; then
 else
     FROM="Voyager"
 fi
+# App keymaps are JKLÖ ("Voyager" state) on every keyboard; only the ESC and Alt remaps follow the preset.
+APP_FROM="Standard"
 
 changed=0
 ahk_dirty=false
@@ -44,18 +46,18 @@ if [[ "$hjkl" == "$FROM" ]]; then
     ahk_dirty=true
     ((changed++))
 fi
-if [[ "$vim" == "$FROM" ]]; then
+if [[ "$vim" == "$APP_FROM" ]]; then
     "$VIM_TOGGLE" toggle >/dev/null 2>&1
     ((changed++))
     # vim-keymap-toggle.sh cascades to obs+ranger managers — refresh state
     # so the if-blocks below see post-cascade values (else they double-flip).
     IFS='|' read -r esc hjkl vim nvim obs ranger ws wt < <("$STATUS_ALL" "$AHK_FILE")
 fi
-if [[ "$obs" == "$FROM" ]]; then
+if [[ "$obs" == "$APP_FROM" ]]; then
     "$TOGGLE_OBS" >/dev/null 2>&1
     ((changed++))
 fi
-if [[ "$ranger" == "$FROM" ]]; then
+if [[ "$ranger" == "$APP_FROM" ]]; then
     "$TOGGLE_RANGER" >/dev/null 2>&1
     ((changed++))
 fi
@@ -63,7 +65,7 @@ if [[ "$ws" == "$FROM" ]]; then
     "$TOGGLE_WS" >/dev/null 2>&1
     ((changed++))
 fi
-if [[ "$wt" == "$FROM" ]]; then
+if [[ "$wt" == "$APP_FROM" ]]; then
     "$TOGGLE_WT" >/dev/null 2>&1
     ((changed++))
 fi

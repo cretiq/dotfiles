@@ -270,10 +270,7 @@ SlashCommand(name, submit := true)
     SlashCommand "/rename", false
 }
 
-; Laptop keyboard: no Win-layer chords there. Active while GlazeWM is off (watchers.ahk keeps it off with the laptop screen on, and Alt+Shift+key belongs to GlazeWM otherwise).
-; The /generate:shorter-title, /copy, /rename macro is repeated below rather than shared: scripts/bindings.py reads it from the z chord block above.
-#HotIf !ProcessExist("glazewm.exe")
-; Ctrl+Shift+1-5 stand in for the ShareX keys on Ctrl+Alt Q W E R T (the last three are ShareX's own hotkeys, all default task settings).
+; Ctrl+Shift+1-6 stand in for the ShareX keys on Ctrl+Alt Q W E R T (the last three are ShareX's own hotkeys, all default task settings).
 ^+1::CaptureToTerminal "ActiveWindowPlain", 5
 
 ^+2::CaptureToTerminal "RegionPlain", 30
@@ -284,19 +281,13 @@ SlashCommand(name, submit := true)
 
 ^+5::ShareX "-OpenImageHistory"
 
-<!+d::SlashCommand "/restart"
+^+6::Run '"' EnvGet("LOCALAPPDATA") '\Programs\ShareX\ShareX.exe" -ScrollingCapture'
 
-<!+e::SlashCommand "/eli3"
-
+; Alt+Shift+letter chords for keyboards without the Win layer. D, E, L, R and W only while GlazeWM is off: it binds Alt+Shift+D, E, L, R and W.
+; The /generate:shorter-title, /copy, /rename macro is repeated below rather than shared: scripts/bindings.py reads it from the z chord block above.
 <!+n::SlashCommand "/next"
 
 <!+x::SlashCommand "/cut"
-
-<!+r::SlashCommand "/restart"
-
-<!+l::SlashCommand "/look"
-
-<!+w::SlashCommand "/wip"
 
 <!+c::SlashCommand "/copy"
 
@@ -312,30 +303,49 @@ SlashCommand(name, submit := true)
     Sleep 300
     SlashCommand "/rename", false
 }
+
+#HotIf !ProcessExist("glazewm.exe")
+<!+d::SlashCommand "/restart"
+
+<!+e::SlashCommand "/eli3"
+
+<!+r::SlashCommand "/restart"
+
+<!+l::SlashCommand "/look"
+
+<!+w::SlashCommand "/wip"
 #HotIf
 
-; Laptop only (GlazeWM off): Alt+S / Alt+D = previous / next tab in any app (Ctrl+Shift+Tab / Ctrl+Tab). Windows Terminal has its own Alt+S/D bindings; dialogs (#32770) keep their Alt+letter button shortcuts.
-#HotIf !ProcessExist("glazewm.exe") && !WinActive("ahk_exe WindowsTerminal.exe") && !WinActive("ahk_class #32770")
+; Alt+S / Alt+D = previous / next tab in any app (Ctrl+Shift+Tab / Ctrl+Tab). GlazeWM only binds Alt+Shift+S/D. Windows Terminal has its own Alt+S/D bindings; dialogs (#32770) keep their Alt+letter button shortcuts.
+#HotIf !WinActive("ahk_exe WindowsTerminal.exe") && !WinActive("ahk_class #32770")
 <!s::Send "^+{Tab}"
 
 <!d::Send "^{Tab}"
 #HotIf
 
-; Laptop mode is GlazeWM stopped (watchers.ahk); desk mode keeps Ctrl+Shift+6 free.
-#HotIf !ProcessExist("glazewm.exe")
-^+6::Run '"' EnvGet("LOCALAPPDATA") '\Programs\ShareX\ShareX.exe" -ScrollingCapture'
-#HotIf
+VarmiloActive() {
+    prev := A_DetectHiddenWindows
+    DetectHiddenWindows True
+    active := WinExist("VarmiloActive")
+    DetectHiddenWindows prev
+    return active
+}
 
 ;---REMAP ESC---
+#HotIf !VarmiloActive()
 ;Esc::CapsLock
 ;CapsLock::Esc
+#HotIf
 ;---------------
 
-;---REMAP ALT+HJKL---
-;!h::Left
-;!j::Down
-;!k::Up
-;!l::Right
-;!u::^Left
-;!i::^Right
+;---REMAP ALT+JKLÖ---
+; J/K/L/Ö not while GlazeWM runs: it binds Alt+H/J/K/L itself (workspace cycle, focus).
+#HotIf !ProcessExist("glazewm.exe")
+!j::Left
+!k::Down
+!l::Up
+!ö::Right
+#HotIf
+!i::^Left
+!o::^Right
 ;---------------------
