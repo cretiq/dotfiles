@@ -88,7 +88,11 @@ function c {
   fi
   if [[ "$1" == "jira" && -n "$2" ]]; then
     local target=$(_wt_least_recent)
-    builtin cd "$target" && claude --model claude-sonnet-5-5 --effort high "/analyze-jira $2"
+    if [[ -n "$(git -C "$target" status --porcelain)" ]]; then
+      git -C "$target" stash push -u -m "auto-stash before jira $2" >/dev/null \
+        && echo "Stashed uncommitted changes in $target (auto-stash before jira $2)"
+    fi
+    builtin cd "$target" && claude --model claude-sonnet-5-5 --effort high "/jira-analyze $2"
     return
   fi
   if [[ "$1" == @* ]]; then
@@ -184,7 +188,21 @@ _wt_setup_completion
 # The sync runs first so links, memory and permission rules are current when the session starts.
 function claude {
   local shared="$HOME/.claude_phoenix/settings.local.json"
-  if [[ "$PWD/" == "$PHOENIX_ROOT"/* && -f "$shared" ]]; then
+  local role="$HOME/.claude_phoenix/orchestrator.md"
+  if [[ "$PWD" == "$PHOENIX_ROOT" && -f "$shared" && -f "$role" ]]; then
+    # The root is a bare container, so the all-worktrees sync skips it; CLAUDE.local.md is removed because every worktree session would also load it from this ancestor folder.
+    "$HOME/.claude_phoenix/bin/sync-personal-claude.sh" --worktree "$PHOENIX_ROOT" >/dev/null 2>&1
+    rm -f "$PHOENIX_ROOT/CLAUDE.local.md"
+    # Model and effort come after "$@" because the c helper passes --model sonnet and the last flag wins.
+    command claude --settings "$shared" --name Orchestrator \
+      --strict-mcp-config --mcp-config "$HOME/.claude_phoenix/orchestrator-mcp.json" \
+      --disallowedTools Edit Write NotebookEdit Agent Workflow \
+        mcp__mssql_schema__execute_query mcp__claude_ai_Gmail mcp__claude_ai_Claude_Docs \
+        "Bash(git push:*)" "Bash(git commit:*)" "Bash(git merge:*)" "Bash(git rebase:*)" "Bash(git reset:*)" \
+        "Bash(glab mr create:*)" "Bash(glab mr merge:*)" "Bash(glab mr note:*)" \
+      --append-system-prompt "$(<"$role")"$'\n\n'"$(<"$HOME/.claude_phoenix/CLAUDE.md")" \
+      "$@" --model claude-opus-5-5 --effort high
+  elif [[ "$PWD/" == "$PHOENIX_ROOT"/* && -f "$shared" ]]; then
     "$HOME/.claude_phoenix/bin/phoenix-claude-sync" --quiet 2>/dev/null
     command claude --settings "$shared" "$@"
   else
