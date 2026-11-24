@@ -148,24 +148,32 @@ window_rules:
         window_class: { equals: 'MozillaDialogClass' }
         window_title: { not_regex: '[Pp]icture.in.[Pp]icture' }
 
+  # Playwright headed test window: a WSLg (RAIL) window owned by msrdc. Title match, since other WSLg apps keep tiling.
+  - commands: ['set-floating']
+    match:
+      - window_process: { equals: 'msrdc' }
+        window_class: { equals: 'RAIL_WINDOW' }
+        window_title: { regex: 'Chrome for Testing' }
+
   # Treeboard office frame captures (tools/capture.sh) go to a workspace never looked at.
   # No ^ anchor: Movie Maker prefixes the title with "MovieWriter: Frame N ... - ".
   - commands: ['move --workspace 9']
     match:
       - window_title: { regex: 'TBO Capture' }
-
-  - commands: ['set-floating']
-    match:
-      - window_process: { equals: 'ShareX' }
-        window_title: { regex: '^ShareX - Image (Editor|history)' }
+      # Test runs from tools/*.sh: winproj.sh renames each project copy to "TBO Test" so its window carries that title from creation.
+      - window_title: { regex: 'TBO Test' }
 
   - commands: ['ignore']
     match:
+      - window_process: { equals: 'ShareX' }
+
       # Ignores any Zebar windows.
       - window_process: { equals: 'zebar' }
 
       # Elevated windows do not follow GlazeWM's tiling; as tiling they leave an empty slot.
       - window_title: { regex: '^Administrator:' }
+
+      - window_process: { equals: 'Pasteboard' }
 
       # Ignores picture-in-picture windows for browsers.
       - window_title: { regex: '[Pp]icture.in.[Pp]icture' }
