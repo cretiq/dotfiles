@@ -340,12 +340,14 @@ VarmiloActive() {
 
 ;---REMAP ALT+JKLÖ---
 ; J/K/L/Ö not while GlazeWM runs: it binds Alt+H/J/K/L itself (workspace cycle, focus).
-#HotIf !ProcessExist("glazewm.exe")
+; Never while Ctrl is held: a remap also fires with extra modifiers, so it swallowed the Ctrl+Alt+Shift(+Win) chords Convey registers.
+#HotIf !ProcessExist("glazewm.exe") && !GetKeyState("Ctrl")
 !j::Left
 !k::Down
 !l::Up
 !ö::Right
-#HotIf
+#HotIf !GetKeyState("Ctrl")
 !i::^Left
 !o::^Right
+#HotIf
 ;---------------------
