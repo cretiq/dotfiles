@@ -69,3 +69,7 @@ Both the interactive menu and `set-all-keymap.sh` compare current state to targe
 **`vim-keymap-toggle.sh`** (in `my_scripts/.script/`) is the Vim/Neovim coordinator. The keymapper system calls it rather than directly editing Vim config, because it manages the `keymap_state` file and cascades to multiple apps.
 
 **AHK hotkey** `Ctrl+Win+Alt+Shift+W` triggers `restart-window-switcher.ps1` to manually restart window-switcher without a full toggle — useful when window-switcher crashes or needs a config reload outside the toggle flow.
+
+## Current policy (2026-11-20): JKLÖ everywhere
+
+App keymaps (Vim/Neovim and everything `vim-keymap-toggle.sh` cascades to, Obsidian, Ranger, Windows Terminal) stay in the JKLÖ ("Voyager") state on every keyboard: `set-all-keymap.sh` uses `APP_FROM="Standard"` for them, so `ks` no longer flips them back to HJKL. Only ESC/CapsLock and the Alt remap follow the preset. The Alt remap is now `Alt+J/K/L/Ö` = Left/Down/Up/Right (`!h/!j/!k/!l` before). To revert, see the `jklo-everywhere` memory.
