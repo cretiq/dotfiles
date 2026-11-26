@@ -101,6 +101,7 @@ bindkey '^[[1;5D' backward-word     # Ctrl+Left
 bindkey '^[[1;5C' forward-word      # Ctrl+Right
 bindkey '^W' backward-kill-word     # Ctrl+W (usually default)
 bindkey '^[d' kill-word             # Alt+d (delete word forward)
+bindkey '^H' backward-kill-word     # Ctrl+Backspace (terminal sends ^H)
 
 spf() {
     command spf "$@"
