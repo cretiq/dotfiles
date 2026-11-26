@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -eu
+schema=org.gnome.settings-daemon.plugins.media-keys
+base=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings
+bin="$HOME/.local/bin/slash-chord"
+
+list="$(gsettings get $schema custom-keybindings)"
+for l in d r e n x c o h l w z; do
+  path="$base/slash-$l/"
+  case "$list" in
+    *"'$path'"*) ;;
+    *)
+      if [ "$list" = "@as []" ] || [ "$list" = "[]" ]; then list="['$path']"; else list="${list%]}, '$path']"; fi
+      ;;
+  esac
+  k="$schema.custom-keybinding:$path"
+  gsettings set "$k" name "Slash $l"
+  gsettings set "$k" command "$bin $l"
+  gsettings set "$k" binding "<Control><Alt><Super>$l"
+done
+gsettings set $schema custom-keybindings "$list"

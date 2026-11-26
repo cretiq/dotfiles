@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -u
+cmd="$(dirname "$(readlink -f "$0")")/slash-cmd"
+dry=()
+[ "${SLASH_DRY_RUN:-}" = 1 ] && dry=(--dry-run)
+
+case "${1:-}" in
+  d|r) "$cmd" "${dry[@]}" "/restart" ;;
+  e) "$cmd" "${dry[@]}" "/eli3" ;;
+  n) "$cmd" "${dry[@]}" "/next" ;;
+  x) "$cmd" "${dry[@]}" "/cut" ;;
+  c) "$cmd" "${dry[@]}" "/copy" ;;
+  o) "$cmd" "${dry[@]}" "/git:commit-detailed-push" ;;
+  h) "$cmd" "${dry[@]}" "/how-to-test" ;;
+  l) "$cmd" "${dry[@]}" "/look" ;;
+  w) "$cmd" "${dry[@]}" "/wip" ;;
+  z)
+    "$cmd" "${dry[@]}" "/generate:shorter-title"
+    sleep 0.3
+    "$cmd" "${dry[@]}" "/copy"
+    sleep 0.3
+    "$cmd" "${dry[@]}" --no-submit "/rename"
+    ;;
+  *) echo "usage: slash-chord <d|r|e|n|x|c|o|h|l|w|z>" >&2; exit 1 ;;
+esac
