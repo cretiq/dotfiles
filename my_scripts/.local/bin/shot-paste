@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# gnome-screenshot cannot capture on Wayland, so replay the built-in Ctrl+Alt+E (window -> file + clipboard), then focus Ghostty with Super+1 (Ghostty must be dock slot 1; its D-Bus Activate opens a new window instead) and press Alt+V.
+set -u
+dir="$HOME/Pictures/Screenshots"
+export YDOTOOL_SOCKET="${XDG_RUNTIME_DIR:-/run/user/$UID}/.ydotool_socket"
+before=$(ls -t "$dir" 2>/dev/null | head -1)
+
+# release the physically held Ctrl+Alt so the replayed chord and Alt+V are clean
+ydotool key 29:0 97:0 56:0 100:0
+ydotool key 29:1 56:1 18:1 18:0 56:0 29:0
+
+for _ in $(seq 40); do
+  sleep 0.1
+  [ "$(ls -t "$dir" | head -1)" != "$before" ] && break
+done
+sleep 0.3
+
+ydotool key 125:1 2:1 2:0 125:0
+sleep 0.6
+ydotool key 56:1 47:1 47:0 56:0
