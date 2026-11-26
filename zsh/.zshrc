@@ -43,12 +43,13 @@ alias vk='~/.dotfiles/my_scripts/.script/vim-keymap-toggle.sh'
 # --repo needed because worktree .git pointer files confuse repo detection.
 glab() {
   if [[ "$PWD" == "$HOME/Dev/phoenix"* ]]; then
-    command glab --repo m5/phoenix "$@"
+    GITLAB_HOST=gitlab.rco.local command glab --repo m5/phoenix "$@"
     return
   fi
   command glab "$@"
 }
 
+if [[ -n $WSL_DISTRO_NAME ]]; then
 # Fix stale netsh portproxy when gitlab.rco.local IP changes.
 # Symptom: glab/git fails with "connection reset by peer" on 127.0.0.1:8888.
 fix-gitlab() {
@@ -62,6 +63,7 @@ fix-gitlab() {
   $PWSH -Command "Start-Process powershell -Verb RunAs -ArgumentList '-Command netsh interface portproxy set v4tov4 listenport=8888 listenaddress=127.0.0.1 connectport=80 connectaddress=$ip'"
   echo "Done (UAC prompt may have appeared on Windows)"
 }
+fi
 
 # ============================================================
 # Phoenix jcodemunch (Claude Code MCP) setup
@@ -198,12 +200,14 @@ alias co='claude --model "claude-opus-5-5[1m]"'
 alias ch='claude --model claude-haiku-5-5 --effort high'
 alias ccc='cd ~/claude-scratch && claude --model claude-sonnet-5-5 --effort high'
 alias cdot='cd ~/.dotfiles && claude --model claude-sonnet-5-5 --effort high'
-alias ccv='cd /mnt/c/Dev/Own/Convey && claude --model claude-sonnet-5-5 --effort high'
-alias cdmntdev='cd /mnt/c/Dev/Own'
-alias cconvey='cd /mnt/c/Dev/Own/Convey/ && claude'
+alias mig='cd ~/projects/linux-migration && claude --continue'
+alias ccv='cd $HOME/Dev/Own/Convey && claude --model claude-sonnet-5-5 --effort high'
+alias cdmntdev='cd $HOME/Dev/Own'
+alias cconvey='cd $HOME/Dev/Own/Convey/ && claude'
 alias ctb='cd ~/Dev/treeboard-ratatui && claude --model claude-sonnet-5-5 --effort high'
 alias cph='cd ~/Dev/phoenix && claude --model claude-sonnet-5-5 --effort high'
 
+if [[ -n $WSL_DISTRO_NAME ]]; then
 # Needs the keyboard on a USB cable: the 2.4 GHz receiver cannot write the keymap.
 function q10 {
   local dir="$HOME/.dotfiles/keyboard/q10max"
@@ -222,9 +226,11 @@ function q10 {
 wt() {
   powershell.exe -NoProfile -Command "wt.exe $args"
 }
+fi
 
 alias cco='node ~/Dev/cco-tui/bin/cli.mjs'
 alias tb='cargo run --release --manifest-path ~/Dev/treeboard-ratatui/Cargo.toml'
+if [[ -n $WSL_DISTRO_NAME ]]; then
 # Pixel office game (Godot on Windows), fed by a running tb. `office -- --fake` = demo.
 # Started by Windows (Start-Process), not as a child of this shell, so closing the
 # terminal leaves the game running and it never reads this terminal's keys.
@@ -235,13 +241,16 @@ office() {
   /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -NoProfile -NonInteractive -Command \
     "Start-Process -FilePath '$(wslpath -w "$godot[1]")' -ArgumentList $args" </dev/null >/dev/null 2>&1
 }
+fi
 alias w='worktree -w'
 alias cdwt='cd ~/.local/src/wt'
 
+if [[ -n $WSL_DISTRO_NAME ]]; then
 # System utilities
 disable-alt-shift() {
   powershell.exe -NoProfile -ExecutionPolicy Bypass -File 'C:\Dev\Own\scripts\disable-alt-shift-lang.ps1'
 }
+fi
 
 # Auto-run init script from treeboard WT pane launch (must be after PATH setup)
 [[ -f /tmp/wt-init.zsh ]] && { source /tmp/wt-init.zsh; rm -f /tmp/wt-init.zsh }
