@@ -1,0 +1,21 @@
+#!/bin/bash
+# m5-svc status|restart [service...] : RaServer/RaServiceHost in the M5 VM, through the qemu guest agent
+# (runs as SYSTEM in the guest, so no remote shell or VM console is needed).
+set -euo pipefail
+action=${1:-status}; shift || true
+[ $# -gt 0 ] || set -- RaServer RaServiceHost
+v() { virsh -c qemu:///system qemu-agent-command m5 "$1"; }
+run_ps() {
+  local r pid o
+  r=$(v "$(jq -nc --arg c "$1" '{execute:"guest-exec",arguments:{path:"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",arg:["-NoProfile","-Command",$c],"capture-output":true}}')")
+  pid=$(jq -r .return.pid <<<"$r")
+  until o=$(v "{\"execute\":\"guest-exec-status\",\"arguments\":{\"pid\":$pid}}"); jq -e .return.exited <<<"$o" >/dev/null; do sleep 0.3; done
+  jq -r '(.return["out-data"] // "" | @base64d), (.return["err-data"] // "" | @base64d)' <<<"$o"
+  return "$(jq -r .return.exitcode <<<"$o")"
+}
+names=$(printf "'%s'," "$@"); names=${names%,}
+case $action in
+  status)  run_ps "Get-Service $names | Format-Table -HideTableHeaders Name,Status" ;;
+  restart) run_ps "Restart-Service $names -Force -ErrorAction Stop; Get-Service $names | Format-Table -HideTableHeaders Name,Status" ;;
+  *) echo "usage: m5-svc status|restart [service...]" >&2; exit 1 ;;
+esac
