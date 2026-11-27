@@ -1,0 +1,73 @@
+--- a/extension.js
++++ b/extension.js
+@@ -815,6 +815,26 @@
+     focus_window() {
+         return this.get_window(display.get_focus_window());
+     }
++    /** GlazeWM wm-cycle-focus: the next non-empty layer in the order tiled, floating, fullscreen, most recently used window first. */
++    focus_toggle_floating() {
++        if (!this.auto_tiler)
++            return;
++        const focused = this.focus_window();
++        const monitor = focused ? focused.meta.get_monitor() : Lib.active_monitor_index();
++        const layer = (win) => (win.meta.is_fullscreen() ? 2 : this.auto_tiler.attached.contains(win.entity) ? 0 : 1);
++        const mru = display.get_tab_list(Meta.TabList.NORMAL, wom.get_active_workspace())
++            .filter((meta) => !meta.minimized && meta.get_monitor() === monitor)
++            .map((meta) => this.get_window(meta))
++            .filter((win) => win && win !== focused);
++        const current = focused ? layer(focused) : 0;
++        for (let step = 1; step < 3; step++) {
++            const target = mru.find((win) => layer(win) === (current + step) % 3);
++            if (target) {
++                this.activate_window(target);
++                return;
++            }
++        }
++    }
+     set_osk_visible(visible) {
+         if (this.osk_visible === visible)
+             return;
+--- a/keybindings/10-o-tiling-navigate.xml
++++ b/keybindings/10-o-tiling-navigate.xml
+@@ -3,6 +3,7 @@
+   <KeyListEntry name="focus-down" description="Switch focus to window down"/>
+   <KeyListEntry name="focus-left" description="Switch focus to window left"/>
+   <KeyListEntry name="focus-right" description="Switch focus to window right"/>
++  <KeyListEntry name="focus-toggle-floating" description="Switch focus between tiled, floating and fullscreen windows"/>
+   <KeyListEntry name="focus-up" description="Switch focus to window up"/>
+   <KeyListEntry name="workspace-switch-1" description="Switch to workspace 1"/>
+   <KeyListEntry name="workspace-switch-2" description="Switch to workspace 2"/>
+--- a/prefs.js
++++ b/prefs.js
+@@ -595,6 +595,7 @@
+         this._addShortcutRow(navGroup, settings, 'focus-right', _('Focus Right'));
+         this._addShortcutRow(navGroup, settings, 'focus-up', _('Focus Up'));
+         this._addShortcutRow(navGroup, settings, 'focus-down', _('Focus Down'));
++        this._addShortcutRow(navGroup, settings, 'focus-toggle-floating', _('Focus Tiled / Floating'));
+         // Tiling Group
+         const tilingGroupShortcuts = new Adw.PreferencesGroup({
+             title: _('Tiling'),
+--- a/schemas/org.gnome.shell.extensions.o-tiling.gschema.xml
++++ b/schemas/org.gnome.shell.extensions.o-tiling.gschema.xml
+@@ -258,6 +258,11 @@
+             <summary>Focus right window</summary>
+         </key>
+ 
++        <key type="as" name="focus-toggle-floating">
++            <default><![CDATA[['<Alt>space']]]></default>
++            <summary>Focus the most recently used window of the next layer: tiled, floating, fullscreen</summary>
++        </key>
++
+         <!-- Window Management Keys -->
+         <key type="as" name="toggle-stacking">
+             <default><![CDATA[['s']]]></default>
+--- a/system/keybindings.js
++++ b/system/keybindings.js
+@@ -191,6 +191,7 @@
+             'focus-down': () => ext.focus_down(),
+             'focus-up': () => ext.focus_up(),
+             'focus-right': () => ext.focus_right(),
++            'focus-toggle-floating': () => ext.focus_toggle_floating(),
+             'tile-orientation': () => {
+                 const win = ext.focus_window();
+                 if (win && ext.auto_tiler) {

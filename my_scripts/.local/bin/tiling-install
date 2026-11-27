@@ -12,9 +12,9 @@ if [ ! -d "$dir" ]; then
   gnome-extensions install --force "$tmp/o.zip"
   rm -rf "$tmp"
 fi
-# An extensions.gnome.org update replaces the extension files and drops both patches until this script runs again; then
-# log out and in. Order matters: border-stacking applies on top of horizontal-gap.
-for p in horizontal-gap border-stacking; do
+# An extensions.gnome.org update replaces the extension files and drops the patches until this script runs again; then
+# log out and in. Order matters: each patch applies on top of the one before it.
+for p in horizontal-gap border-stacking focus-toggle; do
   patch_file="$HOME/.dotfiles/gnome-extensions/o-tiling-$p.patch"
   if ! patch -d "$dir" -p1 -R -s -f --dry-run < "$patch_file" >/dev/null; then
     patch -d "$dir" -p1 -N -s < "$patch_file"
@@ -47,6 +47,7 @@ o focus-left "['<Super>j']"
 o focus-down "['<Super>k']"
 o focus-up "['<Super>l']"
 o focus-right "['<Super>odiaeresis']"
+o focus-toggle-floating "['<Alt>space']"
 
 o tile-move-left-global "['<Super><Shift>j']"
 o tile-move-down-global "['<Super><Shift>k']"
@@ -98,6 +99,7 @@ g "$media.custom-keybinding:$cycle_path" binding "<Super>c"
 
 g org.gnome.mutter dynamic-workspaces false
 g org.gnome.desktop.wm.preferences num-workspaces 9
+g org.gnome.desktop.wm.keybindings activate-window-menu "[]"
 g org.gnome.desktop.wm.keybindings toggle-fullscreen "['<Super>f']"
 g org.gnome.desktop.wm.keybindings close "['<Alt>F4', '<Super><Shift>q']"
 g org.gnome.settings-daemon.plugins.media-keys screensaver "['<Control><Super>l']"
