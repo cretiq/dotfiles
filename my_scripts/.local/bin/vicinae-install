@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Optional arg HOTKEY, e.g. <Alt>space. Snippet paste needs `sudo setcap cap_dac_override=ep ~/.local/lib/vicinae/usr/libexec/vicinae/vicinae-input-server` (skipped, needs root).
+# Optional arg HOTKEY. Snippet paste needs `sudo setcap cap_dac_override=ep ~/.local/lib/vicinae/usr/libexec/vicinae/vicinae-input-server` (skipped, needs root).
 # Needs a log out and in on Wayland before the GNOME extension loads.
 set -eu
-hotkey="${1:-}"
+hotkey="${1:-<Control>space}"
 version=v0.30.1
 sha=9f573dd04389693a1b70653dd4cc3886a1623fc159d50e207486162e6ae91ab2
 uuid=vicinae@dagimg-dot
@@ -40,8 +40,6 @@ case "$cur" in
   *) gsettings set org.gnome.shell enabled-extensions "${cur%]}, '$uuid']" ;;
 esac
 
-[ -n "$hotkey" ] || exit 0
-[ "$hotkey" != "<Alt>space" ] || gsettings set org.gnome.desktop.wm.keybindings activate-window-menu "[]"
 media=org.gnome.settings-daemon.plugins.media-keys
 path=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/vicinae/
 list="$(gsettings get $media custom-keybindings)"
