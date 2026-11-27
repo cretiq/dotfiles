@@ -3,10 +3,104 @@ surface:focus-within {
   outline-offset: -2px;
 }
 
+/* 37px = Firefox's compact tab bar: 29px tab + 4px above and below. */
+headerbar,
+window:not(.ssd-frame) > .titlebar headerbar {
+  min-height: 37px;
+}
+
+headerbar,
+headerbar > windowhandle > box,
+tabbar .box,
+tabbar tabbox,
+tabbar .start-action,
+tabbar .end-action {
+  margin: 0;
+  padding: 0;
+  border-spacing: 0;
+}
+
+headerbar > windowhandle > box > box.start,
+headerbar > windowhandle > box > box.end,
+headerbar > windowhandle > box > widget > box.start,
+headerbar > windowhandle > box > widget > box.end,
+headerbar box,
+splitbutton,
+splitbutton > separator {
+  margin: 0;
+  border-spacing: 0;
+}
+
+headerbar button,
+tabbar .start-action button,
+tabbar .end-action button {
+  min-height: 37px;
+  min-width: 36px;
+  margin: 0;
+  padding: 0 8px;
+  border-radius: 0;
+}
+
+headerbar splitbutton > menubutton > button,
+tabbar splitbutton > menubutton > button {
+  min-width: 24px;
+}
+
+/* Window controls draw their hover box on the icon, so the icon padding sets the size: 17+2*10 = 37px. */
+headerbar windowcontrols > button,
+tabbar .start-action windowcontrols > button,
+tabbar .end-action windowcontrols > button {
+  min-width: 0;
+  padding: 0;
+}
+
+windowcontrols > button > image {
+  min-height: 17px;
+  min-width: 18px;
+  padding: 10px 13px;
+}
+
+tabbar tabbox {
+  min-height: 37px;
+}
+
+tabbar tabbox > separator {
+  margin: 0;
+  min-width: 0;
+  background: none;
+}
+
+/* libadwaita hardcodes 5px between tabs; negative margins let each tab cover it. */
+tabbar tabbox > tabboxchild {
+  margin: 0 -2px 0 -3px;
+  min-width: 5px;
+  border-radius: 0;
+}
+
+tabbar scrolledwindow:not(.pinned) tabbox {
+  margin: 0 -3px 0 -2px;
+}
+
 tabbar tab {
-  min-height: 26px;
-  border-radius: 6px;
+  min-height: 37px;
+  margin: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-radius: 0;
   color: #8a8a99;
+}
+
+headerbar,
+tabbar .box {
+  box-shadow: none;
+  border-bottom: none;
+}
+
+headerbar tabbar tab button.image-button,
+tabbar tab button.image-button {
+  min-width: 20px;
+  min-height: 20px;
+  padding: 0;
 }
 
 tabbar tab:hover {
@@ -15,7 +109,20 @@ tabbar tab:hover {
 }
 
 tabbar tab:selected {
-  background: #2a2340;
-  color: #f4f4f4;
-  box-shadow: inset 0 -2px #6272a4;
+  background: #4a3a7a;
+  color: #ffffff;
+  box-shadow: none;
 }
+
+windowcontrols > button,
+windowcontrols > button > image {
+  border-radius: 0;
+}
+
+windowcontrols { border-spacing: 0; margin: 0; }
+windowcontrols > button { margin: 0; }
+
+splitbutton > separator { min-width: 0; background: none; }
+
+windowcontrols > button:hover > image { background-color: #6a52b3; color: #ffffff; }
+windowcontrols > button:active > image { background-color: #8268d4; color: #ffffff; }

@@ -1,0 +1,38 @@
+--- a/window/window.js
++++ b/window/window.js
+@@ -192,6 +192,26 @@
+     actor_exists() {
+         return !this.destroying && this.meta.get_compositor_private() !== null;
+     }
++    // Browser extension pop-outs (Bitwarden) get their real title only after they have been tiled.
++    // Limited to user rules: the built-in firefox rule matches any title lacking "Mozilla Firefox".
++    title_changed() {
++        const tiler = this.ext.auto_tiler;
++        if (!tiler?.attached.get(this.entity))
++            return;
++        const wm_class = this.meta.get_wm_class() ?? '';
++        const title = this.meta.get_title() ?? '';
++        const matches = this.ext.conf.float.some(r => r.class && r.title && !r.disabled &&
++            new RegExp(r.class, 'i').test(wm_class) && new RegExp(r.title, 'i').test(title));
++        if (!matches || this.is_tilable(this.ext))
++            return;
++        tiler.detach_window(this.ext, this.entity);
++        this.ext.movements.remove(this.entity);
++        const area = this.meta.get_work_area_current_monitor();
++        const width = Math.min(480, area.width);
++        const height = Math.min(720, area.height);
++        this.meta.move_resize_frame(true, area.x + Math.round((area.width - width) / 2), area.y + Math.round((area.height - height) / 2), width, height);
++        this.meta.raise();
++    }
+     bind_window_events() {
+         this.ext.window_signals
+             .get_or(this.entity, () => [])
+@@ -203,6 +223,8 @@
+             this.workspace_changed();
+         }), this.meta.connect('notify::wm-class', () => {
+             this.wm_class_changed();
++        }), this.meta.connect('notify::title', () => {
++            this.title_changed();
+         }), this.meta.connect('raised', () => {
+             this.window_raised();
+         }));

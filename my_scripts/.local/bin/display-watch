@@ -2,12 +2,20 @@
 # Per-display settings, applied at login and on every MonitorsChanged signal from GNOME's display config.
 set -u
 dc=(--session --dest org.gnome.Mutter.DisplayConfig --object-path /org/gnome/Mutter/DisplayConfig)
+ghostty_display_conf="$HOME/.config/ghostty/display.conf"
 
 apply() {
-  local state size
+  local state size font
   state=$(gdbus call "${dc[@]}" --method org.gnome.Mutter.DisplayConfig.GetCurrentState) || return
-  if [[ $state == *"'Odyssey G95NC'"* ]]; then size=32; else size=24; fi
+  if [[ $state == *"'Odyssey G95NC'"* ]]; then size=32; font="font-size = 12"; else size=24; font=""; fi
   [ "$(gsettings get org.gnome.desktop.interface cursor-size)" = "$size" ] || gsettings set org.gnome.desktop.interface cursor-size "$size"
+
+  # Ghostty loads this file last (config-file in its config), so it overrides the base font-size.
+  if [ "$(cat "$ghostty_display_conf" 2>/dev/null)" != "$font" ]; then
+    printf '%s\n' "$font" > "$ghostty_display_conf"
+    gdbus call --session --dest com.mitchellh.ghostty --object-path /com/mitchellh/ghostty \
+      --method org.gtk.Actions.Activate reload-config '[]' '{}' >/dev/null 2>&1
+  fi
 }
 
 apply
