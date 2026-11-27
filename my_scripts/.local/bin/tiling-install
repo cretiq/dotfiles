@@ -28,7 +28,7 @@ mkdir -p "$(dirname "$conf")"
 jq --argjson add '[{"class": "teams-for-linux"}, {"class": "com.gabm.satty"}, {"class": "keymapp"}]' \
   '.float = ((.float // []) + ($add - (.float // [])))' "$conf" > "$conf.tmp"
 mv "$conf.tmp" "$conf"
-jq --argjson add '[{"class": "vicinae"}]' \
+jq --argjson add '[{"class": "vicinae"}, {"class": "teams-for-linux"}]' \
   '.float = ((.float // []) + ($add - (.float // []))) | .noborder = ((.noborder // []) + ($add - (.noborder // [])))' "$conf" > "$conf.tmp"
 mv "$conf.tmp" "$conf"
 

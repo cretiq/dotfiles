@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# GNOME has no Wayland clipboard protocol for background tools, so every wl-copy briefly
+# takes focus from the terminal; Claude Code runs it twice per copy and Ghostty flickers.
+# For Claude Code only, hand the text to Ghostty through OSC 52 on Claude Code's own terminal
+# (its children have no /dev/tty), which sets the clipboard without a focus change.
+if [ "$(cat /proc/$PPID/comm 2>/dev/null)" = claude ]; then
+  [ "${1:-}" = --primary ] && { cat >/dev/null; exit 0; }
+  if [ $# -eq 0 ]; then
+    text=$(base64 -w0)
+    term=$(readlink /proc/$PPID/fd/1)
+    case "$term" in
+      /dev/pts/*) printf '\e]52;c;%s\a' "$text" >"$term" && exit 0 ;;
+    esac
+    base64 -d <<<"$text" | /usr/bin/wl-copy; exit
+  fi
+fi
+exec /usr/bin/wl-copy "$@"

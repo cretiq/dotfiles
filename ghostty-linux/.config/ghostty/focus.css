@@ -1,0 +1,21 @@
+surface:focus-within {
+  outline: 2px solid rgb(0,200,255);
+  outline-offset: -2px;
+}
+
+tabbar tab {
+  min-height: 26px;
+  border-radius: 6px;
+  color: #8a8a99;
+}
+
+tabbar tab:hover {
+  background: #241d33;
+  color: #cccccc;
+}
+
+tabbar tab:selected {
+  background: #2a2340;
+  color: #f4f4f4;
+  box-shadow: inset 0 -2px #6272a4;
+}
