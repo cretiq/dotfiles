@@ -1,0 +1,26 @@
+--- a/extension.js
++++ b/extension.js
+@@ -1192,7 +1192,8 @@
+                     return;
+                 }
+             }
+-            if (focus && Window.clutter_focus_is_shell_panel() && this._bordered_entity !== null)
++            // A pointer resting on the panel must only keep the current border, not block moving it to a newly focused window.
++            if (focus && Window.clutter_focus_is_shell_panel() && this._bordered_entity === focus.entity)
+                 return;
+             this.hide_all_borders();
+             if (focus && focus.same_workspace()) {
+@@ -2366,6 +2367,13 @@
+         this.connect(display, 'window_created', (_, window) => {
+             this.register({ tag: 3, window });
+         });
++        // Mutter re-sorts window actors to the bottom of window_group on a restack, which lifts every border above all windows.
++        this.connect(display, 'restacked', () => {
++            for (const window of this.windows.values()) {
++                if (window.border?.visible)
++                    window.restack();
++            }
++        });
+         // GNOME 40 removed the first argument of the callback
+         this.connect(display, 'grab-op-begin', (_display, win, op) => {
+             this.on_grab_start(win, op);

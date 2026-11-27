@@ -12,13 +12,22 @@ if [ ! -d "$dir" ]; then
   gnome-extensions install --force "$tmp/o.zip"
   rm -rf "$tmp"
 fi
-# The patch adds gap-outer-horizontal-percent (tiling-cycle-width, Super+C). An extensions.gnome.org update replaces the
-# extension files and drops it until this script runs again; then log out and in.
-patch_file="$HOME/.dotfiles/gnome-extensions/o-tiling-horizontal-gap.patch"
-if ! patch -d "$dir" -p1 -R -s -f --dry-run < "$patch_file" >/dev/null; then
-  patch -d "$dir" -p1 -N -s < "$patch_file"
-fi
+# An extensions.gnome.org update replaces the extension files and drops both patches until this script runs again; then
+# log out and in. Order matters: border-stacking applies on top of horizontal-gap.
+for p in horizontal-gap border-stacking; do
+  patch_file="$HOME/.dotfiles/gnome-extensions/o-tiling-$p.patch"
+  if ! patch -d "$dir" -p1 -R -s -f --dry-run < "$patch_file" >/dev/null; then
+    patch -d "$dir" -p1 -N -s < "$patch_file"
+  fi
+done
 glib-compile-schemas "$dir/schemas"
+
+conf="${XDG_CONFIG_HOME:-$HOME/.config}/o-tiling/config.json"
+mkdir -p "$(dirname "$conf")"
+[ -s "$conf" ] || echo '{"float": [], "skiptaskbarhidden": [], "log_on_focus": false}' > "$conf"
+jq --argjson add '[{"class": "teams-for-linux"}, {"class": "com.gabm.satty"}, {"class": "keymapp"}]' \
+  '.float = ((.float // []) + ($add - (.float // [])))' "$conf" > "$conf.tmp"
+mv "$conf.tmp" "$conf"
 
 add_to() {
   local key=$1 val=$2 cur
