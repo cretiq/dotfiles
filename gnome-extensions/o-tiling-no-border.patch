@@ -1,0 +1,60 @@
+--- a/system/config.js
++++ b/system/config.js
+@@ -64,16 +64,20 @@
+     float = [];
+     /** List of Windows with skip taskbar true but still hidden in Overview, Switchers, Workspace Thumbnails */
+     skiptaskbarhidden = [];
++    /** Windows that never get the active-hint border */
++    noborder = [];
+     /** Logs window details on focus of window */
+     log_on_focus = false;
+     /** Pre-compiled float rules for hot-path matching */
+     _compiled_float = compile_rules(DEFAULT_FLOAT_RULES);
+     /** Pre-compiled skip-taskbar rules for hot-path matching */
+     _compiled_skip = compile_rules(SKIPTASKBAR_EXCEPTIONS);
++    _compiled_noborder = compile_rules([]);
+     /** Rebuild compiled rule caches after any mutation */
+     _rebuild_caches() {
+         this._compiled_float = compile_rules(this.float.concat(DEFAULT_FLOAT_RULES));
+         this._compiled_skip = compile_rules(this.skiptaskbarhidden.concat(SKIPTASKBAR_EXCEPTIONS));
++        this._compiled_noborder = compile_rules(this.noborder ?? []);
+     }
+     /** Add a floating exception which matches by wm_class */
+     add_app_exception(wmclass) {
+@@ -111,6 +115,16 @@
+         }
+         return false;
+     }
++    window_no_border(wclass, title) {
++        for (const rule of this._compiled_noborder) {
++            if (rule.classRe && !rule.classRe.test(wclass))
++                continue;
++            if (rule.titleRe && !rule.titleRe.test(title))
++                continue;
++            return true;
++        }
++        return false;
++    }
+     skiptaskbar_shall_hide(meta_window) {
+         const wmclass = meta_window.get_wm_class();
+         const wmtitle = meta_window.get_title();
+@@ -137,6 +151,7 @@
+         if (conf.tag === 0) {
+             const c = conf.value;
+             this.float = c.float;
++            this.noborder = c.noborder ?? [];
+             this.log_on_focus = c.log_on_focus;
+         }
+         else {
+--- a/window/window.js
++++ b/window/window.js
+@@ -459,7 +459,8 @@
+                 !this.meta.is_fullscreen() &&
+                 (!this.is_maximized() || this.is_snap_edge()) &&
+                 !this.meta.minimized &&
+-                !this.smart_gapped;
++                !this.smart_gapped &&
++                !this.ext.conf.window_no_border(this.meta.get_wm_class() ?? '', this.title());
+             if (permitted()) {
+                 this.restack();
+                 border.show();

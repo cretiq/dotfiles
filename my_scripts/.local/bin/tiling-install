@@ -14,7 +14,7 @@ if [ ! -d "$dir" ]; then
 fi
 # An extensions.gnome.org update replaces the extension files and drops the patches until this script runs again; then
 # log out and in. Order matters: each patch applies on top of the one before it.
-for p in horizontal-gap border-stacking focus-toggle; do
+for p in horizontal-gap border-stacking focus-toggle no-border; do
   patch_file="$HOME/.dotfiles/gnome-extensions/o-tiling-$p.patch"
   if ! patch -d "$dir" -p1 -R -s -f --dry-run < "$patch_file" >/dev/null; then
     patch -d "$dir" -p1 -N -s < "$patch_file"
@@ -27,6 +27,9 @@ mkdir -p "$(dirname "$conf")"
 [ -s "$conf" ] || echo '{"float": [], "skiptaskbarhidden": [], "log_on_focus": false}' > "$conf"
 jq --argjson add '[{"class": "teams-for-linux"}, {"class": "com.gabm.satty"}, {"class": "keymapp"}]' \
   '.float = ((.float // []) + ($add - (.float // [])))' "$conf" > "$conf.tmp"
+mv "$conf.tmp" "$conf"
+jq --argjson add '[{"class": "vicinae"}]' \
+  '.float = ((.float // []) + ($add - (.float // []))) | .noborder = ((.noborder // []) + ($add - (.noborder // [])))' "$conf" > "$conf.tmp"
 mv "$conf.tmp" "$conf"
 
 add_to() {
