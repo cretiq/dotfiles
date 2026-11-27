@@ -5,8 +5,12 @@ dir="$HOME/Pictures/Screenshots"
 export YDOTOOL_SOCKET="${XDG_RUNTIME_DIR:-/run/user/$UID}/.ydotool_socket"
 before=$(ls -t "$dir" 2>/dev/null | head -1)
 
-# release the physically held Ctrl+Alt so the replayed chord and Alt+V are clean
-ydotool key 29:0 97:0 56:0 100:0
+# wait for the physical Ctrl+Shift release: ydotool cannot clear keys held on the real keyboard, and a held Shift breaks the replayed Ctrl+Alt+E
+sleep 0.6
+
+# a focused VM window inhibits GNOME shortcuts; Super+Escape restores them so the replayed Ctrl+Alt+E reaches GNOME
+ydotool key 125:1 1:1 1:0 125:0
+sleep 0.2
 ydotool key 29:1 56:1 18:1 18:0 56:0 29:0
 
 for _ in $(seq 40); do

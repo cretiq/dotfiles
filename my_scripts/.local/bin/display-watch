@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Per-display settings, applied at login and on every MonitorsChanged signal from GNOME's display config.
+set -u
+dc=(--session --dest org.gnome.Mutter.DisplayConfig --object-path /org/gnome/Mutter/DisplayConfig)
+
+apply() {
+  local state size
+  state=$(gdbus call "${dc[@]}" --method org.gnome.Mutter.DisplayConfig.GetCurrentState) || return
+  if [[ $state == *"'Odyssey G95NC'"* ]]; then size=32; else size=24; fi
+  [ "$(gsettings get org.gnome.desktop.interface cursor-size)" = "$size" ] || gsettings set org.gnome.desktop.interface cursor-size "$size"
+}
+
+apply
+gdbus monitor "${dc[@]}" | while read -r line; do
+  [[ $line == *MonitorsChanged* ]] && apply
+done

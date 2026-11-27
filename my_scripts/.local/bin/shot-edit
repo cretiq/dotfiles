@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Pick a region, window or screen in GNOME's own screenshot UI (the Print key), then annotate only that capture in satty.
+# ydotool sends Print because GNOME gives no other way to open that UI from a script; the sleep lets the physically held Ctrl+Shift come up first.
+set -u
+dir="$HOME/Pictures/Screenshots"
+export YDOTOOL_SOCKET="${XDG_RUNTIME_DIR:-/run/user/$UID}/.ydotool_socket"
+before=$(ls -t "$dir" 2>/dev/null | head -1)
+
+sleep 0.6
+ydotool key 99:1 99:0
+
+for _ in $(seq 900); do
+  sleep 0.1
+  new=$(ls -t "$dir" | head -1)
+  [ "$new" != "$before" ] && break
+done
+[ "${new:-}" = "$before" ] && exit 0
+
+sleep 0.3
+exec satty --filename "$dir/$new" --initial-tool arrow --early-exit copy --save-after-copy --actions-on-enter save-to-clipboard --output-filename "$dir/satty-%Y%m%d-%H%M%S.png"

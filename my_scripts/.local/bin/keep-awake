@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Toggles keep awake, as the Windows tray toggle did: while the gnome-session inhibitor runs, GNOME does not blank, lock or suspend.
+pidfile="${XDG_RUNTIME_DIR:-/run/user/$UID}/keep-awake.pid"
+
+if [ -f "$pidfile" ] && kill "$(cat "$pidfile")" 2>/dev/null; then
+  rm -f "$pidfile"
+  notify-send -t 2000 "Keep awake off"
+else
+  gnome-session-inhibit --inhibit idle --inhibit suspend --app-id keep-awake --reason "Keep awake" --inhibit-only >/dev/null 2>&1 &
+  echo $! > "$pidfile"
+  disown
+  notify-send -t 2000 "Keep awake on"
+fi
