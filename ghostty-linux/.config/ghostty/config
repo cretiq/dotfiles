@@ -1,19 +1,21 @@
 # Ghostty on Linux (Ubuntu). Keys mirror the old Windows Terminal setup (windows-terminal/settings.json).
 # The Mac config lives in ghostty/ (cmd keys); this file is the Linux one.
 
-theme = dark:Under The Sea,light:Farmhouse Light
+theme = Banana Blueberry
 font-family = "JetBrains Mono"
-font-size = 11
+font-size = 10
+bold-color = bright
 cursor-style = block
 cursor-style-blink = false
-cursor-color = FFA500
 unfocused-split-opacity = 0.9
 unfocused-split-fill = 363636
 split-divider-color = 6272a4
-window-padding-x = 10
-window-padding-y = 10
+window-padding-x = 8
+window-padding-y = 8
 confirm-close-surface = false
 desktop-notifications = false
+copy-on-select = false
+clipboard-paste-protection = false
 
 # Copy / paste: Ctrl+C copies when text is selected, otherwise it interrupts
 keybind = performable:ctrl+c=copy_to_clipboard
@@ -22,7 +24,8 @@ keybind = ctrl+shift+f=start_search
 
 # Editing
 keybind = ctrl+backspace=text:\x17
-keybind = shift+enter=text:\x1b\r
+keybind = shift+enter=text:\n
+keybind = ctrl+shift+l=clear_screen
 
 # Splits (panes)
 keybind = alt+shift+d=new_split:right
@@ -32,27 +35,29 @@ keybind = ctrl+shift+w=close_surface
 
 # Move between splits. performable: only taken when a split exists that way,
 # otherwise the key reaches the shell (Ctrl+L clear, Ctrl+K kill line, ...)
-keybind = performable:ctrl+h=goto_split:left
-keybind = performable:ctrl+j=goto_split:down
-keybind = performable:ctrl+k=goto_split:up
-keybind = performable:ctrl+l=goto_split:right
+keybind = performable:ctrl+j=goto_split:left
+keybind = performable:ctrl+k=goto_split:down
+keybind = performable:ctrl+l=goto_split:up
+keybind = performable:ctrl+ö=goto_split:right
 keybind = ctrl+alt+o=goto_split:right
 keybind = alt+left=goto_split:left
 keybind = alt+right=goto_split:right
 keybind = alt+up=goto_split:up
 keybind = alt+down=goto_split:down
-keybind = alt+shift+left=resize_split:left,20
-keybind = alt+shift+right=resize_split:right,20
-keybind = alt+shift+up=resize_split:up,20
-keybind = alt+shift+down=resize_split:down,20
+keybind = alt+shift+left=resize_split:left,40
+keybind = alt+shift+right=resize_split:right,40
+keybind = alt+shift+up=resize_split:up,40
+keybind = alt+shift+down=resize_split:down,40
 
 # Tabs
 keybind = ctrl+shift+t=new_tab
+keybind = ctrl+t=new_tab
 keybind = alt+s=previous_tab
 keybind = alt+d=next_tab
 keybind = ctrl+tab=next_tab
 keybind = ctrl+shift+tab=previous_tab
 keybind = ctrl+alt+r=prompt_tab_title
+keybind = ctrl+alt+shift+g=new_tab
 keybind = ctrl+alt+one=goto_tab:1
 keybind = ctrl+alt+two=goto_tab:2
 keybind = ctrl+alt+three=goto_tab:3
