@@ -14,7 +14,7 @@ if [ ! -d "$dir" ]; then
 fi
 # An extensions.gnome.org update replaces the extension files and drops the patches until this script runs again; then
 # log out and in. Order matters: each patch applies on top of the one before it.
-for p in horizontal-gap border-stacking focus-toggle no-border; do
+for p in horizontal-gap border-stacking focus-toggle no-border resize; do
   patch_file="$HOME/.dotfiles/gnome-extensions/o-tiling-$p.patch"
   if ! patch -d "$dir" -p1 -R -s -f --dry-run < "$patch_file" >/dev/null; then
     patch -d "$dir" -p1 -N -s < "$patch_file"
@@ -63,9 +63,14 @@ o tile-move-down "['k', 'Down']"
 o tile-move-up "['l', 'Up']"
 o tile-move-right "['odiaeresis', 'Right']"
 o tile-resize-left "['<Shift>j', '<Shift>Left']"
-o tile-resize-down "['<Shift>k', '<Shift>Down']"
-o tile-resize-up "['<Shift>l', '<Shift>Up']"
+# o-tiling's resize-up makes the window shorter; GlazeWM's resize mode has l/up taller and k/down shorter.
+o tile-resize-down "['<Shift>l', '<Shift>Up']"
+o tile-resize-up "['<Shift>k', '<Shift>Down']"
 o tile-resize-right "['<Shift>odiaeresis', '<Shift>Right']"
+o resize-narrower "['<Super>u']"
+o resize-wider "['<Super>p']"
+o resize-shorter "['<Super>i']"
+o resize-taller "['<Super>o']"
 o tile-swap-left "[]"
 o tile-swap-down "[]"
 o tile-swap-up "[]"
@@ -107,6 +112,10 @@ g org.gnome.desktop.wm.keybindings toggle-fullscreen "['<Super>f']"
 g org.gnome.desktop.wm.keybindings close "['<Alt>F4', '<Super><Shift>q']"
 g org.gnome.settings-daemon.plugins.media-keys screensaver "['<Control><Super>l']"
 g org.gnome.shell.keybindings toggle-message-tray "['<Super>m']"
+# Super+P/O/I belong to the direct resize keys above (GlazeWM alt+p/o/i); single external monitor, no rotation sensor in use.
+g org.gnome.mutter.keybindings switch-monitor "['XF86Display']"
+g org.gnome.settings-daemon.plugins.media-keys rotate-video-lock-static "['XF86RotationLockToggle']"
+d intellihide-key-toggle "[]"
 for n in 1 2 3 4 5 6 7 8 9; do
   g org.gnome.shell.keybindings switch-to-application-$n "[]"
   d app-hotkey-$n "[]"

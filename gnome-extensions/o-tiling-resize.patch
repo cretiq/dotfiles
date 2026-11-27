@@ -1,0 +1,250 @@
+--- a/engine/tiling.js
++++ b/engine/tiling.js
+@@ -1,4 +1,3 @@
+-import * as GrabOp from '../window/grab_op.js';
+ import * as Lib from '../utils/lib.js';
+ import * as Log from '../utils/log.js';
+ import * as Node from './node.js';
+@@ -333,38 +332,6 @@
+                 break;
+         }
+     }
+-    move_auto_(ext, mov1, mov2, callback) {
+-        if (ext.auto_tiler && this.window) {
+-            const entity = ext.auto_tiler.attached.get(this.window);
+-            if (entity) {
+-                const fork = ext.auto_tiler.forest.forks.get(entity);
+-                const window = ext.windows.get(this.window);
+-                if (!fork || !window)
+-                    return;
+-                const workspace_id = ext.workspace_id(window);
+-                const toplevel = ext.auto_tiler.forest.find_toplevel(workspace_id);
+-                if (!toplevel)
+-                    return;
+-                const topfork = ext.auto_tiler.forest.forks.get(toplevel);
+-                if (!topfork)
+-                    return;
+-                const toparea = topfork.area;
+-                const before = window.rect();
+-                const grab_op = new GrabOp.GrabOp(this.window, before);
+-                const crect = grab_op.rect.clone();
+-                const resize = (mov, func) => {
+-                    if (func(toparea, crect, mov) || crect.eq(grab_op.rect))
+-                        return;
+-                    ext.auto_tiler.forest.resize(ext, entity, fork, this.window, grab_op.operation(crect), crect);
+-                    grab_op.rect = crect.clone();
+-                };
+-                resize(mov1, callback);
+-                resize(mov2, callback);
+-                ext.auto_tiler.forest.arrange(ext, fork.workspace);
+-                ext.register_fn(() => ext.set_overlay(window.rect()));
+-            }
+-        }
+-    }
+     overlay_watch(ext, window) {
+         ext.register_fn(() => {
+             if (window) {
+@@ -385,35 +352,37 @@
+             }
+         }
+     }
+-    resize_auto(ext, direction) {
+-        let mov1, mov2;
+-        const hrow = ext.row_size;
+-        const hcolumn = ext.column_size;
+-        switch (direction) {
+-            case Direction.Left:
+-                mov1 = [hrow, 0, -hrow, 0];
+-                mov2 = [0, 0, -hrow, 0];
+-                break;
+-            case Direction.Right:
+-                mov1 = [0, 0, hrow, 0];
+-                mov2 = [-hrow, 0, hrow, 0];
+-                break;
+-            case Direction.Up:
+-                mov1 = [0, hcolumn, 0, -hcolumn];
+-                mov2 = [0, 0, 0, -hcolumn];
+-                break;
+-            default:
+-                mov1 = [0, 0, 0, hcolumn];
+-                mov2 = [0, -hcolumn, 0, hcolumn];
++    /** GlazeWM resize --width/--height 2%: moves the split of the nearest fork on that axis, whichever side the window sits on. */
++    resize_auto(ext, entity, direction) {
++        const forest = ext.auto_tiler.forest;
++        const window = ext.windows.get(entity);
++        if (!window)
++            return;
++        const horizontal = direction === Direction.Left || direction === Direction.Right;
++        const grow = direction === Direction.Right || direction === Direction.Down;
++        const area = ext.monitor_work_area(window.meta.get_monitor());
++        // Fork.measure rounds every split to this grid, so a step that is not a multiple of it lands unevenly.
++        const grid = horizontal ? ext.column_size : ext.row_size;
++        const step = Math.max(1, Math.round(((horizontal ? area.width : area.height) * 0.02) / grid)) * grid;
++        let child_fork = null;
++        let fork_e = ext.auto_tiler.attached.get(entity);
++        while (fork_e) {
++            const fork = forest.forks.get(fork_e);
++            if (!fork)
++                return;
++            if (fork.right && fork.is_horizontal() === horizontal) {
++                const in_left = child_fork
++                    ? fork.left.is_fork(child_fork)
++                    : fork.left.is_window(entity) || fork.left.is_in_stack(entity);
++                this.resizing_window = true;
++                fork.set_ratio(fork.length_left + (in_left === grow ? step : -step)).measure(forest, ext, fork.area, forest.on_record());
++                this.resizing_window = false;
++                forest.arrange(ext, fork.workspace);
++                return;
++            }
++            child_fork = fork_e;
++            fork_e = forest.parents.get(fork_e);
+         }
+-        this.move_auto_(ext, new Rect.Rectangle(mov1), new Rect.Rectangle(mov2), (work_area, crect, mov) => {
+-            crect.apply(mov);
+-            const before = crect.clone();
+-            crect.clamp(work_area);
+-            const diff = before.diff(crect);
+-            crect.apply(new Rect.Rectangle([0, 0, -diff.x, -diff.y]));
+-            return false;
+-        });
+     }
+     move_auto(ext, focused, move_to, stack_from_left = true) {
+         let watching = null;
+@@ -498,7 +467,7 @@
+             return;
+         this.resizing_window = true;
+         if (ext.auto_tiler && !ext.contains_tag(this.window, Tags.Floating)) {
+-            this.resize_auto(ext, direction);
++            this.resize_auto(ext, this.window, direction);
+         }
+         else {
+             let array;
+@@ -523,6 +492,36 @@
+         }
+         this.resizing_window = false;
+     }
++    /** GlazeWM resize --width/--height 2% outside adjustment mode; a floating window resizes from its top-left corner. */
++    resize_focused(ext, direction) {
++        const win = ext.focus_window();
++        if (!win || this.window)
++            return;
++        if (ext.auto_tiler && ext.auto_tiler.attached.contains(win.entity)) {
++            this.resize_auto(ext, win.entity, direction);
++            return;
++        }
++        const area = ext.monitor_work_area(win.meta.get_monitor());
++        const dx = Math.round(area.width * 0.02);
++        const dy = Math.round(area.height * 0.02);
++        const rect = win.rect();
++        switch (direction) {
++            case Direction.Left:
++                rect.width = Math.max(rect.width - dx, dx);
++                break;
++            case Direction.Right:
++                rect.width += dx;
++                break;
++            case Direction.Up:
++                rect.height = Math.max(rect.height - dy, dy);
++                break;
++            default:
++                rect.height += dy;
++        }
++        rect.clamp(area);
++        ext.size_signals_block(win);
++        win.move(ext, rect, () => ext.size_signals_unblock(win));
++    }
+     swap(ext, selector) {
+         if (selector) {
+             ext.set_overlay(selector.rect());
+--- a/extension.js
++++ b/extension.js
+@@ -521,7 +521,11 @@
+                         this.on_minimize(win);
+                         break;
+                     case WindowEvent.Size:
+-                        if (this.tiler.window !== null && Ecs.entity_eq(win.entity, this.tiler.window)) {
++                        // Adjustment mode resizes and moves a tiled window itself, and forest.arrange keeps the overlay on it,
++                        // so only a floating window, whose pending rect lives in the overlay, leaves the mode on a size change.
++                        if (this.tiler.window !== null &&
++                            Ecs.entity_eq(win.entity, this.tiler.window) &&
++                            !this.auto_tiler?.attached.contains(win.entity)) {
+                             this.tiler.exit(this);
+                         }
+                         if (this.auto_tiler &&
+--- a/keybindings/10-o-tiling-move.xml
++++ b/keybindings/10-o-tiling-move.xml
+@@ -30,6 +30,10 @@
+   <KeyListEntry name="tile-resize-right" description="Resize window larger"/>
+   <KeyListEntry name="tile-resize-up" description="Resize window shorter"/>
+   <KeyListEntry name="tile-resize-down" description="Resize window taller"/>
++  <KeyListEntry name="resize-narrower" description="Make window narrower outside management mode"/>
++  <KeyListEntry name="resize-wider" description="Make window wider outside management mode"/>
++  <KeyListEntry name="resize-shorter" description="Make window shorter outside management mode"/>
++  <KeyListEntry name="resize-taller" description="Make window taller outside management mode"/>
+   <KeyListEntry name="tile-swap-down" description="Swap window down"/>
+   <KeyListEntry name="tile-swap-left" description="Swap window left"/>
+   <KeyListEntry name="tile-swap-right" description="Swap window right"/>
+--- a/prefs.js
++++ b/prefs.js
+@@ -627,6 +627,10 @@
+         this._addShortcutRow(movementGroup, settings, 'tile-resize-right', _('Resize Right'));
+         this._addShortcutRow(movementGroup, settings, 'tile-resize-up', _('Resize Up'));
+         this._addShortcutRow(movementGroup, settings, 'tile-resize-down', _('Resize Down'));
++        this._addShortcutRow(movementGroup, settings, 'resize-narrower', _('Narrower (no mode)'));
++        this._addShortcutRow(movementGroup, settings, 'resize-wider', _('Wider (no mode)'));
++        this._addShortcutRow(movementGroup, settings, 'resize-shorter', _('Shorter (no mode)'));
++        this._addShortcutRow(movementGroup, settings, 'resize-taller', _('Taller (no mode)'));
+         // Workspaces & Monitors Group
+         const workspaceGroup = new Adw.PreferencesGroup({
+             title: _('Workspaces & Monitors'),
+--- a/schemas/org.gnome.shell.extensions.o-tiling.gschema.xml
++++ b/schemas/org.gnome.shell.extensions.o-tiling.gschema.xml
+@@ -372,6 +372,27 @@
+             <summary>Resize window right</summary>
+         </key>
+ 
++        <!-- Resize the focused window outside management mode -->
++        <key type="as" name="resize-narrower">
++            <default><![CDATA[['<Super>u']]]></default>
++            <summary>Make the focused window 2% narrower</summary>
++        </key>
++
++        <key type="as" name="resize-wider">
++            <default><![CDATA[['<Super>p']]]></default>
++            <summary>Make the focused window 2% wider</summary>
++        </key>
++
++        <key type="as" name="resize-shorter">
++            <default><![CDATA[['<Super>i']]]></default>
++            <summary>Make the focused window 2% shorter</summary>
++        </key>
++
++        <key type="as" name="resize-taller">
++            <default><![CDATA[['<Super>o']]]></default>
++            <summary>Make the focused window 2% taller</summary>
++        </key>
++
+         <!-- Swap windows -->
+         <key type="as" name="tile-swap-left">
+             <default><![CDATA[['<Primary><Super>Left','<Primary><Super>h']]]></default>
+--- a/system/keybindings.js
++++ b/system/keybindings.js
+@@ -3,6 +3,7 @@
+ import Meta from 'gi://Meta';
+ import Gio from 'gi://Gio';
+ import * as log from '../utils/log.js';
++import { Direction } from '../engine/tiling.js';
+ const SYSTEM_KEYBINDING_SCHEMAS = [
+     'org.gnome.desktop.wm.keybindings',
+     'org.gnome.shell.keybindings',
+@@ -202,6 +203,10 @@
+             'toggle-floating': () => ext.auto_tiler?.toggle_floating(ext),
+             'toggle-tiling': () => ext.toggle_tiling(),
+             'toggle-stacking-global': () => ext.auto_tiler?.toggle_stacking(ext),
++            'resize-narrower': () => ext.tiler.resize_focused(ext, Direction.Left),
++            'resize-wider': () => ext.tiler.resize_focused(ext, Direction.Right),
++            'resize-shorter': () => ext.tiler.resize_focused(ext, Direction.Up),
++            'resize-taller': () => ext.tiler.resize_focused(ext, Direction.Down),
+             'tile-move-left-global': () => ext.tiler.move_left(ext, ext.focus_window()?.entity),
+             'tile-move-down-global': () => ext.tiler.move_down(ext, ext.focus_window()?.entity),
+             'tile-move-up-global': () => ext.tiler.move_up(ext, ext.focus_window()?.entity),
