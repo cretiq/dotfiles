@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Cycles the left/right margin of the O-tiling area 25% -> 12% -> 0 -> 25% of the monitor width, like GlazeWM alt+c.
+# Needs the gap-outer-horizontal-percent patch that tiling-install applies.
+set -eu
+export GSETTINGS_SCHEMA_DIR="$HOME/.local/share/gnome-shell/extensions/o-tiling@oliwebd.github.com/schemas"
+key="org.gnome.shell.extensions.o-tiling gap-outer-horizontal-percent"
+case "$(gsettings get $key | sed 's/^uint32 //')" in
+  25) next=12 ;;
+  12) next=0 ;;
+  *) next=25 ;;
+esac
+gsettings set $key $next

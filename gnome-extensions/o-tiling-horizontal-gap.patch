@@ -1,0 +1,69 @@
+--- a/extension.js
++++ b/extension.js
+@@ -900,7 +900,11 @@
+     }
+     monitor_work_area(monitor) {
+         const meta = wom.get_active_workspace().get_work_area_for_monitor(monitor);
+-        return Rect.Rectangle.from_meta(meta);
++        const rect = Rect.Rectangle.from_meta(meta);
++        const margin = Math.round(rect.width * this.settings.gap_outer_horizontal_percent() / 100);
++        rect.x += margin;
++        rect.width -= margin * 2;
++        return rect;
+     }
+     monitor_area(monitor) {
+         const mm = global.backend.get_monitor_manager();
+@@ -2227,6 +2231,9 @@
+                 case 'gap-outer':
+                     this.on_gap_outer();
+                     break;
++                case 'gap-outer-horizontal-percent':
++                    this.update_top_gap(0);
++                    break;
+                 case 'show-title':
+                     this.on_show_window_titles();
+                     break;
+@@ -2914,7 +2921,7 @@
+             const mm = global.backend.get_monitor_manager();
+             const lm = mm ? mm.get_logical_monitors().find((m) => m.get_number() === primary_display) : null;
+             const area = lm ? { x: lm.x, y: lm.y, width: lm.width, height: lm.height } : null;
+-            const work_area = ext.monitor_work_area(primary_display);
++            const work_area = wom.get_active_workspace().get_work_area_for_monitor(primary_display);
+             if (!area || !work_area)
+                 return false;
+             return !(area.width === work_area.width && area.height === work_area.height);
+--- a/schemas/org.gnome.shell.extensions.o-tiling.gschema.xml
++++ b/schemas/org.gnome.shell.extensions.o-tiling.gschema.xml
+@@ -159,6 +159,12 @@
+             <summary>Gap surrounding tiled windows, in pixels</summary>
+         </key>
+ 
++        <key type="u" name="gap-outer-horizontal-percent">
++            <range min="0" max="45"/>
++            <default>0</default>
++            <summary>Extra left and right margin around tiled windows, in percent of the monitor width</summary>
++        </key>
++
+         <key type="b" name="show-title">
+             <default>true</default>
+             <summary>Show title bars on windows with server-side decorations</summary>
+--- a/system/settings.js
++++ b/system/settings.js
+@@ -52,6 +52,7 @@
+ const EDGE_TILING = 'edge-tiling';
+ const GAP_INNER = 'gap-inner';
+ const GAP_OUTER = 'gap-outer';
++const GAP_OUTER_HORIZONTAL_PERCENT = 'gap-outer-horizontal-percent';
+ const ROW_SIZE = 'row-size';
+ const SHOW_TITLE = 'show-title';
+ const SMART_GAPS = 'smart-gaps';
+@@ -127,6 +128,9 @@
+     gap_outer() {
+         return this.ext.get_uint(GAP_OUTER);
+     }
++    gap_outer_horizontal_percent() {
++        return this.ext.get_uint(GAP_OUTER_HORIZONTAL_PERCENT);
++    }
+     get_system_accent_color() {
+         if (!this.int)
+             return DEFAULT_RGBA_COLOR;

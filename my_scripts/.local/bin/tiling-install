@@ -12,7 +12,13 @@ if [ ! -d "$dir" ]; then
   gnome-extensions install --force "$tmp/o.zip"
   rm -rf "$tmp"
 fi
-[ -f "$dir/schemas/gschemas.compiled" ] || glib-compile-schemas "$dir/schemas"
+# The patch adds gap-outer-horizontal-percent (tiling-cycle-width, Super+C). An extensions.gnome.org update replaces the
+# extension files and drops it until this script runs again; then log out and in.
+patch_file="$HOME/.dotfiles/gnome-extensions/o-tiling-horizontal-gap.patch"
+if ! patch -d "$dir" -p1 -R -s -f --dry-run < "$patch_file" >/dev/null; then
+  patch -d "$dir" -p1 -N -s < "$patch_file"
+fi
+glib-compile-schemas "$dir/schemas"
 
 add_to() {
   local key=$1 val=$2 cur
@@ -68,6 +74,18 @@ o gap-inner 4
 o gap-outer 4
 o hint-color-rgba "'rgb(0,200,255)'"
 o active-hint-border-width 1
+
+media=org.gnome.settings-daemon.plugins.media-keys
+cycle_path=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/tiling-cycle-width/
+list="$(gsettings get $media custom-keybindings)"
+case "$list" in
+  *"'$cycle_path'"*) ;;
+  "@as []" | "[]") gsettings set $media custom-keybindings "['$cycle_path']" ;;
+  *) gsettings set $media custom-keybindings "${list%]}, '$cycle_path']" ;;
+esac
+g "$media.custom-keybinding:$cycle_path" name "Tiling cycle width"
+g "$media.custom-keybinding:$cycle_path" command "$HOME/.local/bin/tiling-cycle-width"
+g "$media.custom-keybinding:$cycle_path" binding "<Super>c"
 
 g org.gnome.mutter dynamic-workspaces false
 g org.gnome.desktop.wm.preferences num-workspaces 9
