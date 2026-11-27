@@ -64,9 +64,10 @@ o pop-monitor-down "['<Super><Shift><Control>k']"
 o pop-monitor-up "['<Super><Shift><Control>l']"
 o pop-monitor-right "['<Super><Shift><Control>odiaeresis']"
 
-o gap-inner 8
-o gap-outer 8
-o hint-color-rgba "'rgb(255,149,0)'"
+o gap-inner 4
+o gap-outer 4
+o hint-color-rgba "'rgb(0,200,255)'"
+o active-hint-border-width 1
 
 g org.gnome.mutter dynamic-workspaces false
 g org.gnome.desktop.wm.preferences num-workspaces 9
