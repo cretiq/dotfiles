@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Optional arg HOTKEY, e.g. <Alt>space. Snippet paste needs `sudo setcap cap_dac_override=ep ~/.local/lib/vicinae/usr/libexec/vicinae/vicinae-input-server` (skipped, needs root).
+# Needs a log out and in on Wayland before the GNOME extension loads.
+set -eu
+hotkey="${1:-}"
+version=v0.30.1
+sha=9f573dd04389693a1b70653dd4cc3886a1623fc159d50e207486162e6ae91ab2
+uuid=vicinae@dagimg-dot
+dir="$HOME/.local/share/gnome-shell/extensions/$uuid"
+
+if ! command -v vicinae >/dev/null || ! vicinae version | grep -q "Version $version "; then
+  tmp="$(mktemp -d)"
+  curl -fsSL -o "$tmp/Vicinae.AppImage" "https://github.com/vicinaehq/vicinae/releases/download/$version/Vicinae-x86_64.AppImage"
+  echo "$sha  $tmp/Vicinae.AppImage" | sha256sum -c -
+  curl -fsSL -o "$tmp/install.sh" https://vicinae.com/install
+  bash "$tmp/install.sh" --prefix "$HOME/.local" --appimage "$tmp/Vicinae.AppImage"
+  rm -rf "$tmp"
+fi
+systemctl --user enable --now vicinae
+
+if [ ! -d "$dir" ]; then
+  tmp="$(mktemp -d)"
+  curl -fsSL -o "$tmp/v.zip" "https://extensions.gnome.org/download-extension/$uuid.shell-extension.zip?version_tag=77105"
+  gnome-extensions install --force "$tmp/v.zip"
+  rm -rf "$tmp"
+fi
+glib-compile-schemas "$dir/schemas"
+GSETTINGS_SCHEMA_DIR="$dir/schemas" gsettings set org.gnome.shell.extensions.vicinae enable-clipboard-monitoring false
+
+conf="${XDG_CONFIG_HOME:-$HOME/.config}/o-tiling/config.json"
+if [ -s "$conf" ]; then
+  jq --argjson add '[{"class": "vicinae"}]' '.float = ((.float // []) + ($add - (.float // [])))' "$conf" > "$conf.tmp"
+  mv "$conf.tmp" "$conf"
+fi
+
+cur="$(gsettings get org.gnome.shell enabled-extensions)"
+case "$cur" in
+  *"'$uuid'"*) ;;
+  "@as []" | "[]") gsettings set org.gnome.shell enabled-extensions "['$uuid']" ;;
+  *) gsettings set org.gnome.shell enabled-extensions "${cur%]}, '$uuid']" ;;
+esac
+
+[ -n "$hotkey" ] || exit 0
+[ "$hotkey" != "<Alt>space" ] || gsettings set org.gnome.desktop.wm.keybindings activate-window-menu "[]"
+media=org.gnome.settings-daemon.plugins.media-keys
+path=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/vicinae/
+list="$(gsettings get $media custom-keybindings)"
+case "$list" in
+  *"'$path'"*) ;;
+  "@as []" | "[]") gsettings set $media custom-keybindings "['$path']" ;;
+  *) gsettings set $media custom-keybindings "${list%]}, '$path']" ;;
+esac
+gsettings set "$media.custom-keybinding:$path" name "Vicinae"
+gsettings set "$media.custom-keybinding:$path" command "$HOME/.local/bin/vicinae toggle"
+gsettings set "$media.custom-keybinding:$path" binding "$hotkey"
