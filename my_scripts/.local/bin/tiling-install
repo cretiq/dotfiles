@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# Installs O-tiling (extensions.gnome.org pk 9875, tree tiling, Pop Shell fork) and sets the JKLÖ keymap that mirrors GlazeWM, Super instead of Alt.
+# Alt+J/K/L/Ö is already Alt+arrows via keyd and Ghostty splits own Alt+arrows, so the compositor takes Super.
+# Needs a GNOME Shell restart (log out and in on Wayland) the first time the extension is installed.
+set -eu
+uuid=o-tiling@oliwebd.github.com
+dir="$HOME/.local/share/gnome-shell/extensions/$uuid"
+
+if [ ! -d "$dir" ]; then
+  tmp="$(mktemp -d)"
+  curl -fsSL -o "$tmp/o.zip" "https://extensions.gnome.org/download-extension/$uuid.shell-extension.zip?version_tag=77370"
+  gnome-extensions install --force "$tmp/o.zip"
+  rm -rf "$tmp"
+fi
+[ -f "$dir/schemas/gschemas.compiled" ] || glib-compile-schemas "$dir/schemas"
+
+add_to() {
+  local key=$1 val=$2 cur
+  cur="$(gsettings get org.gnome.shell "$key")"
+  case "$cur" in *"'$val'"*) return ;; esac
+  if [ "$cur" = "@as []" ] || [ "$cur" = "[]" ]; then cur="['$val']"; else cur="${cur%]}, '$val']"; fi
+  gsettings set org.gnome.shell "$key" "$cur"
+}
+add_to enabled-extensions $uuid
+add_to disabled-extensions tiling-assistant@ubuntu.com
+
+o() { GSETTINGS_SCHEMA_DIR="$dir/schemas" gsettings set org.gnome.shell.extensions.o-tiling "$@"; }
+g() { gsettings set "$@"; }
+d() { GSETTINGS_SCHEMA_DIR="$HOME/.local/share/gnome-shell/extensions/dash-to-panel@jderose9.github.com/schemas" gsettings set org.gnome.shell.extensions.dash-to-panel "$@"; }
+
+o focus-left "['<Super>j']"
+o focus-down "['<Super>k']"
+o focus-up "['<Super>l']"
+o focus-right "['<Super>odiaeresis']"
+
+o tile-move-left-global "['<Super><Shift>j']"
+o tile-move-down-global "['<Super><Shift>k']"
+o tile-move-up-global "['<Super><Shift>l']"
+o tile-move-right-global "['<Super><Shift>odiaeresis']"
+
+o tile-enter "['<Super>r']"
+o tile-move-left "['j', 'Left']"
+o tile-move-down "['k', 'Down']"
+o tile-move-up "['l', 'Up']"
+o tile-move-right "['odiaeresis', 'Right']"
+o tile-resize-left "['<Shift>j', '<Shift>Left']"
+o tile-resize-down "['<Shift>k', '<Shift>Down']"
+o tile-resize-up "['<Shift>l', '<Shift>Up']"
+o tile-resize-right "['<Shift>odiaeresis', '<Shift>Right']"
+o tile-swap-left "[]"
+o tile-swap-down "[]"
+o tile-swap-up "[]"
+o tile-swap-right "[]"
+
+o tile-orientation "['<Super>v']"
+o toggle-floating "['<Super>t']"
+o toggle-tiling "['<Super><Shift>t']"
+o toggle-stacking-global "[]"
+
+o pop-workspace-up "[]"
+o pop-workspace-down "[]"
+o pop-monitor-left "['<Super><Shift><Control>j']"
+o pop-monitor-down "['<Super><Shift><Control>k']"
+o pop-monitor-up "['<Super><Shift><Control>l']"
+o pop-monitor-right "['<Super><Shift><Control>odiaeresis']"
+
+o gap-inner 8
+o gap-outer 8
+o hint-color-rgba "'rgb(255,149,0)'"
+
+g org.gnome.mutter dynamic-workspaces false
+g org.gnome.desktop.wm.preferences num-workspaces 9
+g org.gnome.desktop.wm.keybindings toggle-fullscreen "['<Super>f']"
+g org.gnome.desktop.wm.keybindings close "['<Alt>F4', '<Super><Shift>q']"
+g org.gnome.settings-daemon.plugins.media-keys screensaver "['<Control><Super>l']"
+g org.gnome.shell.keybindings toggle-message-tray "['<Super>m']"
+for n in 1 2 3 4 5 6 7 8 9; do
+  g org.gnome.shell.keybindings switch-to-application-$n "[]"
+  d app-hotkey-$n "[]"
+  d app-shift-hotkey-$n "[]"
+  d app-hotkey-kp-$n "[]"
+  d app-shift-hotkey-kp-$n "[]"
+done
