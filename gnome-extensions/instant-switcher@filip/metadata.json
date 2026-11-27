@@ -1,0 +1,6 @@
+{
+  "uuid": "instant-switcher@filip",
+  "name": "Instant Switcher",
+  "description": "Shows the Alt+Tab and Super+Tab switchers at once instead of after GNOME's 150 ms delay.",
+  "shell-version": ["50"]
+}
