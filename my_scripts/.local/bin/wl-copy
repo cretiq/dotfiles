@@ -3,7 +3,12 @@
 # takes focus from the terminal; Claude Code runs it twice per copy and Ghostty flickers.
 # For Claude Code only, hand the text to Ghostty through OSC 52 on Claude Code's own terminal
 # (its children have no /dev/tty), which sets the clipboard without a focus change.
-if [ "$(cat /proc/$PPID/comm 2>/dev/null)" = claude ]; then
+claude_parent() {
+  [ "$(cat /proc/$PPID/comm 2>/dev/null)" = claude ] ||
+    [[ $(readlink /proc/$PPID/exe 2>/dev/null) == "$HOME"/.local/share/claude/versions/* ]]
+}
+
+if claude_parent; then
   [ "${1:-}" = --primary ] && { cat >/dev/null; exit 0; }
   if [ $# -eq 0 ]; then
     text=$(base64 -w0)

@@ -1,0 +1,6 @@
+{
+  "uuid": "clipboard-bridge@filip",
+  "name": "Clipboard Bridge",
+  "description": "Serves the clipboard over D-Bus from inside GNOME Shell, so the wl-paste wrapper can read it without the focus-stealing popup surface wl-paste needs on GNOME. Data is handed over as files under $XDG_RUNTIME_DIR/clipboard-bridge.",
+  "shell-version": ["50"]
+}

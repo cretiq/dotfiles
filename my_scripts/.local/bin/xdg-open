@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Web links go straight to the running Firefox over D-Bus (~0 ms) instead of through the snap
+# launcher (~400 ms). claude.ai links open in the Firefox profile of the signed-in Claude account,
+# per ~/.config/xdg-open-profiles: lines "<email-domain> <profile folder>", e.g. "example.com abcd1234.default";
+# "*" names the profile for every other link (Firefox rewrites its own default to the last used profile).
+ffdir=$HOME/snap/firefox/common/.mozilla/firefox
+url=${1:-}
+case "$url" in http://*|https://*) ;; *) exec /usr/bin/xdg-open "$@" ;; esac
+
+key='*'
+case "$url" in
+  https://claude.ai/*|https://claude.ai)
+    key=$(jq -r '.oauthAccount.emailAddress // "" | sub(".*@"; "")' ~/.claude.json 2>/dev/null) ;;
+esac
+profile=$(awk -v k="$key" '$1 == k || $1 == "*" {sub(/^[^ ]+ +/, ""); p[$1 == k] = $0} END {print (1 in p) ? p[1] : p[0]}' ~/.config/xdg-open-profiles 2>/dev/null)
+[ -n "$profile" ] || exec /usr/bin/xdg-open "$@"
+path=$ffdir/$profile
+
+# Firefox remote command line: [argc][offset per arg]<cwd>\0<argv0>\0<argv1>\0, int32 little-endian.
+le() { printf '%d %d %d %d ' $(($1 & 255)) $((($1 >> 8) & 255)) $((($1 >> 16) & 255)) $((($1 >> 24) & 255)); }
+strs=() lens=()
+for s in "$PWD" firefox "$url"; do
+  read -ra sb <<<"$(printf %s "$s" | od -An -tu1 -v | tr '\n' ' ') 0"
+  strs+=("${sb[*]}") lens+=(${#sb[@]})
+done
+bytes=$(le 2)
+off=$((4 + 4 * 2 + lens[0]))
+for i in 1 2; do bytes+=$(le $off); off=$((off + lens[i])); done
+read -ra b <<<"$bytes ${strs[*]}"
+name=org.mozilla.firefox.$(printf %s "$path" | base64 -w0 | tr '=' '_')
+busctl --user call "$name" /org/mozilla/firefox/Remote org.mozilla.firefox OpenURL ay ${#b[@]} "${b[@]}" 2>/dev/null && exit 0
+
+setsid -f /snap/bin/firefox --profile "$path" "$url" >/dev/null 2>&1

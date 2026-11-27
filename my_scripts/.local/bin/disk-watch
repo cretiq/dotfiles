@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Warns before / or the VM disk fills up: a full /vm2 pauses the M5 VM and stops Phoenix.
+set -u
+warn() { notify-send -u critical -i drive-harddisk "Low disk: $1" "$2 GB free. Free space or tell Claude."; }
+free_gb() { df -BG --output=avail "$1" | tail -1 | tr -dc 0-9; }
+[ "$(free_gb /)" -lt 4 ] && warn / "$(free_gb /)"
+[ "$(free_gb /vm2)" -lt 1 ] && warn /vm2 "$(free_gb /vm2)"
+exit 0

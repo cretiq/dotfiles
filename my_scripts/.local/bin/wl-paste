@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Like wl-copy, every wl-paste briefly takes focus from the terminal on GNOME and Ghostty flickers.
+# For Claude Code's own reads only, get the clipboard from the clipboard-bridge@filip GNOME Shell
+# extension, which reads it inside gnome-shell without a focus change. Output and exit codes match
+# /usr/bin/wl-paste; without the extension, or for any other arguments, the real one runs.
+claude_parent() {
+  [ "$(cat /proc/$PPID/comm 2>/dev/null)" = claude ] ||
+    [[ $(readlink /proc/$PPID/exe 2>/dev/null) == "$HOME"/.local/share/claude/versions/* ]]
+}
+
+bridge() {
+  local reply status path
+  reply=$(busctl --user --timeout=30 call org.gnome.Shell.Extensions.ClipboardBridge \
+    /org/gnome/Shell/Extensions/ClipboardBridge org.gnome.Shell.Extensions.ClipboardBridge "$@" 2>/dev/null) || return
+  read -r _ status path <<<"$reply"
+  path=${path//\"/}
+  case $status in
+    0) cat "$path"; status=$?; rm -f "$path"; exit $status ;;
+    1) echo 'Nothing is copied' >&2; exit 1 ;;
+    2) printf 'Clipboard content is not available as requested type "%s"\nUse "wl-paste --list-types" to view available types.\n' "${@: -1}" >&2
+       exit 1 ;;
+  esac
+}
+
+if claude_parent; then
+  case $#:$1 in
+    1:--list-types) bridge ListTypes b false ;;
+    1:--no-newline) bridge Read bs false '' ;;
+    2:--primary) [ "$2" = --no-newline ] && bridge Read bs true '' ;;
+    2:--type) [[ $2 == image/* ]] && bridge Read bs false "$2" ;;
+  esac
+fi
+exec /usr/bin/wl-paste "$@"
