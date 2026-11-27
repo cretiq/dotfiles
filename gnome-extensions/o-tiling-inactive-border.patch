@@ -1,0 +1,141 @@
+--- a/extension.js
++++ b/extension.js
+@@ -1193,7 +1193,7 @@
+             this.hide_all_borders();
+             return;
+         }
+-        const overlay_all = this.settings.active_hint_overlay_all_windows();
++        const overlay_all = this.settings.active_hint_overlay_all_windows() || this.settings.inactive_hint();
+         if (overlay_all) {
+             for (const window of this.windows.values()) {
+                 if (window.same_workspace()) {
+@@ -2248,6 +2248,11 @@
+                 case 'active-hint-border-radius':
+                 case 'active-hint-border-width':
+                 case 'active-hint-overlay-all-windows':
++                case 'inactive-hint-color-rgba':
++                    this.show_border_on_focused();
++                    break;
++                case 'inactive-hint':
++                    this.hide_all_borders();
+                     this.show_border_on_focused();
+                     break;
+                 case 'gap-inner':
+--- a/schemas/org.gnome.shell.extensions.o-tiling.gschema.xml
++++ b/schemas/org.gnome.shell.extensions.o-tiling.gschema.xml
+@@ -546,6 +546,16 @@
+             <summary>RGBA color for active window hint</summary>
+         </key>
+ 
++        <key type="b" name="inactive-hint">
++            <default>false</default>
++            <summary>Also show a hint around every unfocused window</summary>
++        </key>
++
++        <key type="s" name="inactive-hint-color-rgba">
++            <default>'rgb(161,161,161)'</default>
++            <summary>RGBA color for unfocused window hints</summary>
++        </key>
++
+         <key type="s" name="active-hint-overlay-color-rgba">
+             <default>'auto'</default>
+             <summary>RGBA color for active window overlay background tint</summary>
+--- a/system/settings.js
++++ b/system/settings.js
+@@ -60,6 +60,8 @@
+ const TILE_BY_DEFAULT = 'tile-by-default';
+ const NEW_WINDOW_PLACEMENT = 'new-window-placement';
+ const HINT_COLOR_RGBA = 'hint-color-rgba';
++const INACTIVE_HINT = 'inactive-hint';
++const INACTIVE_HINT_COLOR_RGBA = 'inactive-hint-color-rgba';
+ const DEFAULT_RGBA_COLOR = 'rgba(53, 132, 228, 1)'; // Aura Blue
+ const LOG_LEVEL = 'log-level';
+ const CLEARED_SYSTEM_BINDINGS = 'cleared-system-bindings';
+@@ -113,6 +115,12 @@
+     active_hint_border_width() {
+         return this.ext.get_uint(ACTIVE_HINT_BORDER_WIDTH);
+     }
++    inactive_hint() {
++        return this.ext.get_boolean(INACTIVE_HINT);
++    }
++    inactive_hint_color_rgba() {
++        return this.ext.get_string(INACTIVE_HINT_COLOR_RGBA);
++    }
+     stacking_with_mouse() {
+         return this.ext.get_boolean(STACKING_WITH_MOUSE);
+     }
+--- a/window/window.js
++++ b/window/window.js
+@@ -214,6 +214,8 @@
+         const change_id = settings.ext.connect('changed', (_, key) => {
+             if (this.border) {
+                 if (key === 'hint-color-rgba' ||
++                    key === 'inactive-hint' ||
++                    key === 'inactive-hint-color-rgba' ||
+                     key === 'active-hint-overlay-enabled' ||
+                     key === 'active-hint-overlay-color-rgba' ||
+                     key === 'active-hint-border-radius' ||
+@@ -385,6 +387,9 @@
+                 this.update_border_layout();
+                 ext.show_border_on_focused();
+             }
++            else if (ext.settings.inactive_hint()) {
++                this.show_border();
++            }
+         }
+     }
+     name(ext) {
+@@ -455,7 +460,8 @@
+             const overlay_all_active = this.ext.settings.active_hint_overlay_enabled() && this.ext.settings.active_hint_overlay_all_windows();
+             const permitted = () => this.actor_exists() &&
+                 this.ext.settings.active_hint() &&
+-                (overlay_all_active || (this.ext.focus_window() == this && this.meta.appears_focused)) &&
++                (overlay_all_active || (this.ext.focus_window() == this && this.meta.appears_focused) ||
++                    (this.ext.settings.inactive_hint() && this.inactive_border_eligible())) &&
+                 !this.meta.is_fullscreen() &&
+                 (!this.is_maximized() || this.is_snap_edge()) &&
+                 !this.meta.minimized &&
+@@ -483,6 +489,10 @@
+             }
+         }
+     }
++    /** Dialogs and other transients only get a hint while focused; windows on another workspace never. */
++    inactive_border_eligible() {
++        return this.meta.get_window_type() === Meta.WindowType.NORMAL && !this.is_transient() && this.same_workspace();
++    }
+     /** Suppress the active hint until this window's initial auto-tile pass starts. */
+     suppress_border_until_initial_tile() {
+         this._border_pending_initial_tile = true;
+@@ -520,8 +530,9 @@
+                 }
+             }
+             this._border_settle_id = null;
+-            // Show only if the border/actor still exist and this window is still focused.
+-            if (this.border && this.actor_exists() && this.ext.focus_window() === this &&
++            // Show only if the border/actor still exist and this window is still focused or every window gets a hint.
++            if (this.border && this.actor_exists() &&
++                (this.ext.focus_window() === this || this.ext.settings.inactive_hint()) &&
+                 !this.meta.is_fullscreen() &&
+                 (!this.is_maximized() || this.is_snap_edge()) &&
+                 !this.smart_gapped) {
+@@ -700,6 +711,7 @@
+         const overlay_opacity = overlay_enabled ? settings.active_hint_overlay_opacity() / 100 : 0;
+         // true (default) = tint focused only; false = tint all tiled windows.
+         const only_active = settings.active_hint_overlay_only_active();
++        const inactive_color = settings.inactive_hint() ? settings.inactive_hint_color_rgba() : null;
+         if (this.border) {
+             const is_focused = this.meta.appears_focused;
+             const overlay_color_val = settings.active_hint_overlay_color_rgba();
+@@ -713,9 +725,9 @@
+             // show_tint: overlay enabled + not maximized + (focused-only mode requires focus)
+             const show_tint = overlay_opacity > 0 && !is_maximized_os &&
+                 (only_active ? is_focused : true);
+-            const total_radius = is_focused ? current_radius + width_value : current_radius;
+-            const border_style = is_focused
+-                ? `border-color: ${color_value}; border-radius: ${total_radius}px; border-width: ${width_value}px; outline: none; background-color: transparent; background-clip: padding-box; box-shadow: none;`
++            const total_radius = is_focused || inactive_color ? current_radius + width_value : current_radius;
++            const border_style = is_focused || inactive_color
++                ? `border-color: ${is_focused ? color_value : inactive_color}; border-radius: ${total_radius}px; border-width: ${width_value}px; outline: none; background-color: transparent; background-clip: padding-box; box-shadow: none;`
+                 : `border-color: transparent; border-radius: ${total_radius}px; border-width: 0px; outline: none; background-color: transparent; background-clip: padding-box; box-shadow: none;`;
+             this.border.set_style(border_style);
+             if (this.tint) {

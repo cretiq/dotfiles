@@ -14,7 +14,7 @@ if [ ! -d "$dir" ]; then
 fi
 # An extensions.gnome.org update replaces the extension files and drops the patches until this script runs again; then
 # log out and in. Order matters: each patch applies on top of the one before it.
-for p in horizontal-gap border-stacking focus-toggle no-border resize; do
+for p in horizontal-gap border-stacking focus-toggle no-border resize inactive-border; do
   patch_file="$HOME/.dotfiles/gnome-extensions/o-tiling-$p.patch"
   if ! patch -d "$dir" -p1 -R -s -f --dry-run < "$patch_file" >/dev/null; then
     patch -d "$dir" -p1 -N -s < "$patch_file"
@@ -92,6 +92,8 @@ o gap-inner 4
 o gap-outer 4
 o hint-color-rgba "'rgb(0,200,255)'"
 o active-hint-border-width 1
+o inactive-hint true
+o inactive-hint-color-rgba "'rgb(161,161,161)'"
 
 media=org.gnome.settings-daemon.plugins.media-keys
 cycle_path=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/tiling-cycle-width/
